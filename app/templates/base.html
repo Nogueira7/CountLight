@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}CountLight{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style-liberty.css">
+</head>
+
+<body class="sidebar-menu-collapsed">
+
+    {% include "sidebar.html" %}
+    {% include "header.html" %}
+
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>
+
+<script>
+const API_URL = "/api";
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "/login";
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+  // Logout
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      logout();
+    });
+  }
+
+  // Buscar nome do utilizador
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  try {
+    const res = await fetch(`${API_URL}/me`, {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (!res.ok) throw new Error();
+
+    const user = await res.json();
+    const el = document.getElementById("headerUsername");
+    if (el) el.textContent = user.username ?? "Utilizador";
+
+  } catch {
+    logout();
+  }
+
+});
+</script>

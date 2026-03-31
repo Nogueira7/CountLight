@@ -1,0 +1,342 @@
+perfeito — vou manter **o mesmo estilo, nível técnico e estrutura**, mas **alargar o resumo** para incluir **toda a arquitetura atual**, com **ênfase clara na ingestão de dados (data_ingestion)**, Docker e integração IoT.
+Isto fica **pronto para estudar, colar no relatório ou usar na defesa**.
+
+---
+
+# 📘 RESUMO GERAL – PROJETO ECOvolt (Estado Atual)
+
+## 🎯 Objetivo do Projeto
+
+O projeto **CountLight** tem como objetivo o desenvolvimento de uma **plataforma completa de monitorização energética**, capaz de:
+
+* recolher dados reais de consumo elétrico (IoT – Shelly Plug S)
+* armazenar leituras energéticas de forma persistente
+* gerir utilizadores e autenticação segura
+* fornecer dados ao frontend para dashboards energéticos
+* manter uma arquitetura modular, escalável e profissional
+
+O sistema foi desenhado com **separação clara de responsabilidades**, permitindo evolução futura sem refatorações profundas.
+
+---
+
+## 🧩 VISÃO GERAL DA ARQUITETURA
+
+O projeto está dividido em **três grandes blocos independentes**:
+
+```
+[ Shelly Plug S ]
+        ↓ MQTT
+[ Mosquitto (Docker) ]
+        ↓
+[ Data Ingestion (Python) ]
+        ↓
+[ MySQL (Docker) ]
+        ↑
+[ Backend FastAPI ]
+        ↑
+[ Frontend ]
+```
+
+📌 Cada bloco é independente, comunicando apenas através de protocolos e dados bem definidos.
+
+---
+
+# 🧰 FERRAMENTAS & TECNOLOGIAS UTILIZADAS
+
+## 🐍 Linguagem Base
+
+### **Python 3.10**
+
+Usado em todo o projeto para:
+
+* backend (FastAPI)
+* ingestão de dados IoT
+* scripts de integração
+* automação e serviços
+
+📌 Linguagem madura, robusta e muito usada em sistemas backend e IoT.
+
+---
+
+## ⚡ Backend Web
+
+### **FastAPI**
+
+Usado para:
+
+* criar a API REST
+* gerir autenticação e utilizadores
+* fornecer dados energéticos ao frontend
+* validar dados com Pydantic
+* documentar a API automaticamente (Swagger)
+
+📌 Vantagens:
+
+* elevado desempenho
+* tipagem forte
+* código limpo
+* padrão profissional
+
+---
+
+## 🔐 Segurança & Autenticação
+
+### **JWT (JSON Web Tokens)**
+
+Usado para:
+
+* autenticação stateless
+* proteção de rotas
+* identificação segura de utilizadores
+
+Tipos de token:
+
+* **Access Token** → curto prazo
+* **Refresh Token** → longo prazo
+
+---
+
+### **OAuth2PasswordBearer**
+
+Usado para:
+
+* padronizar autenticação Bearer
+* extrair tokens automaticamente dos headers
+* integração nativa com FastAPI
+
+---
+
+### **Passlib + Bcrypt**
+
+Usado para:
+
+* gerar hash seguro de passwords
+* verificar passwords sem nunca guardar texto plano
+
+📌 Bcrypt é intencionalmente lento → proteção contra brute-force.
+
+---
+
+## 🗄️ Base de Dados
+
+### **MySQL**
+
+Usado para armazenar:
+
+* utilizadores
+* refresh tokens
+* dispositivos Shelly
+* leituras energéticas (potência, energia, tensão, corrente)
+
+📌 Comunicação feita com SQL explícito (`cursor`), garantindo controlo total.
+
+---
+
+## 🐳 Docker (Infraestrutura)
+
+### **Docker**
+
+Usado para:
+
+* executar serviços externos isolados
+* garantir consistência entre ambientes
+* facilitar migração do projeto
+
+Containers usados:
+
+* **MySQL**
+* **Mosquitto (MQTT)**
+* **phpMyAdmin** (opcional)
+
+📌 O código **não depende do Docker**, apenas dos serviços que ele fornece.
+
+---
+
+## 🔌 MQTT & IoT
+
+### **Mosquitto (MQTT Broker)**
+
+Usado para:
+
+* receber mensagens do Shelly Plug S
+* atuar como intermediário entre IoT e backend
+* desacoplar dispositivos do sistema
+
+---
+
+### **paho-mqtt**
+
+Biblioteca usada para:
+
+* subscrever tópicos MQTT
+* receber mensagens em tempo real
+* reagir a eventos IoT
+
+---
+
+## 📦 Outras Bibliotecas Importantes
+
+### **python-dotenv**
+
+* carrega variáveis de ambiente a partir do `.env`
+* evita segredos hardcoded
+* permite mudar ambiente sem alterar código
+
+---
+
+### **logging**
+
+* registo estruturado de eventos
+* debug e auditoria
+* análise de falhas
+
+---
+
+# 🏗️ ARQUITETURA GERAL DO SISTEMA
+
+O projeto segue uma **arquitetura modular e desacoplada**:
+
+```
+IoT → Data Ingestion → Database ← Backend → Frontend
+```
+
+### Vantagens desta abordagem:
+
+* cada módulo pode evoluir isoladamente
+* fácil manutenção
+* escalabilidade
+* arquitetura profissional e realista
+
+---
+
+# 📁 DATA INGESTION – INJEÇÃO DE DADOS ENERGÉTICOS
+
+## 🎯 Objetivo
+
+O módulo **data_ingestion** é responsável por:
+
+* recolher dados enviados pelos dispositivos Shelly
+* processar mensagens MQTT
+* validar dados recebidos
+* gravar leituras energéticas na base de dados
+
+📌 Este módulo **não é uma API** — é um **serviço de backend em background**.
+
+---
+
+## 🔧 Tecnologias Usadas
+
+* Python 3.10
+* paho-mqtt
+* mysql-connector-python
+* python-dotenv
+* logging
+
+---
+
+## 📁 Estrutura Base
+
+```
+data_ingestion/
+ ├── main.py
+ ├── mqtt_client.py
+ ├── db.py
+ ├── config.py
+ ├── utils.py
+ ├── .env
+```
+
+---
+
+## 🔁 Fluxo de Ingestão de Dados
+
+```
+Shelly Plug S
+ → envia dados MQTT
+ → Mosquitto recebe
+ → mqtt_client subscreve tópicos
+ → parse da mensagem
+ → validação de dados
+ → inserção no MySQL
+```
+
+---
+
+## ⚙️ Configuração via `.env`
+
+O módulo **data_ingestion** lê diretamente do seu `.env`:
+
+```env
+# MQTT
+MQTT_BROKER=127.0.0.1
+MQTT_PORT=1883
+
+# MYSQL
+DB_HOST=localhost
+DB_USER=energia_user
+DB_PASSWORD=energia_pass
+DB_NAME=countlight_db
+DB_PORT=3306
+```
+
+📌 Isto permite:
+
+* trocar de base de dados facilmente
+* mover o projeto para outro servidor
+* manter segredos fora do código
+
+---
+
+## ⏱️ Controlo de Inserções
+
+* existe um intervalo mínimo entre gravações
+* evita spam de dados
+* protege a base de dados
+* simula comportamento real de sistemas industriais
+
+---
+
+# 🔁 BACKEND FASTAPI – FUNÇÃO NO SISTEMA
+
+O backend **não recolhe dados diretamente do Shelly**.
+
+Ele:
+
+* lê dados já persistidos no MySQL
+* aplica regras de negócio
+* expõe endpoints REST
+* fornece dados ao frontend
+
+📌 Isto garante baixo acoplamento e alta escalabilidade.
+
+---
+
+# 🟢 PONTOS FORTES DO PROJETO (PARA DEFESA)
+
+✔️ Separação clara entre ingestão e API
+✔️ Uso real de MQTT e IoT
+✔️ Docker apenas como infraestrutura
+✔️ Segurança moderna (JWT + bcrypt)
+✔️ Uso correto de `.env`
+✔️ Arquitetura modular e escalável
+✔️ Projeto realista e profissional
+
+---
+
+# 🧠 FRASES-CHAVE PARA A DEFESA
+
+* *“Separei a ingestão de dados da API para garantir desacoplamento e escalabilidade.”*
+* *“Os dispositivos IoT comunicam via MQTT, sendo os dados persistidos antes de serem consumidos pelo backend.”*
+* *“O Docker é usado apenas para serviços, mantendo o código independente do ambiente.”*
+* *“Toda a configuração sensível é feita através de variáveis de ambiente.”*
+
+---
+
+Se quiseres, no próximo passo posso:
+
+* adaptar este texto **exatamente ao formato do relatório**
+* reduzir para **2–3 páginas**
+* criar **diagramas explicativos**
+* treinar **perguntas difíceis do júri**
+
+Diz-me como queres fechar 🔥

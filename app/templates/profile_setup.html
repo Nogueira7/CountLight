@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>CountLight Edit Profile </title>
+
+  <link rel="icon" type="image/png" href="/static/images/logo_neon.png">
+  <link rel="stylesheet" href="/static/css/style-liberty.css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+
+  <style>
+    /* simples: hover + clique na foto abre picker */
+    .photo-picker {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .photo-picker img {
+      display: block;
+      transition: transform 0.18s ease, filter 0.18s ease;
+    }
+
+    .photo-picker::after {
+      content: "Alterar foto";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 10px 12px;
+      font-weight: 600;
+      font-size: 14px;
+      text-align: center;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transition: opacity 0.18s ease;
+      border-bottom-left-radius: .25rem;
+      border-bottom-right-radius: .25rem;
+      pointer-events: none;
+    }
+
+    .photo-picker:hover img {
+      transform: scale(1.01);
+      filter: brightness(0.92);
+    }
+
+    .photo-picker:hover::after {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body class="sidebar-menu-collapsed">
+  <div class="se-pre-con"></div>
+  <section>
+    {% include "sidebar.html" %}
+    {% include "header.html" %}
+
+    <div class="main-content">
+      <div class="container-fluid content-top-gap">
+
+        <nav aria-label="breadcrumb" class="mb-4">
+          <ol class="breadcrumb my-breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Editar Perfil</li>
+          </ol>
+        </nav>
+
+        <section class="forms">
+          <div class="card card_border py-2 mb-4">
+            <div class="cards__heading">
+              <h3>Editar Perfil <span></span></h3>
+            </div>
+
+            <div class="card-body">
+              <form id="profileForm" enctype="multipart/form-data" novalidate>
+
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label input__label">Nome</label>
+                  <div class="col-sm-10">
+                    <input id="usernameInput" type="text" class="form-control input-style" name="username"
+                      placeholder="O teu username" value="">
+                    <small class="form-text text-muted">
+                      O username será normalizado (minúsculas) e tem de ser único.
+                    </small>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label input__label">Email</label>
+                  <div class="col-sm-10">
+                    <input id="emailInput" type="email" class="form-control input-style" name="email"
+                      placeholder="seu@email.com" value="">
+                    <small class="form-text text-muted">
+                      O email tem de ser único.
+                    </small>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label input__label">Descrição</label>
+                  <div class="col-sm-10">
+                    <textarea id="descriptionInput" class="form-control input-style" name="description" rows="4"
+                      placeholder="Escreve um pouco sobre ti..."></textarea>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label input__label">Foto</label>
+                  <div class="col-sm-10">
+
+                    <!-- input file escondido -->
+                    <input id="photoInput" type="file" name="photo" accept="image/*" style="display:none;">
+
+                    <!-- clicando na foto abre o explorador -->
+                    <div class="mt-2 photo-picker" id="photoPicker" role="button" tabindex="0"
+                      aria-label="Alterar foto de perfil">
+                      <img id="photoPreview" src="/static/images/profile_photos/default-avatar.png"
+                        alt="Pré-visualização" class="img-fluid rounded" style="max-height: 160px;">
+                    </div>
+
+                    <small class="form-text text-muted">Clica na foto para alterar (JPG, PNG ou WEBP, máx 2MB).</small>
+                  </div>
+                </div>
+
+                <!-- só para erros -->
+                <div class="form-group row">
+                  <div class="col-sm-10">
+                    <div id="formMessage" class="text-muted"></div>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <div class="col-sm-10">
+                    <button id="saveBtn" type="submit" class="btn btn-primary btn-style">
+                      Salvar Alterações
+                    </button>
+
+                    <a href="/profile" class="btn btn-style btn-light ml-2">
+                      Voltar
+                    </a>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="dashboard">
+    <p>&copy 2020 Collective. All Rights Reserved.</p>
+  </footer>
+
+  <button onclick="topFunction()" id="movetop" class="bg-primary" title="Go to top">
+    <span class="fa fa-angle-up"></span>
+  </button>
+
+  <script>
+    window.onscroll = function () { scrollFunction() };
+    function scrollFunction() {
+      if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        document.getElementById("movetop").style.display = "block";
+      } else {
+        document.getElementById("movetop").style.display = "none";
+      }
+    }
+    function topFunction() {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+  </script>
+
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/js/jquery-1.10.2.min.js"></script>
+  <script src="/static/js/Chart.min.js"></script>
+  <script src="/static/js/utils.js"></script>
+  <script src="/static/js/bar.js"></script>
+  <script src="/static/js/stacked.js"></script>
+  <script src="/static/js/linechart.js"></script>
+  <script src="/static/js/pie.js"></script>
+  <script src="/static/js/jquery.dataTables.min.js"></script>
+  <script src="/static/js/faq.js"></script>
+  <script src="/static/js/jquery.nicescroll.js"></script>
+  <script src="/static/js/scripts.js"></script>
+  <script src="/static/js/modernizr.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+
+  <script>
+    $(window).load(function () { $(".se-pre-con").fadeOut("slow"); });
+    $(function () {
+      $('.sidebar-menu-collapsed').click(function () { $('body').toggleClass('noscroll'); })
+    });
+  </script>
+
+  <script>
+    // =========================================================
+    // PROFILE SETUP
+    // - Clicar na foto abre o file picker
+    // - Guarda -> redireciona para /profile
+    // - Corrige URL da foto (BD: "images/..." -> site: "/static/images/...")
+    // =========================================================
+
+    const API_URL = "/api";
+
+    function getToken() { return localStorage.getItem("token"); }
+    function getSelectedHouseId() { return localStorage.getItem("selected_house_id"); }
+
+    function redirectToLogin() {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+
+    async function safeReadText(res) {
+      try { return await res.text(); } catch { return ""; }
+    }
+
+    async function apiFetch(path, options = {}) {
+      const token = getToken();
+      const houseId = getSelectedHouseId();
+
+      const headers = new Headers(options.headers || {});
+      headers.set("Accept", "application/json");
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+      if (houseId) headers.set("X-House-Id", houseId);
+
+      const url = `${API_URL}${path.startsWith("/") ? path : "/" + path}`;
+      const res = await fetch(url, { ...options, headers });
+
+      if (res.status === 401 || res.status === 403) {
+        redirectToLogin();
+        throw new Error(`Unauthorized (${res.status})`);
+      }
+      return res;
+    }
+
+    function setMessage(text, isError = false) {
+      const el = document.getElementById("formMessage");
+      if (!el) return;
+      el.textContent = text || "";
+      el.className = isError ? "text-danger" : "text-muted";
+    }
+
+    function setDisabled(disabled) {
+      const saveBtn = document.getElementById("saveBtn");
+      if (saveBtn) saveBtn.disabled = disabled;
+    }
+
+    function resolvePhotoUrl(photoUrl) {
+      const fallback = "/static/images/profile_photos/default-avatar.png";
+      if (!photoUrl) return fallback;
+
+      if (/^https?:\/\//i.test(photoUrl)) return photoUrl;
+
+      let p = photoUrl.startsWith("/") ? photoUrl.slice(1) : photoUrl;
+      if (p.startsWith("static/")) return "/" + p;
+      return "/static/" + p;
+    }
+
+    function setProfilePreview(photoUrl) {
+      const img = document.getElementById("photoPreview");
+      if (!img) return;
+      img.src = resolvePhotoUrl(photoUrl);
+      img.onerror = () => { img.src = "/static/images/profile_photos/default-avatar.png"; };
+    }
+
+    async function loadMe() {
+      const res = await apiFetch("/users/me");
+      if (!res.ok) {
+        const body = await safeReadText(res);
+        console.warn("Erro /users/me:", res.status, body);
+        throw new Error("Erro ao carregar dados do utilizador.");
+      }
+
+      const me = await res.json();
+
+      document.getElementById("usernameInput").value = me.username || "";
+      document.getElementById("emailInput").value = me.email || "";
+      document.getElementById("descriptionInput").value = me.description || "";
+
+      setProfilePreview(me.photo_url);
+    }
+
+    function bindPhotoPicker() {
+      const picker = document.getElementById("photoPicker");
+      const fileInput = document.getElementById("photoInput");
+      const img = document.getElementById("photoPreview");
+      if (!picker || !fileInput) return;
+
+      const openPicker = () => fileInput.click();
+
+      picker.addEventListener("click", openPicker);
+      picker.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openPicker();
+        }
+      });
+
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+
+        const url = URL.createObjectURL(file);
+        if (img) img.src = url;
+      });
+    }
+
+    async function submitProfileForm(e) {
+      e.preventDefault();
+      setMessage("");
+      setDisabled(true);
+
+      try {
+        const username = (document.getElementById("usernameInput").value || "").trim();
+        const email = (document.getElementById("emailInput").value || "").trim();
+        const description = (document.getElementById("descriptionInput").value || "").trim();
+        const photoFile = document.getElementById("photoInput")?.files?.[0] || null;
+
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("email", email);
+        formData.append("description", description);
+        if (photoFile) formData.append("photo", photoFile);
+
+        const res = await apiFetch("/users/me", {
+          method: "PUT",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const body = await safeReadText(res);
+          console.warn("Erro PUT /users/me:", res.status, body);
+          setMessage("Não foi possível guardar. Confirma username/email (únicos) e tenta novamente.", true);
+          return;
+        }
+
+        window.location.href = "/profile";
+      } catch (err) {
+        console.error(err);
+        setMessage("Erro inesperado ao guardar.", true);
+      } finally {
+        setDisabled(false);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const token = getToken();
+      if (!token) {
+        window.location.href = "/login";
+        return;
+      }
+
+      bindPhotoPicker();
+
+      try {
+        await loadMe();
+      } catch (err) {
+        console.error(err);
+        setMessage("Erro ao carregar o perfil.", true);
+      }
+
+      const form = document.getElementById("profileForm");
+      if (form) form.addEventListener("submit", submitProfileForm);
+    });
+  </script>
+
+</body>
+
+</html>

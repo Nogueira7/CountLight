@@ -1,0 +1,53 @@
+login/registo: login ja sabes, tem o id,  username, password_hash, email, role_id (não sei para que serve), refresh_token e is_active)
+
+index: dashboard da casa em geral.no inicio tem o nome de utilizador, depois tem informações no topo da pagina como Consumo total hoje, Consumo total neste mês, Consumo total este ano e Custo mensal estimado atual. depois em baixo tenho gráficos, um piechart de Consumo por divisão (kWh), um barchart de Consumo diário no mês (kWh), um linechart de Consumo ao longo do dia (kWh) e um piechart de Consumo por tipo de equipamento (kWh). depois tenho um Dashboard Detalhado, no inicio Consumo com hoje vs média: +8%, Principal causa: Cozinha (19h–22h), Impacto estimado: +1,90€ hoje, depois tenho Comparações com Diferença vs ontem (%), Diferença vs mês anterior (%), Diferença vs média mensal (kWh).Picos e comportamentos anómalos com Maior pico de hoje: 3,2 kW às 21:14, Dia com maior consumo no mês: 12/01, Faixa horária mais crítica (recorrente): 20h–22h. Top consumos com Divisões, Cozinha — 34%, Escritório — 9%, Equipamentos, Aquecedor — 22%, Frigorífico — 6%. Custos e projeção com Custo atual do mês: 67,40€, Estimativa final do mês: 74,10€, Diferença vs mês anterior: +6,20€. Insight do dia com Se reduzir o uso do aquecedor em 1 hora por dia à noite, pode poupar cerca de 9€ por mês.
+
+statsroom: pagina dedicada a dashboard sobre cada divisao.nome da divisão no topo e depois em baixo tem informações como Consumo total hoje, Consumo total neste mês, Consumo total este ano e Custo mensal estimado atual. em baixo tem um gráfico piechart com Consumo por equipamento nesta divisão (kWh) e depois tem um texto que vou ter de substituir por informações com Informação de Consumo, Esta divisão representa 18% do consumo total da habitação, posicionando-se acima da média das restantes divisões. O consumo é mais elevado durante o período noturno (19h–22h), coincidindo com utilização simultânea de vários equipamentos. Em relação ao mês anterior, verificou-se um aumento de 12%, principalmente associado a climatização e confeção de refeições.
+Grande parte do consumo ocorre em picos curtos mas intensos. Distribuir o uso de equipamentos ou automatizar desligamentos pode reduzir este consumo em até 8–10% nesta divisão.
+
+achievements: pagina dedicada a conquistas para incentivar o utilizador a poupar. tem na esquerda um botão para o utilizador criar a sua propria conquista e em baixo tem Total de conquistas, Concluídas, Em andamento e Falhadas, a frente de cada tem o total de cada estado. a direita tem uma Lista de conquistas disponíveis, cada uma tem nome, descrição e estado (concluída, em andamento e falhada)
+
+alerts (nesta pagina tem informações dentro de {{}}, estas palavras não precisam ser estas na base de dados): esta pagina aborda Recomendações inteligentes e Alertas com base no seu consumo. a nível das Recomendações temos Melhor tarifa para o teu perfil: Com base no seu consumo dos últimos {{days}} dias, a {{recommendedProvider.name}} ({{recommendedProvider.tariff}}) é a melhor opção. Pode poupar cerca de {{estimatedSavingsMonthly}}€/mês ({{estimatedSavingsYearly}}€/ano) em comparação com a sua operadora atual.
+Eficiência energética: A sua máquina de lavar tem classe {{appliance.energyClassCurrent}} (escala A–G). Se trocar por uma classe {{appliance.energyClassRecommended}}, pode poupar ~{{estimatedSavingsYearly}}€/ano e recuperar o investimento em cerca de {{paybackMonths}} meses (considerando {{cyclesPerWeek}} ciclos/semana).
+Equipamento em standby demasiado elevado: O standby médio é de {{standbyAvgW}}W durante {{standbyHoursPerDay}}h/dia. Ao cortar o standby (tomada inteligente/agendamento), pode poupar ~{{estimatedSavingsMonthly}}€/mês ({{estimatedSavingsYearly}}€/ano).
+Horários mais baratos para usar aparelhos (bi-horário/tri-horário): Se deslocar {{shiftableKwhPerMonth}} kWh/mês (ex.: lavar roupa/loiça) para {{cheapestPeriodName}} ({{cheapestPeriodHours}}), pode reduzir a fatura em ~{{estimatedSavingsMonthly}}€/mês.
+Consumo fora do padrão: O consumo desta semana está {{percentAboveBaseline}}% acima do seu normal (média dos últimos {{baselineDays}} dias). Veja quais os dias/horas com maior subida e confirme se há algum aparelho a ficar ligado mais tempo do que o habitual. depois na segunda parte da pagina tem os alertas, cada alerta tem data e hora e informações como Pico de consumo detetado, Potência acima de 2500W durante 3 min, Dispositivo: Shelly Plug S — Cozinha e Ação sugerida: verificar aquecedor/forno ou evitar uso simultâneo, isto é representado em uma time line com vários alertas.
+
+profile: aqui é o perfil do utilizador onde mostra nome e descrição e informações como Total de conquistas: 5, Concluídas: 1, Em andamento: 3, Maior conquista: Divisão Sustentável – redução de 20% no consumo de uma divisão., Impacto financeiro 124,60 € poupados desde que começou a usar a aplicação. também quero fazer um sistema de visitar perfis, o perfil também deve ter username, email, password, Descrição, e foto.
+
+houses: pagina dedicada as casas do utilizador, cada utilizador pode ter varias, casas, cada casa varias divisões, cada divisão vários aparelhos shellys plug S, esta pagina cada casa mostra informações como Casa Porto, 342 kWh este mês, Endereço: Rua das Flores, Porto, Divisões: 5, Dispositivos Shelly: 9, Potência atual: 2 150 W, Custo, estimado (mês): 67,40 €, Última leitura: 15/01/2026 · 21:43. depois o utilizador clica no botão de selecionar a casa e o site mostra apenas informações dessa casa.
+
+forms: pagina para inserir informações da casa selecionada. Informações da Habitação como Pessoas na casa, adultos e crianças, tempo na Habitação (Permanente (24h por dia) , Parte do dia ou Casa de férias), Potência, Comercializadora, Tarifa, Consumo, Equipamentos pesados como Ar condicionado, Termoacumulador ou Carro elétrico, Morada, estou a pensar colocar tipo de morada (moradia, apartamento). na segunda parte da pagina temos a parte Divisões e Shelly, onde o utilizador adiciona, remove, muda nome das divisoes e adiciona shellys e lhes da nome e o seu ID, tipo de aparelho e gama de consumo A-G.
+
+pricing: pagina que o utilizador vai escolher o seu plano tendo 3 planos:
+Plano Free
+0 €/mês
+Monitorização básica da sua primeira casa com alertas simples e histórico limitado.
+
+1 casa monitorizada
+Alertas básicos
+Histórico até 30 dias
+Suporte por email
+Plano Base
+Mais casas e funcionalidades
+6,99 €/mês
+Ideal para quem quer monitorizar uma segunda habitação e obter alertas e recomendações personalizadas.
+
+Até 2 casas monitorizadas
+Até 5 dispositivos Shelly
+Alertas inteligentes e recomendações básicas
+Histórico até 90 dias
+Suporte prioritário
+ 
+Plano Avançado
+Controle total e múltiplas casas
+12,99 €/mês
+Para utilizadores com várias casas ou que desejam controlo completo, histórico detalhado e automações avançadas.
+
+Até 5 casas monitorizadas
+Até 10 dispositivos Shelly
+Alertas avançados e automações inteligentes
+Histórico até 365 dias
+Suporte prioritário
+Simulações de poupança
+ 

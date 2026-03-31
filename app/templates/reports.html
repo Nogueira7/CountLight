@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>CountLight Reports</title>
+
+  <link rel="icon" type="image/png" href="/static/images/logo_neon.png">
+  <link rel="stylesheet" href="/static/css/style-liberty.css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+
+  <style>
+    .choice-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 992px) {
+      .choice-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .help-chip {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(65, 105, 225, .10);
+      color: #4169e1;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .inline {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .hidden { display: none !important; }
+    .req {
+      color: #dc3545;
+      font-weight: 800;
+      margin-left: 6px;
+    }
+  </style>
+</head>
+
+<body class="sidebar-menu-collapsed">
+  <div class="se-pre-con"></div>
+
+  <section>
+    {% include "sidebar.html" %}
+    {% include "header.html" %}
+
+    <div class="main-content">
+      <div class="container-fluid content-top-gap">
+
+        <nav aria-label="breadcrumb" class="mb-4">
+          <ol class="breadcrumb my-breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Relatórios</li>
+          </ol>
+        </nav>
+
+        <section class="forms">
+          <div class="card card_border py-2 mb-4">
+            <div class="cards__heading">
+              <h3>Gerar Relatório <span></span></h3>
+            </div>
+
+            <div class="card-body">
+              <form id="reportForm" novalidate>
+
+                <!-- TIPO -->
+                <div class="form-group">
+                  <label class="input__label">
+                    Tipo de relatório
+                    <span class="help-chip">default: Casa completa</span>
+                  </label>
+
+                  <div class="choice-grid">
+                    <label class="d-flex align-items-center">
+                      <input type="radio" name="report_type" value="house" checked style="margin-right:10px;">
+                      <div>
+                        <div style="font-weight:700;">Casa completa</div>
+                        <small class="form-text text-muted">Resumo do consumo/produção da casa.</small>
+                      </div>
+                    </label>
+
+                    <label class="d-flex align-items-center">
+                      <input type="radio" name="report_type" value="room" style="margin-right:10px;">
+                      <div>
+                        <div style="font-weight:700;">Divisão específica</div>
+                        <small class="form-text text-muted">Gera relatório para uma divisão/equipamento.</small>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div id="roomBlock" class="mt-3 hidden">
+                    <label class="input__label">Divisão</label>
+                    <select id="roomSelect" class="form-control input-style" name="room_id" disabled>
+                      <option value="">A carregar…</option>
+                    </select>
+                    <small class="form-text text-muted">Obrigatório quando escolhes “Divisão específica”.</small>
+                  </div>
+                </div>
+
+                <!-- PERÍODO -->
+                <div class="form-group">
+                  <label class="input__label">
+                    Período <span class="req">*</span>
+                  </label>
+
+                  <div class="choice-grid">
+                    <label class="d-flex align-items-center">
+                      <input type="radio" name="period" value="today" checked style="margin-right:10px;">
+                      <div><div style="font-weight:700;">Hoje</div></div>
+                    </label>
+
+                    <label class="d-flex align-items-center">
+                      <input type="radio" name="period" value="last7" style="margin-right:10px;">
+                      <div><div style="font-weight:700;">Últimos 7 dias</div></div>
+                    </label>
+
+                    <label class="d-flex align-items-center">
+                      <input type="radio" name="period" value="thisMonth" style="margin-right:10px;">
+                      <div><div style="font-weight:700;">Este mês</div></div>
+                    </label>
+
+                    <label class="d-flex align-items-center">
+                      <input type="radio" name="period" value="prevMonth" style="margin-right:10px;">
+                      <div><div style="font-weight:700;">Mês anterior</div></div>
+                    </label>
+
+                    <label class="d-flex align-items-center">
+                      <input type="radio" name="period" value="custom" style="margin-right:10px;">
+                      <div><div style="font-weight:700;">Intervalo personalizado</div></div>
+                    </label>
+                  </div>
+
+                  <div id="customRangeBlock" class="mt-3 hidden">
+                    <div class="inline">
+                      <div style="min-width:260px; flex:1;">
+                        <label class="input__label">Início</label>
+                        <input id="startDate" type="date" class="form-control input-style" disabled>
+                      </div>
+                      <div style="min-width:260px; flex:1;">
+                        <label class="input__label">Fim</label>
+                        <input id="endDate" type="date" class="form-control input-style" disabled>
+                      </div>
+                    </div>
+                    <small class="form-text text-muted">Escolhe datas (inclusive). O fim tem de ser >= início.</small>
+                  </div>
+                </div>
+
+                <!-- DETALHE -->
+                <div class="form-group">
+                  <label class="input__label">
+                    Nível de detalhe
+                  </label>
+
+                  <div class="choice-grid">
+                    <label class="d-flex align-items-center">
+                      <input type="radio" name="detail" value="simple" checked style="margin-right:10px;">
+                      <div>
+                        <div style="font-weight:700;">Simples</div>
+                        <small class="form-text text-muted">Resumo rápido.</small>
+                      </div>
+                    </label>
+
+                    <label class="d-flex align-items-center">
+                      <input type="radio" name="detail" value="detailed" style="margin-right:10px;">
+                      <div>
+                        <div style="font-weight:700;">Detalhado</div>
+                        <small class="form-text text-muted">Com gráficos + breakdown.</small>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- MENSAGEM -->
+                <div class="form-group">
+                  <div id="formMessage" class="text-muted"></div>
+                </div>
+
+                <!-- AÇÕES -->
+                <div class="form-group">
+                  <button id="generateBtn" type="submit" class="btn btn-primary btn-style">
+                    Gerar relatório
+                  </button>
+
+                  <a href="/dashboard" class="btn btn-style btn-light ml-2">
+                    Voltar
+                  </a>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="dashboard">
+    <p>&copy 2020 Collective. All Rights Reserved.</p>
+  </footer>
+
+  <button onclick="topFunction()" id="movetop" class="bg-primary" title="Go to top">
+    <span class="fa fa-angle-up"></span>
+  </button>
+
+  <script>
+    window.onscroll = function () { scrollFunction() };
+    function scrollFunction() {
+      if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        document.getElementById("movetop").style.display = "block";
+      } else {
+        document.getElementById("movetop").style.display = "none";
+      }
+    }
+    function topFunction() {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+  </script>
+
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/js/jquery-1.10.2.min.js"></script>
+  <script src="/static/js/jquery.nicescroll.js"></script>
+  <script src="/static/js/scripts.js"></script>
+  <script src="/static/js/modernizr.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+
+  <script>
+    $(window).load(function () { $(".se-pre-con").fadeOut("slow"); });
+    $(function () {
+      $('.sidebar-menu-collapsed').click(function () { $('body').toggleClass('noscroll'); })
+    });
+  </script>
+
+  <script>
+    // =========================================================
+    // REPORTS PAGE
+    // - Escolha tipo (casa/divisão)
+    // - Período (obrigatório; custom valida datas)
+    // - Nível de detalhe
+    // - Botão "Gerar relatório" -> faz download de PDF
+    //
+    // NOTA: o endpoint de backend pode ser ajustado:
+    //  - GET /api/reports/pdf?...  (resposta application/pdf)
+    // =========================================================
+
+    const API_URL = "/api";
+
+    function getToken() { return localStorage.getItem("token"); }
+    function getSelectedHouseId() { return localStorage.getItem("selected_house_id"); }
+
+    function redirectToLogin() {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+
+    async function safeReadText(res) {
+      try { return await res.text(); } catch { return ""; }
+    }
+
+    async function apiFetch(path, options = {}) {
+      const token = getToken();
+      const houseId = getSelectedHouseId();
+
+      const headers = new Headers(options.headers || {});
+      headers.set("Accept", options.accept || "application/json");
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+      if (houseId) headers.set("X-House-Id", houseId);
+
+      const url = `${API_URL}${path.startsWith("/") ? path : "/" + path}`;
+      const res = await fetch(url, { ...options, headers });
+
+      if (res.status === 401 || res.status === 403) {
+        redirectToLogin();
+        throw new Error(`Unauthorized (${res.status})`);
+      }
+      return res;
+    }
+
+    function setMessage(text, isError = false) {
+      const el = document.getElementById("formMessage");
+      if (!el) return;
+      el.textContent = text || "";
+      el.className = isError ? "text-danger" : "text-muted";
+    }
+
+    function setDisabled(disabled) {
+      const btn = document.getElementById("generateBtn");
+      if (btn) btn.disabled = disabled;
+    }
+
+    function qs(name) {
+      return document.querySelector(`[name="${name}"]:checked`)?.value || "";
+    }
+
+    function show(el, visible) {
+      if (!el) return;
+      el.classList.toggle("hidden", !visible);
+    }
+
+    function toISODate(d) {
+      // YYYY-MM-DD em timezone local (sem puxar para UTC)
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function getPeriodRange(period) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      if (period === "today") {
+        const start = today;
+        const end = today;
+        return { start, end };
+      }
+
+      if (period === "last7") {
+        const end = today;
+        const start = new Date(today);
+        start.setDate(start.getDate() - 6); // inclui hoje = 7 dias
+        return { start, end };
+      }
+
+      if (period === "thisMonth") {
+        const start = new Date(today.getFullYear(), today.getMonth(), 1);
+        const end = today;
+        return { start, end };
+      }
+
+      if (period === "prevMonth") {
+        const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const end = new Date(today.getFullYear(), today.getMonth(), 0); // último dia do mês anterior
+        return { start, end };
+      }
+
+      return null;
+    }
+
+    async function loadRooms() {
+      // Se não tiveres "rooms", troca por "divisions" ou outro endpoint do teu backend.
+      // Esperado: [{id, name}] ou [{id, room_name}]
+      const select = document.getElementById("roomSelect");
+      if (!select) return;
+
+      try {
+        const res = await apiFetch("/rooms", { method: "GET" });
+        if (!res.ok) {
+          const body = await safeReadText(res);
+          console.warn("Erro GET /rooms:", res.status, body);
+          select.innerHTML = `<option value="">(Não foi possível carregar divisões)</option>`;
+          return;
+        }
+
+        const data = await res.json();
+        const rooms = Array.isArray(data) ? data : (data.items || []);
+
+        select.innerHTML = `<option value="">Seleciona uma divisão…</option>` +
+          rooms.map(r => {
+            const id = r.id ?? r.room_id ?? "";
+            const name = r.name ?? r.room_name ?? `Divisão ${id}`;
+            return `<option value="${String(id)}">${String(name)}</option>`;
+          }).join("");
+      } catch (e) {
+        console.error(e);
+        select.innerHTML = `<option value="">(Não foi possível carregar divisões)</option>`;
+      }
+    }
+
+    function syncTypeUI() {
+      const type = qs("report_type");
+      const roomBlock = document.getElementById("roomBlock");
+      const roomSelect = document.getElementById("roomSelect");
+      const needsRoom = (type === "room");
+
+      show(roomBlock, needsRoom);
+      if (roomSelect) roomSelect.disabled = !needsRoom;
+    }
+
+    function syncPeriodUI() {
+      const period = qs("period");
+      const custom = (period === "custom");
+      const block = document.getElementById("customRangeBlock");
+      const start = document.getElementById("startDate");
+      const end = document.getElementById("endDate");
+
+      show(block, custom);
+      if (start) start.disabled = !custom;
+      if (end) end.disabled = !custom;
+
+      if (!custom) {
+        // limpar
+        if (start) start.value = "";
+        if (end) end.value = "";
+      }
+    }
+
+    function validateAndBuildParams() {
+      const reportType = qs("report_type");
+      const detail = qs("detail");
+      const period = qs("period");
+
+      if (!period) {
+        return { ok: false, message: "Tens de escolher um período (obrigatório)." };
+      }
+
+      let startISO = "";
+      let endISO = "";
+
+      if (period === "custom") {
+        const s = document.getElementById("startDate")?.value || "";
+        const e = document.getElementById("endDate")?.value || "";
+        if (!s || !e) {
+          return { ok: false, message: "No intervalo personalizado, tens de escolher início e fim." };
+        }
+        if (e < s) {
+          return { ok: false, message: "O fim tem de ser igual ou posterior ao início." };
+        }
+        startISO = s;
+        endISO = e;
+      } else {
+        const range = getPeriodRange(period);
+        if (!range) return { ok: false, message: "Período inválido." };
+        startISO = toISODate(range.start);
+        endISO = toISODate(range.end);
+      }
+
+      let roomId = "";
+      if (reportType === "room") {
+        roomId = document.getElementById("roomSelect")?.value || "";
+        if (!roomId) return { ok: false, message: "Seleciona uma divisão para gerar o relatório." };
+      }
+
+      const params = new URLSearchParams();
+      params.set("type", reportType);         // house | room
+      params.set("detail", detail);           // simple | detailed
+      params.set("start", startISO);          // YYYY-MM-DD
+      params.set("end", endISO);              // YYYY-MM-DD
+      if (roomId) params.set("room_id", roomId);
+
+      return { ok: true, params };
+    }
+
+    async function downloadPdf(url, filename = "relatorio.pdf") {
+      const res = await apiFetch(url, {
+        method: "GET",
+        accept: "application/pdf"
+      });
+
+      if (!res.ok) {
+        const body = await safeReadText(res);
+        console.warn("Erro PDF:", res.status, body);
+        throw new Error("Não foi possível gerar o PDF.");
+      }
+
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    }
+
+    async function onSubmit(e) {
+      e.preventDefault();
+      setMessage("");
+      setDisabled(true);
+
+      try {
+        const token = getToken();
+        if (!token) { window.location.href = "/login"; return; }
+
+        const built = validateAndBuildParams();
+        if (!built.ok) {
+          setMessage(built.message, true);
+          return;
+        }
+
+        // Ajusta aqui se o teu backend tiver outro endpoint
+        const url = `/reports/pdf?${built.params.toString()}`;
+
+        setMessage("A gerar PDF…");
+        await downloadPdf(url, "countlight-relatorio.pdf");
+        setMessage("PDF gerado. O download deve ter começado.");
+      } catch (err) {
+        console.error(err);
+        setMessage(err?.message || "Erro inesperado ao gerar o relatório.", true);
+      } finally {
+        setDisabled(false);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const token = getToken();
+      if (!token) { window.location.href = "/login"; return; }
+
+      // binds
+      document.querySelectorAll('input[name="report_type"]').forEach(r =>
+        r.addEventListener("change", syncTypeUI)
+      );
+      document.querySelectorAll('input[name="period"]').forEach(r =>
+        r.addEventListener("change", syncPeriodUI)
+      );
+
+      syncTypeUI();
+      syncPeriodUI();
+
+      // tenta carregar divisões (se existir endpoint)
+      await loadRooms();
+
+      const form = document.getElementById("reportForm");
+      if (form) form.addEventListener("submit", onSubmit);
+    });
+  </script>
+</body>
+</html>

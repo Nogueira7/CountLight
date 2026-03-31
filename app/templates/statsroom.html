@@ -1,0 +1,236 @@
+﻿<!doctype html>
+<html lang="pt">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>CountLight Stats Room</title>
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', path='images/logo_neon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style-liberty.css') }}">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+</head>
+
+<body class="sidebar-menu-collapsed">
+
+    <div class="se-pre-con"></div>
+
+    <section>
+        {% include "sidebar.html" %}
+        {% include "header.html" %}
+
+        <div class="main-content">
+            <div class="container-fluid content-top-gap">
+
+                <div class="welcome-msg pt-3 pb-4">
+                    <h1><span class="text-primary" id="room-name">...</span></h1>
+                    <p>Seu dashboard detalhado por divisão.</p>
+                </div>
+
+                <div class="statistics">
+                    <div class="row">
+                        <div class="col-sm-6 col-lg-3 statistics-grid">
+                            <div class="card card_border border-primary-top p-4">
+                                <h3 class="text-primary number" id="room-today">-- kWh</h3>
+                                <p class="stat-text">Consumo hoje</p>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-3 statistics-grid">
+                            <div class="card card_border border-primary-top p-4">
+                                <h3 class="text-primary number" id="room-month">-- kWh</h3>
+                                <p class="stat-text">Consumo mês</p>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-3 statistics-grid">
+                            <div class="card card_border border-primary-top p-4">
+                                <h3 class="text-primary number" id="room-year">-- kWh</h3>
+                                <p class="stat-text">Consumo ano</p>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-3 statistics-grid">
+                            <div class="card card_border border-secondary-top p-4">
+                                <h3 class="text-secondary number" id="room-cost">-- €</h3>
+                                <p class="stat-text">Custo estimado</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-lg-6">
+                        <div class="card card_border">
+                            <div class="card-header">Consumo por equipamento (kWh)</div>
+                            <div class="card-body">
+                                <canvas id="piechart3"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card card_border">
+                            <div class="card-header">Informação de Consumo</div>
+                            <div class="card-body">
+                                <div id="room-summary-text">
+                                    A carregar resumo da divisão...
+                                </div>
+                                <button class="btn btn-primary btn-style" data-toggle="modal"
+                                    data-target="#modalEquipamentos">
+                                    Ver equipamentos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="dashboard">
+        <p>&copy; 2026 CountLight. All Rights Reserved.</p>
+    </footer>
+
+    <div class="modal fade" id="modalEquipamentos" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Equipamentos da Divisão</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body" id="devices-list-container">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', path='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', path='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', path='js/jquery.nicescroll.js') }}"></script>
+    <script src="{{ url_for('static', path='js/Chart.min.js') }}"></script>
+    <script src="{{ url_for('static', path='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', path='js/pie.js') }}"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                window.location.href = "/login";
+                return;
+            }
+
+            // Pega o ID da sala da URL (assumindo /statsroom/5 ou similar)
+            const roomId = window.location.pathname.split("/").pop();
+
+            try {
+                // 🔐 1. Validar utilizador (Igual ao Index)
+                const meResponse = await fetch("/api/me", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!meResponse.ok) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/login";
+                    return;
+                }
+
+                // 📊 2. Buscar dados da divisão (Usando as suas novas funções do repository)
+                const response = await fetch(`/api/rooms/${roomId}/summary`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error("Erro ao buscar dados da divisão");
+
+                const data = await response.json();
+
+                // 🏷️ Atualizar Interface
+                document.getElementById("room-name").textContent = data.room_name;
+                document.getElementById("room-today").textContent = data.consumption.today.toFixed(2) + " kWh";
+                document.getElementById("room-month").textContent = data.consumption.month.toFixed(2) + " kWh";
+                document.getElementById("room-year").textContent = data.consumption.year.toFixed(2) + " kWh";
+                document.getElementById("room-cost").textContent = data.cost.estimated.toFixed(2) + " €";
+// 📊 Construir resumo inteligente
+
+const percentage = Number(data.percentage_of_house ?? 0).toFixed(0);
+const comparison = Number(data.comparison_last_month ?? 0).toFixed(1);
+const peakHour = data.peak_hour ?? "--";
+
+// 🔎 Descobrir equipamento com maior consumo
+let topDevice = "equipamentos diversos";
+
+if (data.devices && data.devices.length > 0) {
+    const sorted = [...data.devices].sort((a, b) => 
+        (b.value ?? 0) - (a.value ?? 0)
+    );
+
+    if ((sorted[0].value ?? 0) > 0) {
+        topDevice = sorted[0].label;
+    }
+}
+
+// 📈 Texto de tendência
+let trendText = "";
+if (comparison > 0) {
+    trendText = `registou-se um aumento de cerca de ${comparison}% no consumo energético.`;
+} else if (comparison < 0) {
+    trendText = `registou-se uma redução de cerca de ${Math.abs(comparison)}% no consumo energético.`;
+} else {
+    trendText = `não houve variação significativa no consumo energético.`;
+}
+
+// 📝 Frase final
+const summaryText = `
+<p>
+Esta divisão representa aproximadamente <strong>${percentage}%</strong> do consumo total da habitação.
+Em comparação com o mês passado, ${trendText}
+</p>
+
+<p>
+O principal fator de consumo está associado a <strong>${topDevice}</strong>,
+especialmente durante o período <strong>${peakHour}</strong>.
+</p>
+`;
+
+document.getElementById("room-summary-text").innerHTML = summaryText;
+
+                // 🥧 Atualizar Pie Chart (usar consumo por TIPO de dispositivo da divisão)
+                try {
+                    const typesRes = await fetch(`/api/rooms/${roomId}/device-types`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+
+                    if (typesRes.ok) {
+                        const types = await typesRes.json();
+                        const labels = (types || []).map(t => t.label);
+                        const values = (types || []).map(t => t.value);
+
+                        if (window.updatePieChart && window.pieChart3Instance) {
+                            window.updatePieChart(window.pieChart3Instance, labels, values);
+                        }
+                    } else {
+                        console.warn('Não foi possível obter tipos de dispositivo para a divisão');
+                    }
+                } catch (err) {
+                    console.error('Erro ao carregar tipos de dispositivo:', err);
+                }
+
+                // 📋 Preencher Modal de Equipamentos
+                const modalBody = document.getElementById("devices-list-container");
+                modalBody.innerHTML = (data.devices || []).map(device => `
+    <p><strong>${device.name || device.label}</strong> - ${(device.kwh ?? device.value ?? 0).toFixed(2)} kWh</p>
+`).join("");
+
+            } catch (error) {
+                console.error("Erro na carga de dados:", error);
+            } finally {
+                // Remover preloader
+                const preloader = document.querySelector(".se-pre-con");
+                if (preloader) preloader.style.display = "none";
+            }
+        });
+    </script>
+</body>
+
+</html>

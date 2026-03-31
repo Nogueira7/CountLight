@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Verificação de conta</title>
+  <link rel="icon" type="image/png" href="/static/images/logo_neon.png">
+  <link rel="stylesheet" href="/static/css/style-liberty.css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+</head>
+
+<body class="sidebar-menu-collapsed">
+  <section>
+    <div class="">
+      <section class="login-form py-md-5 py-3">
+        <div class="card card_border p-md-4">
+          <div class="card-body">
+
+            <div class="login__header text-center mb-lg-5 mb-4">
+              <h3 class="login__title mb-2">Verificação de conta</h3>
+              <p id="subtitle">Estamos a validar o teu link…</p>
+            </div>
+
+            <div id="statusWrap" class="text-center">
+              <div id="status" class="mb-3">A verificar conta...</div>
+
+              <a id="loginLink" class="btn btn-primary btn-style mt-2" href="/login" style="display:none;">
+                Ir para o login
+              </a>
+
+              <p class="signup mt-4" id="hint" style="display:none;">
+                Se não fores redirecionado automaticamente,
+                <a href="/login">clica aqui</a>.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const subtitleEl = document.getElementById("subtitle");
+    const loginLinkEl = document.getElementById("loginLink");
+    const hintEl = document.getElementById("hint");
+
+    function showSuccess(message) {
+      statusEl.innerText = message;
+      subtitleEl.innerText = "Tudo pronto.";
+      loginLinkEl.style.display = "inline-block";
+      hintEl.style.display = "block";
+    }
+
+    function showError(message) {
+      statusEl.innerText = message;
+      subtitleEl.innerText = "Não foi possível concluir a verificação.";
+      loginLinkEl.style.display = "inline-block";
+      hintEl.style.display = "none";
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (!token) {
+      showError("Token inválido.");
+    } else {
+      fetch(`/api/verify?token=${encodeURIComponent(token)}`)
+        .then(async (res) => {
+          let data = null;
+          try { data = await res.json(); } catch (_) {}
+          if (!res.ok) throw new Error(data?.detail || "Erro ao verificar conta.");
+          return data;
+        })
+        .then((data) => {
+          if (data && (data.message || data.success)) {
+            showSuccess("Conta verificada com sucesso.");
+            setTimeout(() => { window.location.href = "/login"; }, 2000);
+          } else {
+            showError("Erro ao verificar conta.");
+          }
+        })
+        .catch(() => {
+          showError("Erro de ligação ao servidor.");
+        });
+    }
+  </script>
+</body>
+</html>

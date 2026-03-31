@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="pt-PT">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>Conquistas e Metas</title>
+
+  <link rel="stylesheet" href="/static/css/style-liberty.css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+</head>
+
+<body class="sidebar-menu-collapsed">
+  <script>
+    const API_URL = "/api";
+
+    async function checkAchievementsAccess() {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        window.location.href = "/login";
+        return;
+      }
+
+      // 1️⃣ validar user
+      const meRes = await fetch(`${API_URL}/me`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      if (!meRes.ok) {
+        localStorage.clear();
+        window.location.href = "/login";
+        return;
+      }
+
+      // 2️⃣ verificar casas
+      const housesRes = await fetch(`${API_URL}/houses`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      if (!housesRes.ok) {
+        window.location.href = "/houses";
+        return;
+      }
+
+      const houses = await housesRes.json();
+
+      if (!houses || houses.length === 0) {
+        window.location.href = "/houses";
+        return;
+      }
+
+      // 3️⃣ verificar plano
+      const planRes = await fetch(`${API_URL}/plans/me`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      if (!planRes.ok) {
+        window.location.href = "/pricing";
+        return;
+      }
+
+      const plan = await planRes.json();
+
+      // ⚠️ só permitir PRO (5) ou ADVANCED (6)
+      if (![5, 6].includes(plan.plan_id)) {
+        window.location.href = "/pricing";
+        return;
+      }
+    }
+
+    checkAchievementsAccess();
+  </script>
+  <div class="se-pre-con"></div>
+
+  <section>
+    {% include "sidebar.html" %}
+    {% include "header.html" %}
+
+    <div class="main-content">
+      <div class="container-fluid content-top-gap">
+
+        <div class="welcome-msg pt-3 pb-4">
+          <h1><span class="text-primary">Conquistas</span></h1>
+          <p>Gestão e acompanhamento das suas conquistas e metas.</p>
+        </div>
+
+        <div class="card card_border p-1 mb-4">
+          <div class="card-body">
+            <div class="d-grid align-mails-block">
+
+              <!-- ESQUERDA -->
+              <div class="mail-inbox-left">
+                <nav class="navbar p-0">
+                  <ul class="nav nav-pills nav-stacked mail-nav">
+
+                    <li class="mb-3">
+                      <button class="btn btn-primary btn-style btn-block" id="goalSetupBtn" type="button">
+                        <span class="fa fa-plus-circle" id="goalSetupBtnIcon"></span>
+                        <span id="goalSetupBtnText">Criar Meta</span>
+                      </button>
+                    </li>
+
+                    <li aria-hidden="true">
+                      <div class="left-section-title">
+                        <span class="fa fa-bullseye"></span>
+                        Metas
+                      </div>
+                    </li>
+
+                    <li class="goal-item active" id="filter-goals-all">
+                      <a href="#" onclick="filterRight('goals','all'); return false;">
+                        <i class="fa fa-list"></i> Todas as metas
+                        <span class="badge" id="goals-count">0</span>
+                      </a>
+                    </li>
+
+                    <li class="goal-item" id="filter-goals-active">
+                      <a href="#" onclick="filterRight('goals','active'); return false;">
+                        <i class="fa fa-play-circle"></i> Em curso
+                        <span class="badge" id="goals-active-count">0</span>
+                      </a>
+                    </li>
+
+                    <li class="goal-item" id="filter-goals-completed">
+                      <a href="#" onclick="filterRight('goals','completed'); return false;">
+                        <i class="fa fa-check-circle"></i> Concluídas
+                        <span class="badge" id="goals-completed-count">0</span>
+                      </a>
+                    </li>
+
+                    <li aria-hidden="true">
+                      <hr>
+                    </li>
+
+                    <li aria-hidden="true">
+                      <div class="left-section-title">
+                        <span class="fa fa-trophy"></span>
+                        Conquistas
+                      </div>
+                    </li>
+
+                    <li id="filter-ach-all">
+                      <a href="#" onclick="filterRight('achievements','all'); return false;">
+                        <i class="fa fa-trophy"></i> Todas as conquistas
+                        <span class="badge" id="ach-total-count">0</span>
+                      </a>
+                    </li>
+
+                    <li id="filter-ach-completed">
+                      <a href="#" onclick="filterRight('achievements','completed'); return false;">
+                        <i class="fa fa-check-circle"></i> Concluídas
+                        <span class="badge" id="ach-completed-count">0</span>
+                      </a>
+                    </li>
+
+                    <li id="filter-ach-pending">
+                      <a href="#" onclick="filterRight('achievements','pending'); return false;">
+                        <i class="fa fa-clock-o"></i> Não concluídas
+                        <span class="badge" id="ach-pending-count">0</span>
+                      </a>
+                    </li>
+
+                  </ul>
+                </nav>
+              </div>
+
+              <!-- DIREITA -->
+              <div class="mail-messages-view mt-md-0 mt-4">
+                <div class="row">
+                  <div class="col-sm-12">
+
+                    <div class="card">
+                      <div class="card-heading pl-4 py-3" id="rightTitle">
+                        <span class="fa fa-book"></span>
+                        Lista
+                      </div>
+
+                      <div class="card-body">
+                        <table class="table inbox-messages">
+                          <tbody id="right-table-body"></tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="dashboard">
+    <p>&copy 2020 Collective. All Rights Reserved.</p>
+  </footer>
+
+  <button onclick="topFunction()" id="movetop" class="bg-primary" title="Go to top">
+    <span class="fa fa-angle-up"></span>
+  </button>
+
+  <script>
+    window.onscroll = function () { scrollFunction() };
+
+    function scrollFunction() {
+      if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        document.getElementById("movetop").style.display = "block";
+      } else {
+        document.getElementById("movetop").style.display = "none";
+      }
+    }
+
+    function topFunction() {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+  </script>
+
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/js/jquery-1.10.2.min.js"></script>
+
+  <script src="/static/js/Chart.min.js"></script>
+  <script src="/static/js/utils.js"></script>
+
+  <script src="/static/js/bar.js"></script>
+  <script src="/static/js/stacked.js"></script>
+  <script src="/static/js/linechart.js"></script>
+  <script src="/static/js/pie.js"></script>
+
+  <script src="/static/js/jquery.dataTables.min.js"></script>
+  <script src="/static/js/faq.js"></script>
+  <script src="/static/js/jquery.nicescroll.js"></script>
+  <script src="/static/js/scripts.js"></script>
+
+  <script src="/static/js/modernizr.js"></script>
+  <script>
+    $(window).on("load", function () {
+      $(".se-pre-con").fadeOut("slow");
+    });
+  </script>
+
+  <script src="/static/js/bootstrap.min.js"></script>
+
+  <script>
+    // ----------------------------
+    // Estado
+    // ----------------------------
+    let achievements = [];
+    let goals = [];
+    let active = { kind: "goals", type: "all" };
+
+    // ----------------------------
+    // Helpers UI
+    // ----------------------------
+    function setActiveNav(kind, type) {
+      const ids = [
+        "filter-goals-all", "filter-goals-active", "filter-goals-completed",
+        "filter-ach-all", "filter-ach-completed", "filter-ach-pending"
+      ];
+      ids.forEach(id => document.getElementById(id)?.classList.remove("active"));
+
+      const map = {
+        goals: { all: "filter-goals-all", active: "filter-goals-active", completed: "filter-goals-completed" },
+        achievements: { all: "filter-ach-all", completed: "filter-ach-completed", pending: "filter-ach-pending" }
+      };
+      const targetId = map[kind]?.[type];
+      if (targetId) document.getElementById(targetId)?.classList.add("active");
+    }
+
+    function setRightTitle(kind, type) {
+      const el = document.getElementById("rightTitle");
+      if (!el) return;
+
+      const label =
+        kind === "goals"
+          ? (type === "completed" ? "Metas concluídas" : type === "active" ? "Metas em curso" : "Todas as metas")
+          : (type === "completed" ? "Conquistas concluídas" : type === "pending" ? "Conquistas não concluídas" : "Conquistas totais");
+
+      el.innerHTML = `<span class="fa fa-book"></span> ${label}`;
+    }
+
+    function safeText(v) { return (v === null || v === undefined) ? "" : String(v); }
+
+    function pct(v) {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return 0;
+      return Math.max(0, Math.min(100, Math.round(n)));
+    }
+
+    // ----------------------------
+    // API
+    // ----------------------------
+    function getAuthHeaders() {
+      // Alinhado com o resto do projeto
+      const token = localStorage.getItem("access_token") || localStorage.getItem("token");
+      const houseId = localStorage.getItem("selectedHouseId") || localStorage.getItem("selected_house_id");
+      if (!token || !houseId) return null;
+      return { Authorization: "Bearer " + token, "X-House-Id": String(houseId) };
+    }
+
+    async function loadGoals() {
+      const headers = getAuthHeaders();
+      if (!headers) return [];
+
+      const res = await fetch("/api/goals", { headers }).catch(() => null);
+      if (!res || !res.ok) return [];
+
+      const data = await res.json().catch(() => null);
+      return Array.isArray(data) ? data : [];
+    }
+
+    async function loadAchievements() {
+      const headers = getAuthHeaders();
+      if (!headers) return [];
+
+      const res = await fetch("/api/achievements", { headers }).catch(() => null);
+      if (!res || !res.ok) return [];
+
+      const data = await res.json().catch(() => null);
+      return Array.isArray(data) ? data : [];
+    }
+
+    function wireGoalButton() {
+      const btn = document.getElementById("goalSetupBtn");
+      if (!btn) return;
+      btn.addEventListener("click", function () {
+        window.location.href = "/goal-setup";
+      });
+    }
+
+    async function updateGoalCta() {
+      const textEl = document.getElementById("goalSetupBtnText");
+      const iconEl = document.getElementById("goalSetupBtnIcon");
+      if (!textEl || !iconEl) return;
+
+      const hasAnyGoal = goals.length > 0;
+      textEl.textContent = hasAnyGoal ? "Gerir Meta" : "Criar Meta";
+      iconEl.className = hasAnyGoal ? "fa fa-cog" : "fa fa-plus-circle";
+    }
+
+    // ----------------------------
+    // Regras de negócio da UI
+    // ----------------------------
+    function excludeFailedGoals(list) {
+      // pedido: não incluir falhadas em nenhuma listagem
+      return (Array.isArray(list) ? list : []).filter(g => g?.status !== "failed");
+    }
+
+    // ----------------------------
+    // Métricas esquerda
+    // ----------------------------
+    function updateLeftBadges() {
+      const visibleGoals = excludeFailedGoals(goals);
+
+      const totalGoals = visibleGoals.length;
+      const completedGoals = visibleGoals.filter(g => g?.status === "completed").length;
+      const activeGoals = visibleGoals.filter(g => g?.status === "active").length;
+
+      document.getElementById("goals-count").innerText = totalGoals;
+      document.getElementById("goals-completed-count").innerText = completedGoals;
+      document.getElementById("goals-active-count").innerText = activeGoals;
+
+      const totalAch = achievements.length;
+      const completedAch = achievements.filter(a => a?.status === "completed").length;
+      const pendingAch = totalAch - completedAch;
+
+      document.getElementById("ach-total-count").innerText = totalAch;
+      document.getElementById("ach-completed-count").innerText = completedAch;
+      document.getElementById("ach-pending-count").innerText = pendingAch;
+    }
+
+    // ----------------------------
+    // Render direita
+    // ----------------------------
+    function renderGoals(list) {
+      const body = document.getElementById("right-table-body");
+      if (!body) return;
+      body.innerHTML = "";
+
+      if (!list.length) {
+        body.innerHTML = `
+          <tr><td>
+            <div class="inbox__grid">
+              <div class="inbox-main"><strong>Sem metas</strong></div>
+              <div class="cs-5 achievement-block">
+                <div class="achievement-description">Ainda não existem metas para mostrar.</div>
+              </div>
+            </div>
+          </td></tr>
+        `;
+        return;
+      }
+
+      list.forEach(g => {
+        const status = g?.status;
+
+        // já não existem "failed" aqui, mas fica seguro
+        let badge;
+        if (status === "completed") {
+          badge = `<span class="badge badge-primary"><i class="fa fa-check-circle"></i> Concluída</span>`;
+        } else {
+          badge = `<span class="badge badge-primary"><i class="fa fa-play-circle"></i> Em curso</span>`;
+        }
+
+        let title;
+        if (g?.goal_type === "monthly_cost_limit") {
+          title = "Meta de custo mensal";
+        } else {
+          title = "Meta de consumo mensal";
+        }
+
+        const unit = g?.goal_type === "monthly_cost_limit" ? "€" : "kWh";
+        const target = safeText(g?.target_value ?? g?.target ?? "");
+        const progress = pct(g?.progress);
+
+        const detailsParts = [];
+        if (target !== "") detailsParts.push(`Limite: ${target} ${unit}`);
+        detailsParts.push(`Progresso: ${progress}%`);
+        const details = detailsParts.join(" · ");
+
+        body.innerHTML += `
+          <tr>
+            <td>
+              <div class="inbox__grid">
+                <div class="inbox-main">
+                  <strong>${safeText(title)}</strong>
+                </div>
+
+                <div class="cs-5 achievement-block">
+                  <div class="achievement-description">${safeText(details)}</div>
+                </div>
+
+                <div class="time">
+                  ${badge}
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function renderAchievements(list) {
+      const body = document.getElementById("right-table-body");
+      if (!body) return;
+      body.innerHTML = "";
+
+      if (!list.length) {
+        body.innerHTML = `
+          <tr><td>
+            <div class="inbox__grid">
+              <div class="inbox-main"><strong>Sem conquistas</strong></div>
+              <div class="cs-5 achievement-block">
+                <div class="achievement-description">Não existem conquistas para mostrar neste filtro.</div>
+              </div>
+            </div>
+          </td></tr>
+        `;
+        return;
+      }
+
+      list.forEach(a => {
+        const isCompleted = a?.status === "completed";
+        const title = safeText(a?.title || "Conquista");
+        const desc = safeText(a?.description || "");
+        const progress = pct(a?.progress);
+
+        const rightBadge = isCompleted
+          ? `<span class="badge badge-primary"><i class="fa fa-check-circle"></i> Concluída</span>`
+          : ``;
+
+        body.innerHTML += `
+          <tr>
+            <td>
+              <div class="inbox__grid">
+
+                <div class="inbox-main">
+                  <strong>${title}</strong>
+                </div>
+
+                <div class="cs-5 achievement-block">
+                  <div class="achievement-description">${desc}</div>
+                  <div class="achievement-progress">Progresso: ${progress}%</div>
+                </div>
+
+                <div class="time">
+                  ${rightBadge}
+                </div>
+
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // ----------------------------
+    // Filtro unificado
+    // ----------------------------
+    function filterRight(kind, type) {
+      active = { kind, type };
+      setActiveNav(kind, type);
+      setRightTitle(kind, type);
+
+      if (kind === "goals") {
+        // pedido: nunca incluir "failed"
+        let list = excludeFailedGoals(goals);
+
+        if (type === "completed") list = list.filter(g => g?.status === "completed");
+        if (type === "active") list = list.filter(g => g?.status === "active");
+
+        renderGoals(list);
+        return;
+      }
+
+      let list = achievements.slice();
+      if (type === "completed") list = list.filter(a => a?.status === "completed");
+      if (type === "pending") list = list.filter(a => a?.status !== "completed");
+      renderAchievements(list);
+    }
+
+    // ----------------------------
+    // Init
+    // ----------------------------
+    document.addEventListener("DOMContentLoaded", async function () {
+      wireGoalButton();
+
+      goals = await loadGoals();
+      achievements = await loadAchievements();
+
+      updateLeftBadges();
+      await updateGoalCta();
+
+      filterRight("goals", "all");
+    });
+  </script>
+</body>
+
+</html>

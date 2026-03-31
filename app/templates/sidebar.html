@@ -1,0 +1,151 @@
+<div class="sidebar-menu sticky-sidebar-menu">
+
+  <!-- LOGO -->
+  <div class="logo">
+    <h1><a href="/dashboard">CountLight</a></h1>
+  </div>
+
+  <div class="logo-icon text-center">
+    <a href="/dashboard" title="logo">
+      <img src="/static/images/logo_neon.png" alt="logo-icon">
+    </a>
+  </div>
+
+  <div class="sidebar-menu-inner">
+
+    <ul class="nav nav-pills nav-stacked custom-nav">
+
+      <!-- DASHBOARD -->
+      <li>
+        <a href="/dashboard">
+          <i class="fa fa-tachometer"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+
+      <!-- DIVISÕES -->
+      <li class="menu-list">
+        <a href="javascript:void(0);">
+          <i class="fa fa-th"></i>
+          <span>
+            Divisões da casa
+            <i class="lnr lnr-chevron-right"></i>
+          </span>
+        </a>
+
+        <ul class="sub-menu-list" id="rooms-submenu">
+          <!-- carregado dinamicamente -->
+        </ul>
+      </li>
+
+      <!-- OUTROS LINKS -->
+      <li>
+        <a href="/achievements">
+          <i class="fa fa-book"></i>
+          <span>Conquistas</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/alerts">
+          <i class="fa fa-exclamation-triangle"></i>
+          <span>Alertas</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/reports">
+          <i class="fa fa-file-text"></i>
+          <span>Relatórios</span>
+          <label class="label label-primary">New</label>
+        </a>
+      </li>
+
+    </ul>
+
+    <!-- TOGGLE BUTTON -->
+    <a class="toggle-btn">
+      <i class="fa fa-angle-double-left menu-collapsed__left">
+        <span>Collapse Sidebar</span>
+      </i>
+      <i class="fa fa-angle-double-right menu-collapsed__right"></i>
+    </a>
+
+  </div>
+</div>
+
+<!-- SCRIPT DINÂMICO DAS DIVISÕES -->
+<script>
+  document.addEventListener("DOMContentLoaded", async function () {
+
+    const submenu = document.getElementById("rooms-submenu");
+    if (!submenu) return;
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/login";
+      return;
+    }
+
+    try {
+      // 🔹 Buscar casas
+      const housesResponse = await fetch("/api/houses", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (!housesResponse.ok) {
+        console.error("Erro ao buscar casas");
+        return;
+      }
+
+      const houses = await housesResponse.json();
+
+      if (!houses.length) {
+        submenu.innerHTML = "<li><a href='#'>Sem casas</a></li>";
+        return;
+      }
+
+      const houseId = houses[0].id_house;
+
+      // 🔹 Buscar divisões da casa
+      const roomsResponse = await fetch(`/api/houses/${houseId}/rooms`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (!roomsResponse.ok) {
+        console.error("Erro ao buscar divisões");
+        return;
+      }
+
+      const rooms = await roomsResponse.json();
+
+      submenu.innerHTML = "";
+
+      if (!rooms.length) {
+        submenu.innerHTML = "<li><a href='#'>Sem divisões</a></li>";
+        return;
+      }
+
+      rooms.forEach(room => {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+        <a href="/statsroom/${room.id_room}">
+          ${room.name}
+        </a>
+      `;
+
+        submenu.appendChild(li);
+      });
+
+    } catch (error) {
+      console.error("Erro ao carregar divisões:", error);
+    }
+
+  });
+</script>

@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="pt-PT">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>CountLight · Configurar Casa</title>
+  <link rel="icon" type="image/png" href="assets/images/logo_neon.png">
+  <link rel="stylesheet" href="assets/css/style-liberty.css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+</head>
+
+<body class="sidebar-menu-collapsed">
+  <div class="se-pre-con"></div>
+
+  <section>
+    <!-- sidebar menu start -->
+    <div class="sidebar-menu sticky-sidebar-menu">
+      <div class="logo">
+        <h1><a href="index.html">Collective</a></h1>
+      </div>
+
+      <div class="logo-icon text-center">
+        <a href="index.html" title="logo">
+          <img src="assets/images/logo_neon.png" alt="logo-icon">
+        </a>
+      </div>
+
+      <div class="sidebar-menu-inner">
+        <ul class="nav nav-pills nav-stacked custom-nav">
+          <li class="active">
+            <a href="index.html"><i class="fa fa-tachometer"></i><span> Dashboard</span></a>
+          </li>
+
+          <li class="menu-list">
+            <a href="#"><i class="fa fa-th"></i>
+              <span>Divisões da casa <i class="lnr lnr-chevron-right"></i></span>
+            </a>
+            <ul class="sub-menu-list" id="roomsMenu">
+              <!-- preenchido via JS -->
+            </ul>
+          </li>
+
+          <li><a href="achievements.html"><i class="fa fa-book"></i> <span>Conquistas</span></a></li>
+          <li><a href="alerts.html"><i class="fa fa-exclamation-triangle"></i> <span>Alertas</span></a></li>
+          <li><a href="simulation.html"><i class="fa fa-flask"></i> <span>Simulação</span></a></li>
+          <li>
+            <a href="house-setup.html">
+              <i class="fa fa-file-text"></i>
+              <span>Relatórios</span>
+              <label class="label label-primary">New</label>
+            </a>
+          </li>
+        </ul>
+
+        <a class="toggle-btn">
+          <i class="fa fa-angle-double-left menu-collapsed__left"><span>Collapse Sidebar</span></i>
+          <i class="fa fa-angle-double-right menu-collapsed__right"></i>
+        </a>
+      </div>
+    </div>
+    <!-- //sidebar menu end -->
+
+    <!-- header-starts -->
+    <div class="header sticky-header">
+      <div class="menu-right">
+        <div class="navbar user-panel-top">
+          <div class="search-box">
+            <form action="#search-results.html" method="get">
+              <input class="search-input" placeholder="Search Here..." type="search" id="search">
+              <button class="search-submit" value=""><span class="fa fa-search"></span></button>
+            </form>
+          </div>
+
+          <div class="user-dropdown-details d-flex">
+            <div class="profile_details_left">
+              <ul class="nofitications-dropdown">
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-bell-o"></i><span class="badge blue">3</span>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <div class="notification_header">
+                        <h3>You have 3 new notifications</h3>
+                      </div>
+                    </li>
+                    <li>
+                      <a href="#" class="grid">
+                        <div class="user_img"><img src="assets/images/avatar1.jpg" alt=""></div>
+                        <div class="notification_desc">
+                          <p>Johnson purchased template</p>
+                          <span>Just Now</span>
+                        </div>
+                      </a>
+                    </li>
+                    <li class="odd">
+                      <a href="#" class="grid">
+                        <div class="user_img"><img src="assets/images/avatar2.jpg" alt=""></div>
+                        <div class="notification_desc">
+                          <p>New customer registered </p>
+                          <span>1 hour ago</span>
+                        </div>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" class="grid">
+                        <div class="user_img"><img src="assets/images/avatar3.jpg" alt=""></div>
+                        <div class="notification_desc">
+                          <p>Lorem ipsum dolor sit amet </p>
+                          <span>2 hours ago</span>
+                        </div>
+                      </a>
+                    </li>
+                    <li>
+                      <div class="notification_bottom">
+                        <a href="#all" class="bg-primary">See all notifications</a>
+                      </div>
+                    </li>
+                  </ul>
+                </li>
+
+                <li>
+                  <a href="pricing.html" class="btn-planos" title="Ver Planos">
+                    <i class="fa fa-star"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="profile_details">
+              <ul>
+                <li class="dropdown profile_details_drop">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="dropdownMenu3" aria-haspopup="true"
+                    aria-expanded="false">
+                    <div class="profile_img">
+                      <img src="assets/images/profileimg.jpg" class="rounded-circle" alt="">
+                      <div class="user-active"><span></span></div>
+                    </div>
+                  </a>
+
+                  <ul class="dropdown-menu drp-mnu" aria-labelledby="dropdownMenu3">
+                    <li class="user-info">
+                      <h5 class="user-name">John Deo</h5>
+                      <span class="status ml-2">Available</span>
+                    </li>
+                    <li><a href="profile.html"><i class="lnr lnr-user"></i>Meu perfil</a></li>
+                    <li><a href="houses.html"><i class="lnr lnr-home"></i>Minha casa</a></li>
+                    <li><a href="settings.html"><i class="lnr lnr-cog"></i>Setting</a></li>
+                    <li class="logout"><a href="#" id="logoutBtn"><i class="fa fa-power-off"></i> Logout</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- //header-ends -->
+
+    <!-- main content start -->
+    <div class="main-content">
+      <div class="container-fluid content-top-gap">
+
+        <nav aria-label="breadcrumb" class="mb-4">
+          <ol class="breadcrumb my-breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item"><a href="houses.html">Casas</a></li>
+            <li class="breadcrumb-item active" aria-current="page" id="breadcrumbMode">Configurar</li>
+          </ol>
+        </nav>
+
+        <section class="forms">
+          <form id="houseForm">
+
+            <!-- ================= STEP 1 ================= -->
+            <section id="step1">
+              <div class="card card_border py-2 mb-4">
+                <div class="cards__heading">
+                  <h3 id="pageTitle">Informações da Habitação <span id="pageStep">Passo 1 de 2</span></h3>
+                </div>
+
+                <div class="card-body">
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label input__label">Nome da casa</label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control input-style" name="house_name" placeholder="Ex: Casa Porto"
+                        required>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label input__label">Pessoas na casa</label>
+                    <div class="col-sm-5">
+                      <input type="number" class="form-control input-style" name="adultos" placeholder="Adultos (+18)"
+                        min="0">
+                    </div>
+                    <div class="col-sm-5">
+                      <input type="number" class="form-control input-style" name="criancas"
+                        placeholder="Crianças (até 18)" min="0">
+                    </div>
+                  </div>
+
+                  <fieldset class="form-group">
+                    <div class="row">
+                      <legend class="col-form-label col-sm-2 pt-0 input__label">Habitação</legend>
+                      <div class="col-sm-10">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="usage_type" value="permanent" required>
+                          <label class="form-check-label">Permanente (24h por dia)</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="usage_type" value="partial">
+                          <label class="form-check-label">Parte do dia</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="usage_type" value="vacation">
+                          <label class="form-check-label">Casa de férias</label>
+                        </div>
+                      </div>
+                    </div>
+                  </fieldset>
+
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label input__label">Tipo de habitação</label>
+                    <div class="col-sm-10">
+                      <select class="form-control input-style" name="house_type" required>
+                        <option value="">Selecionar</option>
+                        <option value="moradia">Moradia</option>
+                        <option value="apartamento">Apartamento</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label input__label">Potência</label>
+                    <div class="col-sm-10">
+                      <select class="form-control input-style" name="potencia">
+                        <option value="">Selecionar</option>
+                        <option value="1.15">1,15 kVA</option>
+                        <option value="2.3">2,30 kVA</option>
+                        <option value="3.45">3,45 kVA</option>
+                        <option value="4.6">4,60 kVA</option>
+                        <option value="5.75">5,75 kVA</option>
+                        <option value="6.9">6,90 kVA</option>
+                        <option value="10.35">10,35 kVA</option>
+                        <option value="13.8">13,80 kVA</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label input__label">Comercializadora</label>
+                    <div class="col-sm-10">
+                      <select class="form-control input-style" name="comercializadora">
+                        <option value="">Selecionar</option>
+                        <option value="EDP">EDP</option>
+                        <option value="Endesa">Endesa</option>
+                        <option value="Goldenergy">Goldenergy</option>
+                        <option value="Iberdrola">Iberdrola</option>
+                        <option value="Galp">Galp</option>
+                        <option value="Outro">Outro</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label input__label">Tarifa</label>
+                    <div class="col-sm-10">
+                      <select class="form-control input-style" name="tarifa">
+                        <option value="">Selecionar</option>
+                        <option value="Simples">Simples</option>
+                        <option value="Bi-horária">Bi-horária</option>
+                        <option value="Tri-horária">Tri-horária</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label input__label">Consumo</label>
+                    <div class="col-sm-10">
+                      <input type="number" class="form-control input-style" name="consumo_kwh_mes"
+                        placeholder="kWh por mês (se souber)" min="0" step="1">
+                      <small class="form-text text-muted">
+                        Pode encontrar esta informação na sua fatura.
+                      </small>
+                    </div>
+                  </div>
+
+                  <!-- MORADA (1 linha) -->
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label input__label">Morada</label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control input-style" name="morada"
+                        placeholder="Rua/Avenida, nº, andar, 0000-000, Portugal">
+                      <small class="form-text text-muted">
+                        Portugal é assumido por defeito (não precisas escrever).
+                      </small>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <div class="col-sm-10">
+                      <button type="button" class="btn btn-primary btn-style" id="btnStep2">
+                        Seguinte
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </section>
+
+            <!-- ================= STEP 2 ================= -->
+            <section id="step2" style="display:none;">
+              <div class="card card_border py-2 mb-4">
+                <div class="cards__heading">
+                  <h3>Divisões e Equipamentos <span>Passo 2 de 2</span></h3>
+                </div>
+
+                <div class="card-body">
+                  <div id="divisoes-container"></div>
+
+                  <button type="button" class="btn btn-outline-primary mb-3" id="btnAddDivisao">
+                    + Adicionar Divisão
+                  </button>
+
+                  <div class="form-group row mt-4">
+                    <div class="col-sm-10">
+                      <button type="button" class="btn btn-secondary btn-style" id="btnBackStep1">
+                        Voltar
+                      </button>
+                      <button type="submit" class="btn btn-primary btn-style" id="btnSubmit">
+                        Guardar
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </section>
+
+          </form>
+        </section>
+
+      </div>
+    </div>
+    <!-- main content end-->
+  </section>
+
+  <footer class="dashboard">
+    <p>&copy; 2020 Collective. All Rights Reserved.</p>
+  </footer>
+
+  <button onclick="topFunction()" id="movetop" class="bg-primary" title="Go to top">
+    <span class="fa fa-angle-up"></span>
+  </button>
+
+  <!-- scripts base -->
+  <script src="assets/js/jquery-3.3.1.min.js"></script>
+  <script src="assets/js/bootstrap.min.js"></script>
+  <script src="assets/js/jquery.dataTables.min.js"></script>
+  <script src="assets/js/jquery.nicescroll.js"></script>
+  <script src="assets/js/scripts.js"></script>
+  <script src="assets/js/faq.js"></script>
+  <script src="assets/js/modernizr.js"></script>
+
+  <script>
+    // LOADER
+    window.addEventListener("load", function () {
+      const loader = document.querySelector(".se-pre-con");
+      if (!loader) return;
+      loader.style.opacity = "0";
+      loader.style.transition = "opacity 0.6s ease";
+      setTimeout(() => {
+        loader.style.display = "none";
+      }, 600);
+    });
+  </script>
+
+  <script>
+    /* ====================================================== CONFIG ====================================================== */
+    const API_URL = "http://127.0.0.1:8000";
+
+    /* ====================================================== UI – MOVE TOP ====================================================== */
+    (function () {
+      const btn = document.getElementById("movetop");
+      if (!btn) return;
+      window.addEventListener("scroll", () => {
+        const visible = document.body.scrollTop > 20 || document.documentElement.scrollTop > 20;
+        btn.style.display = visible ? "block" : "none";
+      });
+      window.topFunction = function () {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      };
+    })();
+
+    /* ====================================================== UI – SIDEBAR SCROLL LOCK ====================================================== */
+    jQuery(function () {
+      jQuery(".sidebar-menu-collapsed").on("click", function () {
+        jQuery("body").toggleClass("noscroll");
+      });
+    });
+
+    /* ====================================================== HELPERS ====================================================== */
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getAuthTokenOrRedirect() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "login.html";
+        return null;
+      }
+      return token;
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+
+    function getHouseIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const raw = params.get("id");
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function val(name) {
+      return document.querySelector(`[name="${name}"]`)?.value ?? "";
+    }
+
+    function setRadioValue(name, value) {
+      document.querySelectorAll(`input[type="radio"][name="${name}"]`)
+        .forEach(r => { r.checked = (r.value === value); });
+    }
+
+    function setTextValue(name, value) {
+      const el = document.querySelector(`input[name="${name}"]`);
+      if (el) el.value = value ?? "";
+    }
+
+    function setSelectValue(name, value) {
+      const el = document.querySelector(`select[name="${name}"]`);
+      if (!el) return;
+      el.value = value ?? "";
+    }
+
+    function showStep(step) {
+      document.getElementById("step1").style.display = step === 1 ? "block" : "none";
+      document.getElementById("step2").style.display = step === 2 ? "block" : "none";
+      window.scrollTo(0, 0);
+    }
+
+    function setEditModeUi(isEdit) {
+      const title = document.getElementById("pageTitle");
+      const submit = document.getElementById("btnSubmit");
+      const crumb = document.getElementById("breadcrumbMode");
+
+      if (title) {
+        title.innerHTML = isEdit
+          ? `Editar Habitação <span id="pageStep">Passo 1 de 2</span>`
+          : `Informações da Habitação <span id="pageStep">Passo 1 de 2</span>`;
+      }
+      if (submit) submit.textContent = isEdit ? "Guardar Alterações" : "Guardar";
+      if (crumb) crumb.textContent = isEdit ? "Editar" : "Configurar";
+      document.title = isEdit ? "CountLight · Editar Casa" : "CountLight · Configurar Casa";
+    }
+
+    function usageToOccupancy(usage) {
+      const map = { permanent: "permanente", partial: "parcial", vacation: "ferias" };
+      return map[usage] ?? null;
+    }
+
+    function occupancyToUsage(occ) {
+      const map = { permanente: "permanent", parcial: "partial", ferias: "vacation" };
+      return map[occ] ?? null;
+    }
+
+    // MORADA (1 linha) -> backend recebe string
+    function buildMorada() {
+      const raw = val("morada").trim();
+      if (!raw) return null;
+      const hasPortugal = /portugal/i.test(raw);
+      return hasPortugal ? raw : `${raw}, Portugal`;
+    }
+
+    function uid(prefix = "c") {
+      return `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now()}`;
+    }
+
+    function normalizeEnergyClass(v) {
+      const s = String(v ?? "").trim().toUpperCase();
+      if (!s || s === "NAO_SEI") return null;
+      if (["A", "B", "C", "D", "E", "F", "G"].includes(s)) return s;
+      return null;
+    }
+
+    /* ====================================================== API ====================================================== */
+    async function apiFetch(path, { method = "GET", token, body } = {}) {
+      const headers = { "Accept": "application/json" };
+      if (token) headers["Authorization"] = "Bearer " + token;
+      if (body !== undefined) headers["Content-Type"] = "application/json";
+
+      const res = await fetch(`${API_URL}${path}`, {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      });
+
+      const contentType = res.headers.get("content-type") || "";
+      let parsed = null;
+
+      if (contentType.includes("application/json")) {
+        parsed = await res.json().catch(() => null);
+      } else {
+        const text = await res.text().catch(() => "");
+        parsed = text ? { raw: text } : null;
+      }
+
+      if (!res.ok) {
+        const detail = parsed?.detail ?? parsed?.raw ?? "";
+        const msg = detail ? `HTTP ${res.status}: ${detail}` : `HTTP ${res.status}`;
+        const err = new Error(msg);
+        err.status = res.status;
+        err.payload = parsed;
+        throw err;
+      }
+
+      return parsed;
+    }
+
+    async function loadHouseForEdit(houseId, token) {
+      return await apiFetch(`/houses/${houseId}`, { token });
+    }
+
+    async function loadHouseFullForEdit(houseId, token) {
+      return await apiFetch(`/houses/${houseId}/full`, { token });
+    }
+
+    /* ====================================================== FORM -> PAYLOAD (houses.py aceita PT) ====================================================== */
+    function fillFormFromHouse(house) {
+      setTextValue("house_name", house?.name ?? "");
+
+      // Mostrar vazio se vier 0 (para não obrigar a apagar)
+      const adults = Number(house?.adults);
+      setTextValue("adultos", Number.isFinite(adults) && adults > 0 ? String(adults) : "");
+
+      const children = Number(house?.children);
+      setTextValue("criancas", Number.isFinite(children) && children > 0 ? String(children) : "");
+
+      const usage = occupancyToUsage(house?.occupancy_type);
+      if (usage) setRadioValue("usage_type", usage);
+
+      setSelectValue("house_type", house?.house_type ?? "");
+
+      if (house?.contract_power !== null && house?.contract_power !== undefined && String(house.contract_power).trim() !== "") {
+        setSelectValue("potencia", String(house.contract_power));
+      }
+
+      setSelectValue("comercializadora", house?.provider ?? "");
+      setSelectValue("tarifa", house?.tariff ?? "");
+
+      const kwh = Number(house?.monthly_kwh);
+      setTextValue("consumo_kwh_mes", Number.isFinite(kwh) && kwh > 0 ? String(kwh) : "");
+
+      // Morada 1 linha
+      if (typeof house?.address === "string" && house.address.trim()) {
+        setTextValue("morada", house.address.trim());
+      } else {
+        setTextValue("morada", "");
+      }
+    }
+
+    function buildPayloadPT() {
+      const usage = document.querySelector('[name="usage_type"]:checked')?.value ?? null;
+
+      const payload = {
+        nome: val("house_name").trim(),
+        tipo_casa: val("house_type"),
+        tipo_ocupacao: usage ? usageToOccupancy(usage) : null,
+      };
+
+      if (!payload.nome || !payload.tipo_casa || !payload.tipo_ocupacao) {
+        return { ok: false, error: "Preenche o nome, o tipo de habitação e o tipo de ocupação." };
+      }
+
+      // Defaults: se vazio => 0 (mas na UI fica vazio para aparecer placeholder)
+      const adultosRaw = val("adultos").trim();
+      payload.adultos = adultosRaw === "" ? 0 : Number(adultosRaw);
+
+      const criancasRaw = val("criancas").trim();
+      payload.criancas = criancasRaw === "" ? 0 : Number(criancasRaw);
+
+      if (!Number.isFinite(payload.adultos) || payload.adultos < 0) return { ok: false, error: "Adultos inválido." };
+      if (!Number.isFinite(payload.criancas) || payload.criancas < 0) return { ok: false, error: "Crianças inválido." };
+
+      const comercializadora = val("comercializadora").trim();
+      if (comercializadora) payload.comercializadora = comercializadora;
+
+      const tarifa = val("tarifa").trim();
+      if (tarifa) payload.tarifa = tarifa;
+
+      const potenciaRaw = val("potencia").trim();
+      if (potenciaRaw) {
+        const p = Number(potenciaRaw);
+        if (!Number.isFinite(p)) return { ok: false, error: "Potência inválida." };
+        payload.potencia_contratada = p;
+      }
+
+      const consumoRaw = val("consumo_kwh_mes").trim();
+      if (consumoRaw === "") {
+        payload.consumo_kwh_mes = 0;
+      } else {
+        const consumo = Number(consumoRaw);
+        if (!Number.isFinite(consumo) || consumo < 0) return { ok: false, error: "Consumo inválido." };
+        payload.consumo_kwh_mes = consumo;
+      }
+
+      const morada = buildMorada();
+      if (morada) payload.morada = morada;
+
+      return { ok: true, payload };
+    }
+
+    /* ====================================================== ROOMS & DEVICES STATE - backend suporta: create/list/delete (sem update) ====================================================== */
+    const state = {
+      initial: { rooms: [] },
+      rooms: []
+      // room: { client_id, id_room|null, name, devices: [ {client_id, id_device|null, name, shelly_id, device_type, energy_class } ] }
+    };
+
+    function setStateFromHouseFull(houseFull) {
+      const rooms = Array.isArray(houseFull?.rooms) ? houseFull.rooms : [];
+
+      state.initial.rooms = rooms.map(r => ({
+        id_room: r.id_room,
+        name: r.name ?? "",
+        devices: (Array.isArray(r.devices) ? r.devices : []).map(d => ({
+          id_device: d.id_device,
+          name: d.name ?? "",
+          shelly_id: d.shelly_id ?? "",
+          device_type: d.device_type ?? null,
+          energy_class: d.energy_class ?? null,
+        }))
+      }));
+
+      state.rooms = rooms.map(r => ({
+        client_id: uid("room"),
+        id_room: r.id_room,
+        name: r.name ?? "",
+        devices: (Array.isArray(r.devices) ? r.devices : []).map(d => ({
+          client_id: uid("dev"),
+          id_device: d.id_device,
+          name: d.name ?? "",
+          shelly_id: d.shelly_id ?? "",
+          device_type: d.device_type ?? "",
+          energy_class: d.energy_class ?? "",
+        }))
+      }));
+
+      renderRoomsMenu();
+      renderDivisoes();
+    }
+
+    function renderRoomsMenu() {
+      const ul = document.getElementById("roomsMenu");
+      if (!ul) return;
+      ul.innerHTML = "";
+      state.rooms.forEach(r => {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="statsroom.html">${escapeHtml(r.name || "Divisão")}</a>`;
+        ul.appendChild(li);
+      });
+    }
+
+    /* ====================================================== STEP 2 UI (divisoes-container) ====================================================== */
+    function addDivisaoUI(prefill) {
+      const room = {
+        client_id: uid("room"),
+        id_room: prefill?.id_room ?? null,
+        name: prefill?.name ?? "",
+        devices: Array.isArray(prefill?.devices) ? prefill.devices : [],
+      };
+
+      // normalizar devices (quando prefill vem do backend)
+      room.devices = room.devices.map(d => ({
+        client_id: uid("dev"),
+        id_device: d.id_device ?? null,
+        name: d.name ?? "",
+        shelly_id: d.shelly_id ?? "",
+        device_type: d.device_type ?? "",
+        energy_class: d.energy_class ?? "",
+      }));
+
+      state.rooms.push(room);
+      renderRoomsMenu();
+      renderDivisoes();
+    }
+
+    function addDeviceUI(roomClientId, prefill) {
+      const room = state.rooms.find(r => r.client_id === roomClientId);
+      if (!room) return;
+
+      room.devices.push({
+        client_id: uid("dev"),
+        id_device: prefill?.id_device ?? null,
+        name: prefill?.name ?? "",
+        shelly_id: prefill?.shelly_id ?? "",
+        device_type: prefill?.device_type ?? "",
+        energy_class: prefill?.energy_class ?? "",
+      });
+
+      renderDivisoes();
+    }
+
+    function removeDivisaoUI(roomClientId) {
+      state.rooms = state.rooms.filter(r => r.client_id !== roomClientId);
+      renderRoomsMenu();
+      renderDivisoes();
+    }
+
+    function removeDeviceUI(roomClientId, devClientId) {
+      const room = state.rooms.find(r => r.client_id === roomClientId);
+      if (!room) return;
+      room.devices = room.devices.filter(d => d.client_id !== devClientId);
+      renderDivisoes();
+    }
+
+    function renderDivisoes() {
+      const container = document.getElementById("divisoes-container");
+      if (!container) return;
+
+      container.innerHTML = "";
+
+      state.rooms.forEach((room, idx) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "card card_border mb-3";
+        wrapper.dataset.roomClientId = room.client_id;
+
+        wrapper.innerHTML = `
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between">
+              <h5>Divisão ${idx + 1}</h5>
+              <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-action="add-device">+ Adicionar Equipamento</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove-room">Remover Divisão</button>
+              </div>
+            </div>
+
+            <div class="form-group mt-3">
+              <input type="text" class="form-control input-style" data-field="room-name"
+                placeholder="Nome da divisão (ex: Sala)" value="${escapeHtml(room.name)}">
+            </div>
+
+            <div data-slot="devices"></div>
+          </div>
+        `;
+
+        wrapper.querySelector('[data-action="add-device"]').addEventListener("click", () => addDeviceUI(room.client_id));
+        wrapper.querySelector('[data-action="remove-room"]').addEventListener("click", () => removeDivisaoUI(room.client_id));
+        wrapper.querySelector('[data-field="room-name"]').addEventListener("input", (e) => {
+          room.name = e.target.value;
+          renderRoomsMenu();
+        });
+
+        const devicesSlot = wrapper.querySelector('[data-slot="devices"]');
+
+        room.devices.forEach((dev, devIdx) => {
+          const devBox = document.createElement("div");
+          devBox.className = "border rounded p-3 mb-3";
+          devBox.dataset.devClientId = dev.client_id;
+
+          devBox.innerHTML = `
+            <div class="d-flex align-items-center justify-content-between">
+              <h6 class="mb-0">Equipamento ${devIdx + 1}</h6>
+              <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove-device">Remover</button>
+            </div>
+
+            <div class="form-group mt-3">
+              <input type="text" class="form-control input-style" data-field="dev-name"
+                placeholder="Nome do equipamento" value="${escapeHtml(dev.name)}">
+            </div>
+
+            <div class="form-group">
+              <input type="text" class="form-control input-style" data-field="dev-shelly"
+                placeholder="ID do Shelly" value="${escapeHtml(dev.shelly_id)}">
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-2">
+  <select class="form-control input-style" data-field="dev-type">
+    <option value="">Tipo (opcional)</option>
+    <option value="Eletrodoméstico" ${dev.device_type === "Eletrodoméstico" ? "selected" : ""}>Eletrodoméstico</option>
+    <option value="Climatização" ${dev.device_type === "Climatização" ? "selected" : ""}>Climatização</option>
+    <option value="Iluminação" ${dev.device_type === "Iluminação" ? "selected" : ""}>Iluminação</option>
+    <option value="Eletrónica e Entretenimento" ${dev.device_type === "Eletrónica e Entretenimento" ? "selected" : ""}>Eletrónica e Entretenimento</option>
+    <option value="Utensílios" ${dev.device_type === "Utensílios" ? "selected" : ""}>Utensílios</option>
+    <option value="Outros" ${dev.device_type === "Outros" ? "selected" : ""}>Outros</option>
+  </select>
+</div>
+
+              <div class="col-md-6 mb-2">
+                <select class="form-control input-style" data-field="dev-class">
+                  <option value="">Classe energética (não sei)</option>
+                  <option value="A" ${String(dev.energy_class).toUpperCase() === "A" ? "selected" : ""}>A</option>
+                  <option value="B" ${String(dev.energy_class).toUpperCase() === "B" ? "selected" : ""}>B</option>
+                  <option value="C" ${String(dev.energy_class).toUpperCase() === "C" ? "selected" : ""}>C</option>
+                  <option value="D" ${String(dev.energy_class).toUpperCase() === "D" ? "selected" : ""}>D</option>
+                  <option value="E" ${String(dev.energy_class).toUpperCase() === "E" ? "selected" : ""}>E</option>
+                  <option value="F" ${String(dev.energy_class).toUpperCase() === "F" ? "selected" : ""}>F</option>
+                  <option value="G" ${String(dev.energy_class).toUpperCase() === "G" ? "selected" : ""}>G</option>
+                </select>
+              </div>
+            </div>
+          `;
+
+          devBox.querySelector('[data-action="remove-device"]').addEventListener("click", () => removeDeviceUI(room.client_id, dev.client_id));
+          devBox.querySelector('[data-field="dev-name"]').addEventListener("input", (e) => dev.name = e.target.value);
+          devBox.querySelector('[data-field="dev-shelly"]').addEventListener("input", (e) => dev.shelly_id = e.target.value);
+          devBox.querySelector('[data-field="dev-type"]').addEventListener("change", (e) =>
+            dev.device_type = e.target.value
+          );
+
+          devBox.querySelector('[data-field="dev-class"]').addEventListener("change", (e) => dev.energy_class = e.target.value);
+
+          devicesSlot.appendChild(devBox);
+        });
+
+        container.appendChild(wrapper);
+      });
+    }
+
+    /* ====================================================== SYNC LOGIC (backend) ====================================================== */
+    function diffForDeletes() {
+      const keepRoomIds = new Set(state.rooms.filter(r => r.id_room).map(r => r.id_room));
+      const keepDeviceIds = new Set();
+
+      for (const r of state.rooms) {
+        for (const d of r.devices) {
+          if (d.id_device) keepDeviceIds.add(d.id_device);
+        }
+      }
+
+      const roomIdsToDelete = [];
+      const deviceIdsToDelete = [];
+
+      for (const r0 of state.initial.rooms) {
+        if (!keepRoomIds.has(r0.id_room)) {
+          roomIdsToDelete.push(r0.id_room);
+          continue;
+        }
+        for (const d0 of (r0.devices || [])) {
+          if (!keepDeviceIds.has(d0.id_device)) {
+            deviceIdsToDelete.push(d0.id_device);
+          }
+        }
+      }
+
+      return { roomIdsToDelete, deviceIdsToDelete };
+    }
+
+    function validateRoomsAndDevices() {
+      const errors = [];
+
+      state.rooms.forEach((room, i) => {
+        const roomName = String(room.name ?? "").trim();
+        if (!roomName) errors.push(`Divisão ${i + 1}: nome é obrigatório.`);
+
+        room.devices.forEach((dev, j) => {
+          const devName = String(dev.name ?? "").trim();
+          const shellyId = String(dev.shelly_id ?? "").trim();
+          if (!devName) errors.push(`Divisão ${i + 1} · Equipamento ${j + 1}: nome é obrigatório.`);
+          if (!shellyId) errors.push(`Divisão ${i + 1} · Equipamento ${j + 1}: Shelly ID é obrigatório.`);
+        });
+      });
+
+      return errors;
+    }
+
+    async function syncRoomsAndDevices({ token, id_house }) {
+      const { roomIdsToDelete, deviceIdsToDelete } = diffForDeletes();
+
+      // 0) renomear rooms existentes (se mudou o nome)
+      const initialRoomNameById = new Map(
+        (state.initial.rooms || []).map(r => [r.id_room, String(r.name ?? "")])
+      );
+
+      for (const room of state.rooms) {
+        if (!room.id_room) continue;
+        const before = (initialRoomNameById.get(room.id_room) ?? "").trim();
+        const now = String(room.name ?? "").trim();
+        if (now && before !== now) {
+          await apiFetch(`/rooms/${room.id_room}`, {
+            method: "PUT",
+            token,
+            body: { name: now },
+          });
+        }
+      }
+
+      // 1) apagar devices removidos
+      for (const id_device of deviceIdsToDelete) {
+        await apiFetch(`/devices/${id_device}`, { method: "DELETE", token });
+      }
+
+      // 2) apagar rooms removidas (cascade apaga devices)
+      for (const id_room of roomIdsToDelete) {
+        await apiFetch(`/rooms/${id_room}`, { method: "DELETE", token });
+      }
+
+      // 3) criar rooms novas
+      for (const room of state.rooms) {
+        if (room.id_room) continue;
+        const body = { name: String(room.name ?? "").trim() };
+        const res = await apiFetch(`/houses/${id_house}/rooms`, { method: "POST", token, body });
+        room.id_room = Number(res?.id_room);
+      }
+
+      // 4) criar devices novos
+      for (const room of state.rooms) {
+        if (!room.id_room) continue;
+        for (const dev of room.devices) {
+          if (dev.id_device) continue;
+          const body = {
+            name: String(dev.name ?? "").trim(),
+            shelly_id: String(dev.shelly_id ?? "").trim(),
+            device_type: String(dev.device_type ?? "").trim() || null,
+            energy_class: normalizeEnergyClass(dev.energy_class),
+          };
+          const res = await apiFetch(`/rooms/${room.id_room}/devices`, { method: "POST", token, body });
+          dev.id_device = Number(res?.id_device);
+        }
+      }
+
+      // 5) refresh do estado
+      const full = await apiFetch(`/houses/${id_house}/full`, { token });
+      setStateFromHouseFull(full);
+    }
+
+    /* ====================================================== BOOT ====================================================== */
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("houseForm");
+      if (!form) return;
+
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        logout();
+      });
+
+      const token = getAuthTokenOrRedirect();
+      if (!token) return;
+
+      const houseId = getHouseIdFromUrl();
+      const isEdit = houseId !== null;
+
+      setEditModeUi(isEdit);
+
+      document.getElementById("btnBackStep1")?.addEventListener("click", () => showStep(1));
+      document.getElementById("btnAddDivisao")?.addEventListener("click", () => { addDivisaoUI(); });
+
+      document.getElementById("btnStep2")?.addEventListener("click", () => {
+        const built = buildPayloadPT();
+        if (!built.ok) {
+          alert(built.error);
+          return;
+        }
+        showStep(2);
+      });
+
+      (async () => {
+        if (!isEdit) {
+          // garante "Selecionar" no tipo de habitação em modo criação
+          setSelectValue("house_type", "");
+          renderRoomsMenu();
+          renderDivisoes();
+          return;
+        }
+
+        try {
+          // Step 1
+          const house = await loadHouseForEdit(houseId, token);
+          fillFormFromHouse(house);
+
+          // Step 2 (rooms + devices)
+          const full = await loadHouseFullForEdit(houseId, token);
+          setStateFromHouseFull(full);
+        } catch (err) {
+          console.error(err);
+          alert("Não foi possível carregar os dados desta casa para edição.");
+          window.location.href = "houses.html";
+        }
+      })();
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const built = buildPayloadPT();
+        if (!built.ok) {
+          alert(built.error);
+          showStep(1);
+          return;
+        }
+
+        const errors = validateRoomsAndDevices();
+        if (errors.length) {
+          alert(errors.join("\n"));
+          showStep(2);
+          return;
+        }
+
+        const url = isEdit ? `/houses/${houseId}` : `/houses`;
+        const method = isEdit ? "PUT" : "POST";
+        const btn = document.getElementById("btnSubmit");
+        const prevText = btn ? btn.textContent : null;
+
+        try {
+          if (btn) {
+            btn.disabled = true;
+            btn.textContent = "A guardar…";
+          }
+
+          // 1) guardar casa
+          const result = await apiFetch(url, { method, token, body: built.payload });
+          const id_house = isEdit ? houseId : Number(result?.id_house);
+
+          if (!Number.isFinite(id_house)) {
+            throw new Error("Resposta inválida ao guardar casa (id_house em falta).");
+          }
+
+          localStorage.setItem("selected_house_id", String(id_house));
+
+          // 2) sincronizar divisões + devices com a BD
+          await syncRoomsAndDevices({ token, id_house });
+
+          // 3) redirect
+          window.location.href = "houses.html";
+        } catch (err) {
+          console.error(err);
+          let msg = err?.message ?? "Erro ao guardar.";
+          if (err?.status === 409) msg = "Este Shelly já está associado a uma divisão.";
+          alert(msg);
+          showStep(2);
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            if (prevText) btn.textContent = prevText;
+          }
+        }
+      });
+    });
+  </script>
+
+</body>
+
+</html>

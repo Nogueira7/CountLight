@@ -1,0 +1,376 @@
+perfeito — isto que pediste agora é **mesmo coisa de projeto final bem feito** 👌
+vou fazer um **relatório técnico completo e honesto**, **atualizado com TUDO o que realmente mudou**, sem maquilhar nada e sem esquecer detalhes técnicos.
+podes usar isto **mais tarde no relatório final, apresentação ou defesa**.
+
+---
+
+# 📘 Relatório Técnico – Backend Ecovolt (Versão Atualizada)
+
+## 1. Introdução
+
+Este relatório descreve de forma detalhada todo o trabalho realizado no desenvolvimento e **aperfeiçoamento do backend do projeto Ecovolt**, no âmbito do projeto final de licenciatura.
+
+O foco principal foi a construção de um backend **robusto, seguro, modular e escalável**, seguindo **boas práticas profissionais** de desenvolvimento web moderno.
+Ao longo do desenvolvimento, o sistema evoluiu de uma implementação inicial simples para uma arquitetura mais madura, com separação clara de responsabilidades, autenticação profissional e mecanismos de segurança adicionais.
+
+O backend foi desenvolvido em **Python**, utilizando o framework **FastAPI**, com autenticação baseada em **JWT (JSON Web Tokens)**, validação de dados com **Pydantic**, acesso isolado à base de dados **MySQL**, logging estruturado e controlo do estado dos utilizadores.
+
+---
+
+## 2. Estrutura Geral do Projeto
+
+A estrutura atual e final do backend é a seguinte:
+
+```
+countlight/
+├── frontend/
+├── backend/
+│   ├── app/
+│   │   ├── core/
+│   │   │   ├── security.py
+│   │   │   ├── config.py
+│   │   │   └── logging.py
+│   │   ├── db/
+│   │   │   └── database.py
+│   │   ├── models/
+│   │   │   └── user.py
+│   │   ├── repositories/
+│   │   │   └── user_repository.py
+│   │   ├── services/
+│   │   │   └── auth_service.py
+│   │   ├── routes/
+│   │   │   └── auth.py
+│   │   └── main.py
+│   └── __pycache__/
+├── .env
+└── .gitignore
+```
+
+### Objetivo da Estrutura
+
+Esta organização segue princípios de arquitetura limpa:
+
+* **Routes** → apenas recebem pedidos HTTP
+* **Services** → lógica de negócio
+* **Repositories** → acesso à base de dados
+* **Core** → segurança, configuração e logging
+* **Models** → validação e tipagem de dados
+* **DB** → ligação à base de dados
+
+Esta separação melhora:
+
+* legibilidade
+* manutenção
+* testabilidade
+* escalabilidade futura
+
+---
+
+## 3. Tecnologias e Ferramentas Utilizadas
+
+### Linguagem e Framework
+
+* **Python 3.10**
+* **FastAPI** – framework web moderno e performante
+* **Uvicorn** – servidor ASGI
+
+### Base de Dados
+
+* **MySQL** – base de dados relacional
+* **mysql-connector-python** – ligação à base de dados
+
+### Segurança e Autenticação
+
+* **Passlib (bcrypt)** – hashing seguro de passwords
+* **Python-JOSE** – criação e validação de JWT
+* **OAuth2PasswordBearer** – padrão OAuth2 no FastAPI
+
+### Validação e Tipagem
+
+* **Pydantic** – validação, normalização e documentação automática
+
+### Logging
+
+* **logging (standard library)** – logs estruturados e auditáveis
+
+### Infraestrutura e Qualidade
+
+* **CORS Middleware**
+* **Git** – controlo de versões
+* **.env** – variáveis de ambiente (segredos e configurações)
+
+---
+
+## 4. Configuração e Gestão de Variáveis
+
+Foi introduzido um ficheiro dedicado:
+
+### `core/config.py`
+
+Responsável por centralizar:
+
+* `SECRET_KEY`
+* `ALGORITHM`
+* `ACCESS_TOKEN_EXPIRE_MINUTES`
+* `REFRESH_TOKEN_EXPIRE_DAYS`
+
+Vantagens:
+
+* evita valores “hardcoded”
+* facilita mudanças entre ambientes (local / produção)
+* melhora segurança
+
+---
+
+## 5. Autenticação e Segurança
+
+### 5.1 Hashing de Passwords
+
+As passwords **nunca** são armazenadas em texto simples.
+
+* Algoritmo: **bcrypt**
+* Biblioteca: `passlib`
+
+Funções:
+
+* `hash_password(password)`
+* `verify_password(password, password_hash)`
+
+Isto protege contra:
+
+* ataques de força bruta
+* fuga de dados da base de dados
+
+---
+
+### 5.2 JSON Web Tokens (JWT)
+
+O sistema utiliza **dois tipos de tokens**:
+
+#### 🔑 Access Token
+
+* Curta duração
+* Usado para autenticar pedidos protegidos
+* Contém:
+
+  * `sub` (ID do utilizador)
+  * `exp`
+  * `type = "access"`
+
+#### 🔄 Refresh Token
+
+* Longa duração
+* Usado para renovar access tokens
+* Contém:
+
+  * `sub`
+  * `exp`
+  * `type = "refresh"`
+
+---
+
+### 5.3 Middleware de Autenticação
+
+A função `get_current_user`:
+
+* valida o token JWT
+* bloqueia refresh tokens
+* extrai o ID do utilizador
+* protege rotas privadas
+
+Usada com:
+
+```python
+Depends(get_current_user)
+```
+
+---
+
+## 6. Sistema de Autenticação Profissional
+
+### Funcionalidades Implementadas
+
+* Login
+* Registo
+* Logout
+* Refresh de token
+* Bloqueio de utilizadores
+* Tokens com tipo (`access` / `refresh`)
+
+### Estado do Utilizador
+
+Na base de dados existe:
+
+```sql
+is_active BOOLEAN
+```
+
+Se `is_active = FALSE`:
+
+* login bloqueado
+* conta considerada desativada
+
+---
+
+## 7. Logs Estruturados
+
+Foi introduzido **logging estruturado**, em vez de `print`.
+
+### Exemplos de logs:
+
+* Tentativas de login
+* Logins falhados
+* Registos de utilizadores
+* Acessos bloqueados
+
+Os logs aparecem:
+
+* no terminal durante desenvolvimento
+* prontos para ficheiro ou sistemas externos no futuro
+
+Isto permite:
+
+* auditoria
+* deteção de abuso
+* diagnóstico de erros
+
+---
+
+## 8. Rotas de Autenticação
+
+Localizadas em `routes/auth.py`:
+
+### `/login`
+
+* valida credenciais
+* verifica estado do utilizador
+* gera access + refresh token
+
+### `/register`
+
+* valida dados
+* normaliza username
+* cria utilizador
+
+### `/me`
+
+* rota protegida
+* retorna ID do utilizador autenticado
+
+### `/refresh`
+
+* valida refresh token
+* gera novo access token
+
+### `/logout`
+
+* invalida refresh token na base de dados
+
+---
+
+## 9. Validação de Dados (Pydantic)
+
+Implementada em `models/user.py`:
+
+* Username:
+
+  * normalizado (lowercase, trim)
+  * regex restrita
+* Email:
+
+  * validado automaticamente
+* Password:
+
+  * mínimo de caracteres
+  * maiúsculas, minúsculas e números
+
+Benefícios:
+
+* segurança
+* dados consistentes
+* erros claros
+* documentação automática via Swagger
+
+---
+
+## 10. Acesso à Base de Dados
+
+O acesso à base de dados foi isolado em **repositories**:
+
+### `user_repository.py`
+
+* `get_user_by_username`
+* `create_user`
+* `save_refresh_token`
+
+Benefícios:
+
+* SQL fora das rotas
+* fácil migração futura
+* código mais limpo
+
+---
+
+## 11. main.py e Orquestração
+
+O ficheiro `main.py` tem apenas:
+
+* criação da app FastAPI
+* configuração CORS
+* inclusão de routers
+
+Não contém:
+
+* lógica de negócio
+* SQL
+* autenticação direta
+
+Isto representa uma arquitetura correta e profissional.
+
+---
+
+## 12. Estado Atual do Projeto
+
+Neste momento, o backend possui:
+
+* ✅ Autenticação JWT profissional
+* ✅ Refresh tokens
+* ✅ Logout real
+* ✅ Validação forte de dados
+* ✅ Logs estruturados
+* ✅ Controlo de utilizadores ativos/inativos
+* ✅ Arquitetura modular e escalável
+* ✅ Pronto para crescer sem refatoração
+
+---
+
+## 13. Próximos Passos Recomendados
+
+* Implementar rotas funcionais:
+
+  * `/devices`
+  * `/measurements`
+  * `/consumption`
+* Associar dados ao utilizador autenticado
+* Integração com Shelly API
+* Desenvolvimento do frontend
+* Rate limiting
+* Reset de password
+* Verificação por email
+* Testes automatizados
+* Deploy em produção
+
+---
+
+## 14. Conclusão
+
+O backend do projeto Ecovolt encontra-se **num nível profissional sólido**, adequado para um projeto final de licenciatura.
+A base criada permite evolução contínua, com foco em segurança, escalabilidade e boas práticas, sem necessidade de reestruturação futura.
+
+👉 **O sistema de login e registo está completo para esta fase do projeto.**
+
+Se quiseres, no próximo passo posso:
+
+* ajudar a escrever isto em formato académico (PDF/Word)
+* adaptar linguagem para defesa
+* ou começar já as próximas rotas do sistema 🚀

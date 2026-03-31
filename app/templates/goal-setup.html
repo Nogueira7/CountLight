@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>CountLight · Criar Meta</title>
+  <link rel="icon" type="image/png" href="/static/images/logo_neon.png">
+  <link rel="stylesheet" href="/static/css/style-liberty.css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+  <style>
+    .progress { height: 12px; }
+    .progress-bar { transition: width .4s ease; }
+    .badge-success { background: #28a745; }
+    .badge-info { background: #17a2b8; }
+    .badge-warning { background: #ffc107; color: #111; }
+    .muted { color: #6c757d; }
+    .mono { font-variant-numeric: tabular-nums; }
+    .goal-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 992px) { .goal-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+
+<body class="sidebar-menu-collapsed">
+  <div class="se-pre-con"></div>
+
+  <section>
+    {% include "sidebar.html" %}
+    {% include "header.html" %}
+
+    <div class="main-content">
+      <div class="container-fluid content-top-gap">
+
+        <nav aria-label="breadcrumb" class="mb-4">
+          <ol class="breadcrumb my-breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Criar Meta</li>
+          </ol>
+        </nav>
+
+        <section class="forms">
+
+          <!-- ALERTS -->
+          <div id="alertSlot"></div>
+
+          <!-- LOADING CARD -->
+          <div class="card card_border py-2 mb-4" id="loadingCard">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h4 class="mb-1">Metas mensais</h4>
+                  <div class="muted">A carregar estado das metas…</div>
+                </div>
+                <div class="spinner-border text-primary" role="status" aria-label="Loading"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACTIVE GOALS (0..2 cards) -->
+          <div class="goal-grid mb-4" id="activeGoalsGrid" style="display:none;">
+            <!-- kWh -->
+            <div class="card card_border py-2" id="activeGoalCardKwh" style="display:none;">
+              <div class="cards__heading">
+                <h3>
+                  Meta ativa <span class="muted">(Consumo)</span>
+                  <span class="ml-2" id="goalBadgeKwh"></span>
+                </h3>
+              </div>
+
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <div class="border rounded p-3">
+                      <div class="muted">Limite definido</div>
+                      <div class="h4 mb-0 mono">
+                        <span id="goalTargetKwh">—</span> <span id="goalUnitKwh">kWh</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <div class="border rounded p-3">
+                      <div class="muted">Atual do mês</div>
+                      <div class="h4 mb-0 mono">
+                        <span id="goalMonthKwh">—</span> <span class="muted">kWh</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-2 d-flex align-items-center justify-content-between">
+                  <div class="muted">Progresso</div>
+                  <div class="mono"><strong><span id="goalPercentKwh">—</span>%</strong></div>
+                </div>
+
+                <div class="progress mb-3">
+                  <div class="progress-bar bg-primary" role="progressbar" id="goalProgressBarKwh" style="width:0%"></div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between flex-wrap">
+                  <div class="muted" id="goalStatusTextKwh">—</div>
+
+                  <button type="button" class="btn btn-outline-danger btn-style mt-2 mt-sm-0" id="btnCancelGoalKwh">
+                    Cancelar meta
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- € -->
+            <div class="card card_border py-2" id="activeGoalCardCost" style="display:none;">
+              <div class="cards__heading">
+                <h3>
+                  Meta ativa <span class="muted">(Custo)</span>
+                  <span class="ml-2" id="goalBadgeCost"></span>
+                </h3>
+              </div>
+
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <div class="border rounded p-3">
+                      <div class="muted">Limite definido</div>
+                      <div class="h4 mb-0 mono">
+                        <span id="goalTargetCost">—</span> <span id="goalUnitCost">€</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <div class="border rounded p-3">
+                      <div class="muted">Estimativa do mês</div>
+                      <div class="h4 mb-0 mono">
+                        <span id="goalMonthCost">—</span> <span class="muted">€</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-2 d-flex align-items-center justify-content-between">
+                  <div class="muted">Progresso</div>
+                  <div class="mono"><strong><span id="goalPercentCost">—</span>%</strong></div>
+                </div>
+
+                <div class="progress mb-3">
+                  <div class="progress-bar bg-primary" role="progressbar" id="goalProgressBarCost" style="width:0%"></div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between flex-wrap">
+                  <div class="muted" id="goalStatusTextCost">—</div>
+
+                  <button type="button" class="btn btn-outline-danger btn-style mt-2 mt-sm-0" id="btnCancelGoalCost">
+                    Cancelar meta
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- FORM (always available; blocks creation if that type already has an active goal) -->
+          <form id="goalForm" style="display:none;">
+            <div class="card card_border py-2 mb-4">
+              <div class="cards__heading">
+                <h3 id="goalTitle">
+                  Definir meta mensal <span class="muted" id="goalUnitLabel">kWh</span>
+                </h3>
+              </div>
+
+              <div class="card-body">
+
+                <!-- 1) GOAL TYPE SELECTOR -->
+                <div class="form-group row">
+                  <label class="col-sm-3 col-form-label input__label">Tipo de meta</label>
+                  <div class="col-sm-9">
+                    <select class="form-control input-style" id="goalType" required>
+                      <option value="monthly_limit_kwh">Consumo mensal (kWh)</option>
+                      <option value="monthly_cost_limit">Custo mensal (€)</option>
+                    </select>
+                    <small class="form-text text-muted">
+                      Escolhe se queres limitar o consumo ou o custo.
+                    </small>
+                  </div>
+                </div>
+
+                <!-- CURRENT MONTH (dynamic: shows kWh or € based on selector) -->
+                <div class="form-group row">
+                  <label class="col-sm-3 col-form-label input__label" id="currentMonthLabel">Consumo atual do mês</label>
+                  <div class="col-sm-9">
+                    <div class="form-control input-style d-flex align-items-center justify-content-between" style="background:#f8f9fa;">
+                      <span class="muted">Até agora</span>
+                      <strong class="mono">
+                        <span id="monthValue">—</span> <span id="monthUnit">kWh</span>
+                      </strong>
+                    </div>
+                    <small class="form-text text-muted" id="currentMonthHelp">
+                      Este valor vem do dashboard e ajuda-te a escolher um limite realista.
+                    </small>
+                  </div>
+                </div>
+
+                <!-- LIMIT INPUT (dynamic label/placeholder) -->
+                <div class="form-group row">
+                  <label class="col-sm-3 col-form-label input__label" id="limitLabel">Limite mensal (kWh)</label>
+                  <div class="col-sm-9">
+                    <input
+                      type="number"
+                      class="form-control input-style"
+                      id="targetValue"
+                      name="target_value"
+                      placeholder="Ex: 180"
+                      required
+                      min="0.01"
+                      step="0.01"
+                      inputmode="decimal"
+                    >
+                    <small class="form-text text-muted">
+                      Obrigatório. Tem de ser maior que 0.
+                    </small>
+                    <small class="form-text text-muted" id="activeTypeHint" style="display:none;">
+                      Já existe uma meta ativa deste tipo. Cancela-a para criares outra.
+                    </small>
+                  </div>
+                </div>
+
+                <div class="form-group row mt-3">
+                  <div class="col-sm-9 offset-sm-3">
+                    <button type="submit" class="btn btn-primary btn-style" id="btnCreateGoal">
+                      Criar meta
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </form>
+
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="dashboard">
+    <p>&copy; 2020 Collective. All Rights Reserved.</p>
+  </footer>
+
+  <button onclick="topFunction()" id="movetop" class="bg-primary" title="Go to top">
+    <span class="fa fa-angle-up"></span>
+  </button>
+
+  <!-- scripts base -->
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script src="/static/js/jquery.dataTables.min.js"></script>
+  <script src="/static/js/jquery.nicescroll.js"></script>
+  <script src="/static/js/scripts.js"></script>
+  <script src="/static/js/faq.js"></script>
+  <script src="/static/js/modernizr.js"></script>
+
+  <script>
+    // LOADER
+    window.addEventListener("load", function () {
+      const loader = document.querySelector(".se-pre-con");
+      if (!loader) return;
+      loader.style.opacity = "0";
+      loader.style.transition = "opacity 0.6s ease";
+      setTimeout(() => { loader.style.display = "none"; }, 600);
+    });
+
+    // CONFIG
+    const API_URL = "/api";
+
+    // UI – MOVE TOP
+    (function () {
+      const btn = document.getElementById("movetop");
+      if (!btn) return;
+
+      window.addEventListener("scroll", () => {
+        const visible = document.body.scrollTop > 20 || document.documentElement.scrollTop > 20;
+        btn.style.display = visible ? "block" : "none";
+      });
+
+      window.topFunction = function () {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      };
+    })();
+
+    // UI – SIDEBAR SCROLL LOCK
+    jQuery(function () {
+      jQuery(".sidebar-menu-collapsed").on("click", function () {
+        jQuery("body").toggleClass("noscroll");
+      });
+    });
+
+    // HELPERS
+    function getAuthTokenOrRedirect() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/login";
+        return null;
+      }
+      return token;
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "/login";
+    }
+
+    function getSelectedHouseIdOrRedirect() {
+      const raw = localStorage.getItem("selected_house_id");
+      const n = Number(raw);
+      if (Number.isFinite(n)) return n;
+
+      const params = new URLSearchParams(window.location.search);
+      const q = Number(params.get("id"));
+      if (Number.isFinite(q)) return q;
+
+      window.location.href = "/houses";
+      return null;
+    }
+
+    function showAlert(type, message) {
+      const slot = document.getElementById("alertSlot");
+      if (!slot) return;
+      const safe = String(message ?? "Ocorreu um erro.");
+      slot.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+          ${safe}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      `;
+    }
+
+    function clearAlert() {
+      const slot = document.getElementById("alertSlot");
+      if (slot) slot.innerHTML = "";
+    }
+
+    function clamp(n, a, b) {
+      return Math.max(a, Math.min(b, n));
+    }
+
+    function toNumber(x) {
+      const n = Number(x);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function fmt1(x) {
+      const n = toNumber(x);
+      if (n === null) return "—";
+      return n.toFixed(1);
+    }
+
+    function money2(x) {
+      const n = toNumber(x);
+      if (n === null) return "—";
+      return n.toFixed(2);
+    }
+
+    // API
+    async function apiFetch(path, { method = "GET", token, houseId, body } = {}) {
+      const headers = { "Accept": "application/json" };
+      if (token) headers["Authorization"] = "Bearer " + token;
+      if (houseId) headers["X-House-Id"] = String(houseId);
+      if (body !== undefined) headers["Content-Type"] = "application/json";
+
+      const res = await fetch(`${API_URL}${path}`, {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      });
+
+      const contentType = res.headers.get("content-type") || "";
+      let parsed = null;
+
+      if (contentType.includes("application/json")) {
+        parsed = await res.json().catch(() => null);
+      } else {
+        const text = await res.text().catch(() => "");
+        parsed = text ? { raw: text } : null;
+      }
+
+      if (!res.ok) {
+        const detail = parsed?.detail ?? parsed?.raw ?? "";
+        const msg = detail ? `HTTP ${res.status}: ${detail}` : `HTTP ${res.status}`;
+        const err = new Error(msg);
+        err.status = res.status;
+        err.payload = parsed;
+        throw err;
+      }
+
+      return parsed;
+    }
+
+    // GOALS LOGIC (UPDATED)
+    async function fetchActiveGoals({ token, houseId }) {
+      // /goals/active agora devolve lista (pode ser [] com 200)
+      return await apiFetch(`/goals/active`, { token, houseId });
+    }
+
+    async function fetchDashboardSummary({ token, houseId }) {
+      return await apiFetch(`/dashboard/summary`, { token, houseId });
+    }
+
+    async function createGoal({ token, houseId, goalType, targetValue }) {
+      const qType = encodeURIComponent(goalType);
+      const qValue = encodeURIComponent(String(targetValue));
+
+      return await apiFetch(
+        `/goals?goal_type=${qType}&target_value=${qValue}`,
+        { method: "POST", token, houseId }
+      );
+    }
+
+    async function deleteGoal({ token, houseId, goalId }) {
+      return await apiFetch(`/goals/${encodeURIComponent(String(goalId))}`, { method: "DELETE", token, houseId });
+    }
+
+    // UI RENDER
+    function setLoading(loading) {
+      const card = document.getElementById("loadingCard");
+      if (card) card.style.display = loading ? "block" : "none";
+    }
+
+    function showForm(show) {
+      const form = document.getElementById("goalForm");
+      if (form) form.style.display = show ? "block" : "none";
+    }
+
+    function showActiveGrid(show) {
+      const grid = document.getElementById("activeGoalsGrid");
+      if (grid) grid.style.display = show ? "grid" : "none";
+    }
+
+    function showActiveCardByType(goalType, show) {
+      const card = (goalType === "monthly_cost_limit")
+        ? document.getElementById("activeGoalCardCost")
+        : document.getElementById("activeGoalCardKwh");
+      if (card) card.style.display = show ? "block" : "none";
+    }
+
+    function getUiMeta(goalType) {
+      if (goalType === "monthly_cost_limit") {
+        return {
+          unit: "€",
+          titleUnit: "€",
+          limitLabel: "Limite mensal (€)",
+          currentLabel: "Custo atual do mês",
+          placeholder: "Ex: 60",
+          monthUnit: "€",
+        };
+      }
+      return {
+        unit: "kWh",
+        titleUnit: "kWh",
+        limitLabel: "Limite mensal (kWh)",
+        currentLabel: "Consumo atual do mês",
+        placeholder: "Ex: 180",
+        monthUnit: "kWh",
+      };
+    }
+
+    function setFormTypeUI(goalType) {
+      const meta = getUiMeta(goalType);
+
+      const unitLabel = document.getElementById("goalUnitLabel");
+      if (unitLabel) unitLabel.textContent = meta.titleUnit;
+
+      const limitLabel = document.getElementById("limitLabel");
+      if (limitLabel) limitLabel.textContent = meta.limitLabel;
+
+      const currentLabel = document.getElementById("currentMonthLabel");
+      if (currentLabel) currentLabel.textContent = meta.currentLabel;
+
+      const monthUnit = document.getElementById("monthUnit");
+      if (monthUnit) monthUnit.textContent = meta.monthUnit;
+
+      const input = document.getElementById("targetValue");
+      if (input) input.placeholder = meta.placeholder;
+    }
+
+    function setFormMonthValue({ goalType, monthKwh, monthCost }) {
+      const v = (goalType === "monthly_cost_limit") ? monthCost : monthKwh;
+      const el = document.getElementById("monthValue");
+      if (!el) return;
+
+      if (goalType === "monthly_cost_limit") {
+        el.textContent = (toNumber(v) === null) ? "—" : money2(v);
+      } else {
+        el.textContent = (toNumber(v) === null) ? "—" : fmt1(v);
+      }
+    }
+
+    function setCreationBlocked(blocked) {
+      const btn = document.getElementById("btnCreateGoal");
+      const hint = document.getElementById("activeTypeHint");
+      const input = document.getElementById("targetValue");
+
+      if (hint) hint.style.display = blocked ? "block" : "none";
+      if (btn) btn.disabled = blocked;
+      if (input) input.disabled = blocked;
+    }
+
+    function renderNoActiveGoals() {
+      document.title = "CountLight · Criar Meta";
+      showActiveGrid(false);
+      setLoading(false);
+      showForm(true);
+    }
+
+    function renderActiveGoalCard({ goal, goalType, monthValue }) {
+      const completed = goal?.status === "completed";
+      const pct = toNumber(goal?.progress) ?? 0;
+      const pctClamped = clamp(pct, 0, 9999);
+      const width = clamp(pctClamped, 0, 100);
+
+      const goalId = goal?.goal_id ?? null;
+      const target = toNumber(goal?.target_value);
+
+      if (goalType === "monthly_cost_limit") {
+        showActiveCardByType(goalType, true);
+
+        document.getElementById("goalTargetCost").textContent = (target !== null) ? money2(target) : "—";
+        document.getElementById("goalMonthCost").textContent = (toNumber(monthValue) !== null) ? money2(monthValue) : "—";
+        document.getElementById("goalPercentCost").textContent = fmt1(pct);
+
+        const bar = document.getElementById("goalProgressBarCost");
+        if (bar) {
+          bar.style.width = `${width}%`;
+          bar.classList.toggle("bg-success", completed);
+          bar.classList.toggle("bg-primary", !completed);
+        }
+
+        const badge = document.getElementById("goalBadgeCost");
+        if (badge) {
+          badge.innerHTML = completed
+            ? `<span class="badge badge-success">Concluída</span>`
+            : `<span class="badge badge-info">Em progresso</span>`;
+        }
+
+        const statusText = document.getElementById("goalStatusTextCost");
+        if (statusText) {
+          statusText.textContent = completed
+            ? "Meta concluída — já atingiste o limite definido."
+            : "Meta em progresso — acompanha o custo ao longo do mês.";
+        }
+
+        const cancelBtn = document.getElementById("btnCancelGoalCost");
+        if (cancelBtn) {
+          cancelBtn.disabled = !goalId;
+          cancelBtn.dataset.goalId = goalId ? String(goalId) : "";
+        }
+
+        return;
+      }
+
+      // default: kWh
+      showActiveCardByType(goalType, true);
+
+      document.getElementById("goalTargetKwh").textContent = (target !== null) ? fmt1(target) : "—";
+      document.getElementById("goalMonthKwh").textContent = (toNumber(monthValue) !== null) ? fmt1(monthValue) : "—";
+      document.getElementById("goalPercentKwh").textContent = fmt1(pct);
+
+      const bar = document.getElementById("goalProgressBarKwh");
+      if (bar) {
+        bar.style.width = `${width}%`;
+        bar.classList.toggle("bg-success", completed);
+        bar.classList.toggle("bg-primary", !completed);
+      }
+
+      const badge = document.getElementById("goalBadgeKwh");
+      if (badge) {
+        badge.innerHTML = completed
+          ? `<span class="badge badge-success">Concluída</span>`
+          : `<span class="badge badge-info">Em progresso</span>`;
+      }
+
+      const statusText = document.getElementById("goalStatusTextKwh");
+      if (statusText) {
+        statusText.textContent = completed
+          ? "Meta concluída — já atingiste o limite definido."
+          : "Meta em progresso — acompanha o consumo ao longo do mês.";
+      }
+
+      const cancelBtn = document.getElementById("btnCancelGoalKwh");
+      if (cancelBtn) {
+        cancelBtn.disabled = !goalId;
+        cancelBtn.dataset.goalId = goalId ? String(goalId) : "";
+      }
+    }
+
+    // PAGE STATE
+    const pageState = {
+      monthKwh: null,
+      monthCost: null, // summary.estimated_month_cost
+      activeGoals: [],
+    };
+
+    function findActiveGoalByType(goals, goalType) {
+      if (!Array.isArray(goals)) return null;
+      return goals.find(g => g?.goal_type === goalType) ?? null;
+    }
+
+    function syncFormWithState() {
+      const sel = document.getElementById("goalType");
+      const goalType = sel ? sel.value : "monthly_limit_kwh";
+
+      setFormTypeUI(goalType);
+      setFormMonthValue({ goalType, monthKwh: pageState.monthKwh, monthCost: pageState.monthCost });
+
+      const existing = findActiveGoalByType(pageState.activeGoals, goalType);
+      setCreationBlocked(!!existing);
+    }
+
+    async function refresh() {
+      clearAlert();
+      setLoading(true);
+      showForm(false);
+      showActiveGrid(false);
+      showActiveCardByType("monthly_limit_kwh", false);
+      showActiveCardByType("monthly_cost_limit", false);
+
+      const token = getAuthTokenOrRedirect();
+      if (!token) return;
+
+      const houseId = getSelectedHouseIdOrRedirect();
+      if (!houseId) return;
+
+      // 1) summary
+      let summary = null;
+      try {
+        summary = await fetchDashboardSummary({ token, houseId });
+      } catch (e) {
+        console.error(e);
+      }
+      pageState.monthKwh = toNumber(summary?.month_kwh);
+      pageState.monthCost = toNumber(summary?.estimated_month_cost);
+
+      // 2) active goals (array)
+      try {
+        const goals = await fetchActiveGoals({ token, houseId });
+        pageState.activeGoals = Array.isArray(goals) ? goals : [];
+
+        // render active cards (0..2)
+        const gKwh = findActiveGoalByType(pageState.activeGoals, "monthly_limit_kwh");
+        const gCost = findActiveGoalByType(pageState.activeGoals, "monthly_cost_limit");
+
+        const hasAny = !!gKwh || !!gCost;
+
+        if (hasAny) {
+          showActiveGrid(true);
+          if (gKwh) renderActiveGoalCard({ goal: gKwh, goalType: "monthly_limit_kwh", monthValue: pageState.monthKwh });
+          if (gCost) renderActiveGoalCard({ goal: gCost, goalType: "monthly_cost_limit", monthValue: pageState.monthCost });
+        } else {
+          renderNoActiveGoals();
+        }
+
+        // form is always shown (but blocked per-type if already exists)
+        showForm(true);
+        setLoading(false);
+        syncFormWithState();
+      } catch (e) {
+        console.error(e);
+        setLoading(false);
+        showForm(true);
+        syncFormWithState();
+        showAlert("danger", "Não foi possível obter o estado das metas.");
+      }
+    }
+
+    // BOOT
+    document.addEventListener("DOMContentLoaded", () => {
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        logout();
+      });
+
+      const goalTypeSel = document.getElementById("goalType");
+      if (goalTypeSel) {
+        goalTypeSel.addEventListener("change", () => {
+          clearAlert();
+          syncFormWithState();
+          document.getElementById("targetValue")?.focus?.();
+        });
+      }
+
+      const form = document.getElementById("goalForm");
+      if (form) {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          clearAlert();
+
+          const token = getAuthTokenOrRedirect();
+          if (!token) return;
+
+          const houseId = getSelectedHouseIdOrRedirect();
+          if (!houseId) return;
+
+          const sel = document.getElementById("goalType");
+          const goalType = sel ? sel.value : "monthly_limit_kwh";
+
+          // block if already active of that type
+          const existing = findActiveGoalByType(pageState.activeGoals, goalType);
+          if (existing) {
+            showAlert("warning", "Já existe uma meta ativa deste tipo. Cancela-a para criares outra.");
+            return;
+          }
+
+          const input = document.getElementById("targetValue");
+          const btn = document.getElementById("btnCreateGoal");
+          const targetValue = input ? input.valueAsNumber : NaN;
+
+          if (!Number.isFinite(targetValue) || targetValue <= 0) {
+            showAlert("warning", "O limite mensal tem de ser um número maior que 0.");
+            input?.focus?.();
+            return;
+          }
+
+          // validação por tipo
+          if (goalType === "monthly_limit_kwh") {
+            const monthKwh = pageState.monthKwh;
+            if (monthKwh !== null && targetValue < monthKwh) {
+              showAlert("warning", "O limite não pode ser inferior ao consumo atual do mês.");
+              input?.focus?.();
+              return;
+            }
+          } else if (goalType === "monthly_cost_limit") {
+            const monthCost = pageState.monthCost;
+            if (monthCost !== null && targetValue < monthCost) {
+              showAlert("warning", "O limite não pode ser inferior ao custo estimado atual do mês.");
+              input?.focus?.();
+              return;
+            }
+          }
+
+          const prevText = btn ? btn.textContent : null;
+
+          try {
+            if (btn) { btn.disabled = true; btn.textContent = "A criar…"; }
+            if (input) input.disabled = true;
+
+            await createGoal({ token, houseId, goalType, targetValue });
+
+            // UX: depois de criar, vai para conquistas (meta aparece lá)
+            window.location.href = "/achievements";
+          } catch (err) {
+            console.error(err);
+
+            if (err?.status === 400) {
+              showAlert("warning", "Não foi possível criar: já existe uma meta ativa desse tipo ou o valor é inválido.");
+              await refresh();
+              return;
+            }
+
+            showAlert("danger", err?.message ?? "Erro ao criar meta.");
+          } finally {
+            if (btn) {
+              btn.disabled = false;
+              if (prevText) btn.textContent = prevText;
+            }
+            if (input) input.disabled = false;
+            syncFormWithState();
+          }
+        });
+      }
+
+      async function handleCancel(btn, goalType) {
+        clearAlert();
+
+        const token = getAuthTokenOrRedirect();
+        if (!token) return;
+
+        const houseId = getSelectedHouseIdOrRedirect();
+        if (!houseId) return;
+
+        const goalId = btn.dataset.goalId;
+        if (!goalId) {
+          showAlert("warning", "Não foi possível cancelar: id da meta em falta.");
+          return;
+        }
+
+        const prevText = btn.textContent;
+
+        try {
+          btn.disabled = true;
+          btn.textContent = "A cancelar…";
+
+          await deleteGoal({ token, houseId, goalId });
+
+          await refresh();
+          showAlert("success", `Meta cancelada (${goalType === "monthly_cost_limit" ? "custo" : "consumo"}).`);
+        } catch (err) {
+          console.error(err);
+          showAlert("danger", err?.message ?? "Erro ao cancelar meta.");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = prevText;
+        }
+      }
+
+      const cancelKwh = document.getElementById("btnCancelGoalKwh");
+      if (cancelKwh) cancelKwh.addEventListener("click", () => handleCancel(cancelKwh, "monthly_limit_kwh"));
+
+      const cancelCost = document.getElementById("btnCancelGoalCost");
+      if (cancelCost) cancelCost.addEventListener("click", () => handleCancel(cancelCost, "monthly_cost_limit"));
+
+      // bloquear scroll em number inputs
+      document.addEventListener("wheel", function (e) {
+        if (e.target && e.target.matches('input[type="number"]')) {
+          e.preventDefault();
+        }
+      }, { passive: false, capture: true });
+
+      // initial UI defaults + refresh
+      setFormTypeUI(document.getElementById("goalType")?.value || "monthly_limit_kwh");
+      refresh();
+    });
+  </script>
+
+</body>
+</html>

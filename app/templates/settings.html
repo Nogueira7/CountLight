@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="pt-PT">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>CountLight • Definições</title>
+
+  <link rel="icon" type="image/png" href="/static/images/logo_neon.png">
+  <link rel="stylesheet" href="/static/css/style-liberty.css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+</head>
+
+<body class="sidebar-menu-collapsed">
+  <div class="se-pre-con"></div>
+
+  <section>
+    {% include "sidebar.html" %}
+    {% include "header.html" %}
+
+    <!-- Main content -->
+    <div class="main-content">
+      <div class="container-fluid content-top-gap">
+
+        <div class="welcome-msg pt-3 pb-4">
+          <h1><span class="text-primary">Definições</span></h1>
+          <p>Controla a tua conta, a sessão e ações irreversíveis.</p>
+        </div>
+
+        <!-- Mantém apenas os blocos "Eliminar casa" e "Eliminar conta" -->
+        <div class="row danger-actions">
+          <!-- Eliminar casa -->
+          <div class="col-lg-6 mb-4">
+            <div class="card card_border">
+              <div class="card-header">Eliminar casa</div>
+              <div class="card-body">
+
+                <p class="inline-status mb-3">
+                  Casa selecionada: <strong id="selectedHouseLabel">—</strong>
+                </p>
+
+                <div class="form-group">
+                  <label for="confirmHouseText">Escreve <strong>APAGAR CASA</strong> para confirmar</label>
+                  <input type="text" class="form-control" id="confirmHouseText" placeholder="APAGAR CASA"
+                    autocomplete="off">
+                </div>
+
+                <button type="button" class="btn btn-outline-dark btn-style" id="btnDeleteHouse" disabled>
+                  Apagar casa
+                </button>
+
+                <!-- Feedback inline (sem pop-ups) -->
+                <div id="houseMsg" class="mt-3" style="display:none;"></div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Eliminarconta -->
+          <div class="col-lg-6 mb-4">
+            <div class="card card_border">
+              <div class="card-header">Eliminar conta</div>
+              <div class="card-body">
+
+                <p class="inline-status mb-3">
+                  Utilizador: <strong id="selectedUserLabel">—</strong>
+                </p>
+
+                <div class="form-group">
+                  <label for="confirmUserText">Escreve <strong>APAGAR CONTA</strong> para confirmar</label>
+                  <input type="text" class="form-control" id="confirmUserText" placeholder="APAGAR CONTA"
+                    autocomplete="off">
+                </div>
+
+                <button type="button" class="btn btn-outline-dark btn-style" id="btnDeleteUser" disabled>
+                  Apagar conta
+                </button>
+
+                <!-- Feedback inline (sem pop-ups) -->
+                <div id="userMsg" class="mt-3" style="display:none;"></div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- /Main content -->
+  </section>
+
+  <footer class="dashboard">
+    <p>&copy; 2020 Collective. All Rights Reserved.</p>
+  </footer>
+
+  <button onclick="topFunction()" id="movetop" class="bg-primary" title="Go to top">
+    <span class="fa fa-angle-up"></span>
+  </button>
+
+  <!-- Base libs -->
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script src="/static/js/jquery.nicescroll.js"></script>
+  <script src="/static/js/scripts.js"></script>
+  <script src="/static/js/modernizr.js"></script>
+
+  <script>
+    // Loader (com fallback)
+    (function () {
+      function hideLoader() {
+        var el = document.querySelector(".se-pre-con");
+        if (!el) return;
+        el.style.transition = "opacity .5s ease";
+        el.style.opacity = "0";
+        setTimeout(function () { el.style.display = "none"; }, 550);
+      }
+      window.addEventListener("load", hideLoader);
+      setTimeout(hideLoader, 1500);
+    })();
+
+    // Move top
+    window.addEventListener("scroll", function () {
+      var btn = document.getElementById("movetop");
+      if (!btn) return;
+      btn.style.display = (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) ? "block" : "none";
+    });
+
+    function topFunction() {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+
+    // Sidebar noscroll
+    jQuery(function () {
+      jQuery(".sidebar-menu-collapsed").on("click", function () {
+        jQuery("body").toggleClass("noscroll");
+      });
+    });
+
+    // =========================
+    // API helpers
+    // =========================
+    const API_URL = "http://127.0.0.1:8000";
+
+    function getToken() {
+      return localStorage.getItem("token") || localStorage.getItem("access_token");
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+
+    async function apiFetch(path, { method = "GET", token, body } = {}) {
+      const headers = { "Accept": "application/json" };
+      if (token) headers["Authorization"] = "Bearer " + token;
+      if (body !== undefined) headers["Content-Type"] = "application/json";
+
+      const res = await fetch(`${API_URL}${path}`, {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      });
+
+      const contentType = res.headers.get("content-type") || "";
+      let parsed = null;
+
+      if (contentType.includes("application/json")) parsed = await res.json().catch(() => null);
+      else parsed = { raw: await res.text().catch(() => "") };
+
+      if (!res.ok) {
+        const detail = parsed?.detail ?? parsed?.raw ?? "";
+        const msg = detail ? `HTTP ${res.status}: ${detail}` : `HTTP ${res.status}`;
+        const err = new Error(msg);
+        err.status = res.status;
+        err.payload = parsed;
+        throw err;
+      }
+      return parsed;
+    }
+
+    // =========================
+    // Inline messages (substitui alert/confirm)
+    // =========================
+    function showMsg(id, type, text) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.display = "block";
+      el.className = "mt-3 alert " + (type === "success" ? "alert-success" : "alert-danger");
+      el.textContent = text;
+    }
+    function clearMsg(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.display = "none";
+      el.textContent = "";
+      el.className = "mt-3";
+    }
+    function setBusy(btnId, busy) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.dataset._label = btn.dataset._label || btn.textContent;
+      btn.textContent = busy ? "A processar..." : btn.dataset._label;
+    }
+
+    // =========================
+    // Labels (casa + user)
+    // =========================
+    function getSelectedHouseId() {
+      const raw =
+        localStorage.getItem("selected_house_id") ||
+        localStorage.getItem("selectedHouseId") ||
+        localStorage.getItem("id_house");
+      const n = Number(raw);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    }
+
+    function getSelectedHouseNameCache() {
+      return (
+        localStorage.getItem("selected_house_name") ||
+        localStorage.getItem("selectedHouseName") ||
+        localStorage.getItem("house_name") ||
+        localStorage.getItem("houseName") ||
+        ""
+      ).trim();
+    }
+
+    async function fillHouseName() {
+      const el = document.getElementById("selectedHouseLabel");
+      if (!el) return;
+
+      const id = getSelectedHouseId();
+      const cachedName = getSelectedHouseNameCache();
+
+      if (cachedName) {
+        el.textContent = cachedName;
+        return;
+      }
+
+      if (!id) {
+        el.textContent = "nenhuma";
+        return;
+      }
+
+      const token = getToken();
+      if (!token) {
+        el.textContent = "—";
+        return;
+      }
+
+      try {
+        const house = await apiFetch(`/houses/${id}`, { token });
+        const name = String(house?.name ?? house?.nome ?? "").trim();
+        el.textContent = name || `Casa #${id}`;
+      } catch (e) {
+        console.warn(e);
+        el.textContent = `Casa #${id}`;
+      }
+    }
+
+    function getUsernameCache() {
+      return (
+        localStorage.getItem("username") ||
+        localStorage.getItem("user_name") ||
+        localStorage.getItem("name") ||
+        ""
+      ).trim();
+    }
+
+    async function fillUserName() {
+      const top = document.getElementById("userNameTop");
+      const card = document.getElementById("selectedUserLabel");
+
+      const cached = getUsernameCache();
+      if (cached) {
+        if (top) top.textContent = cached;
+        if (card) card.textContent = cached;
+        return;
+      }
+
+      const token = getToken();
+      if (!token) {
+        if (top) top.textContent = "Utilizador";
+        if (card) card.textContent = "—";
+        return;
+      }
+
+      try {
+        const me = await apiFetch(`/me`, { token });
+        const id = me?.user_id;
+        const label = id ? `ID ${id}` : "Utilizador";
+
+        if (top) top.textContent = label;
+        if (card) card.textContent = label;
+
+        if (id) localStorage.setItem("user_id", String(id));
+      } catch (e) {
+        console.warn(e);
+        if (top) top.textContent = "Utilizador";
+        if (card) card.textContent = "—";
+      }
+    }
+
+    function getUserId() {
+      const raw =
+        localStorage.getItem("user_id") ||
+        localStorage.getItem("userId") ||
+        localStorage.getItem("id_user") ||
+        localStorage.getItem("id");
+      const n = Number(raw);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    }
+
+    function wireConfirmations() {
+      const houseInput = document.getElementById("confirmHouseText");
+      const userInput = document.getElementById("confirmUserText");
+      const btnHouse = document.getElementById("btnDeleteHouse");
+      const btnUser = document.getElementById("btnDeleteUser");
+
+      function normalize(s) { return (s ?? "").trim().toUpperCase(); }
+
+      function update() {
+        const hasHouse = !!getSelectedHouseId();
+        if (btnHouse) btnHouse.disabled = !hasHouse || normalize(houseInput?.value) !== "APAGAR CASA";
+
+        const hasToken = !!getToken();
+        if (btnUser) btnUser.disabled = !hasToken || normalize(userInput?.value) !== "APAGAR CONTA";
+      }
+
+      houseInput?.addEventListener("input", update);
+      userInput?.addEventListener("input", update);
+      update();
+    }
+
+    // =========================
+    // Actions (SEM POP-UPS)
+    // =========================
+    async function deactivateSelectedHouse() {
+      clearMsg("houseMsg");
+
+      const token = getToken();
+      if (!token) return logout();
+
+      const id = getSelectedHouseId();
+      if (!id) {
+        showMsg("houseMsg", "error", "Não existe casa selecionada. Vai a “Minha casa” e seleciona uma.");
+        return;
+      }
+
+      try {
+        setBusy("btnDeleteHouse", true);
+
+        await apiFetch(`/houses/${id}/deactivate`, { method: "PATCH", token });
+
+        localStorage.removeItem("selected_house_id");
+        localStorage.removeItem("selectedHouseId");
+        localStorage.removeItem("selected_house_name");
+        localStorage.removeItem("selectedHouseName");
+
+        showMsg("houseMsg", "success", "Casa desativada com sucesso. A redirecionar...");
+        window.location.href = "houses.html";
+      } catch (e) {
+        console.error(e);
+        const msg = e?.message || "Erro inesperado";
+        if (e?.status === 401) return logout();
+        showMsg("houseMsg", "error", "Não foi possível desativar a casa. " + msg);
+      } finally {
+        setBusy("btnDeleteHouse", false);
+      }
+    }
+
+    async function deactivateCurrentUser() {
+      clearMsg("userMsg");
+
+      const token = getToken();
+      if (!token) return logout();
+
+      try {
+        setBusy("btnDeleteUser", true);
+
+        const userId = getUserId();
+
+        try {
+          await apiFetch(`/users/me/deactivate`, { method: "PATCH", token });
+        } catch (e) {
+          if (userId) {
+            await apiFetch(`/users/${userId}/deactivate`, { method: "PATCH", token });
+          } else {
+            throw e;
+          }
+        }
+
+        showMsg("userMsg", "success", "Conta desativada com sucesso. A terminar sessão...");
+        logout();
+      } catch (e) {
+        console.error(e);
+        const msg = e?.message || "Erro inesperado";
+        if (e?.status === 401) return logout();
+        showMsg("userMsg", "error", "Não foi possível desativar a conta. " + msg);
+      } finally {
+        setBusy("btnDeleteUser", false);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("logoutBtn")?.addEventListener("click", function (e) {
+        e.preventDefault();
+        logout();
+      });
+
+      document.getElementById("btnDeleteHouse")?.addEventListener("click", deactivateSelectedHouse);
+      document.getElementById("btnDeleteUser")?.addEventListener("click", deactivateCurrentUser);
+
+      fillUserName();
+      fillHouseName();
+      wireConfirmations();
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,15 @@
+1️⃣ Ligar infraestrutura (Docker)
+cd C:\Users\tomas\shelly-energy
+docker compose up -d
+docker ps
+
+2️⃣ Iniciar recolha de dados Shelly
+python mqtt_to_mysql_v2.py
+
+3️⃣ Ligar backend do site (FastAPI)
+cd C:\Users\tomas\shelly-energy\countlight\backend
+python -m uvicorn main:app --reload (desatualizado)
+python -m uvicorn app.main:app --reload
+
+🛠️ phpMyAdmin (APENAS quando necessário) - http://localhost:8080
+docker start phpmyadmin

@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>CountLight Profile</title>
+  <link rel="icon" type="image/png" href="/static/images/logo_neon.png">
+  <link rel="stylesheet" href="/static/css/style-liberty.css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+
+  <style>
+    .avatar-lg {
+      width: 160px;
+      height: 160px;
+      border-radius: 9999px;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      border: 3px solid rgba(0,0,0,0.08);
+      background: #f1f1f1;
+    }
+    .avatar-sm {
+      width: 96px;
+      height: 96px;
+      border-radius: 9999px;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border: 2px solid rgba(0,0,0,0.08);
+      background: #f1f1f1;
+    }
+    @media (max-width: 576px) {
+      .avatar-lg { width: 130px; height: 130px; }
+      .avatar-sm { width: 88px; height: 88px; }
+    }
+  </style>
+</head>
+
+<body class="sidebar-menu-collapsed">
+  <div class="se-pre-con"></div>
+
+  <section>
+    {% include "sidebar.html" %}
+    {% include "header.html" %}
+
+    <div class="main-content">
+      <div class="container-fluid content-top-gap">
+
+        <div class="welcome-msg pt-3 pb-4">
+          <h1><span class="text-primary">Perfil</span></h1>
+          <p>Informações gerais do utilizador e resumo de conquistas.</p>
+        </div>
+
+        <section class="people">
+          <div class="row">
+
+            <div class="col-lg-6 mb-4">
+              <div class="card card_border h-100">
+                <div class="card-header">Informações do Perfil</div>
+
+                <div class="card-body">
+                  <div class="row align-items-center">
+
+                    <div class="col-sm-5 d-flex justify-content-center justify-content-sm-start">
+                      <img
+                        id="profilePhoto"
+                        class="avatar-lg"
+                        src="/static/images/profile_photos/default-avatar.png"
+                        alt="Fotografia do utilizador"
+                      >
+                    </div>
+
+                    <div class="col-sm-7 mt-sm-0 mt-4">
+                      <h5 id="username" class="card__title">--</h5>
+                      <p id="description" class="mb-3">--</p>
+
+                      <a href="/profile_setup" class="btn btn-style btn-primary">
+                        Editar informações
+                      </a>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+              <div class="card card_border h-100">
+                <div class="card-header">Resumo de Impacto</div>
+
+                <div class="card-body">
+
+                  <div class="mb-2">
+                    <strong>Conquistas concluídas:</strong>
+                    <span id="completedAchievements">--</span>
+                  </div>
+
+                  <div class="mb-3">
+                    <strong>Última conquista:</strong>
+                    <span id="latestAchievement" class="text-primary">--</span>
+                  </div>
+
+                  <hr>
+
+                  <div class="mb-3">
+                    <strong>Total energia (kWh):</strong>
+                    <span id="totalEnergy">--</span>
+                  </div>
+
+                  <div class="mb-1 text-muted">
+                    <strong>Impacto financeiro:</strong>
+                    <span id="totalSaved" class="text-primary">--</span> €
+                  </div>
+
+                  <small class="text-muted">
+                    poupados desde que começou a usar a aplicação
+                  </small>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <div class="welcome-msg pt-3 pb-4">
+          <h1><span class="text-primary">Pessoas que possas conhecer</span></h1>
+          <p>Descobre utilizadores com interesses semelhantes aos teus.</p>
+        </div>
+
+        <!-- Dinâmico: o JS vai gerar os cards aqui -->
+        <div id="peopleRow" class="row"></div>
+
+        <!-- Estados (loading / vazio / erro) -->
+        <div id="peopleState" class="mt-2"></div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="dashboard">
+    <p>&copy 2020 Collective. All Rights Reserved.</p>
+  </footer>
+
+  <button onclick="topFunction()" id="movetop" class="bg-primary" title="Go to top">
+    <span class="fa fa-angle-up"></span>
+  </button>
+
+  <script>
+    window.onscroll = function () { scrollFunction() };
+    function scrollFunction() {
+      if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        document.getElementById("movetop").style.display = "block";
+      } else {
+        document.getElementById("movetop").style.display = "none";
+      }
+    }
+    function topFunction() {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+  </script>
+
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/js/Chart.min.js"></script>
+  <script src="/static/js/utils.js"></script>
+  <script src="/static/js/bar.js"></script>
+  <script src="/static/js/stacked.js"></script>
+  <script src="/static/js/linechart.js"></script>
+  <script src="/static/js/pie.js"></script>
+  <script src="/static/js/jquery.dataTables.min.js"></script>
+  <script src="/static/js/faq.js"></script>
+  <script src="/static/js/jquery.nicescroll.js"></script>
+  <script src="/static/js/scripts.js"></script>
+
+  <script>
+    var closebtns = document.getElementsByClassName("close-grid");
+    for (var i = 0; i < closebtns.length; i++) {
+      closebtns[i].addEventListener("click", function () {
+        this.parentElement.style.display = 'none';
+      });
+    }
+  </script>
+
+  <script>
+    $(function () {
+      $('.sidebar-menu-collapsed').click(function () {
+        $('body').toggleClass('noscroll');
+      })
+    });
+  </script>
+
+  <script>
+    window.addEventListener("load", function () {
+      const el = document.querySelector(".se-pre-con");
+      if (el) {
+        el.style.transition = "opacity 0.5s";
+        el.style.opacity = "0";
+        setTimeout(() => el.style.display = "none", 500);
+      }
+    });
+  </script>
+
+  <script src="/static/js/bootstrap.min.js"></script>
+
+  <script>
+    // =========================================================
+    // PROFILE + IMPACT + People suggestions (dinâmico)
+    // =========================================================
+    const API_URL = "/api";
+    const DEFAULT_AVATAR = "/static/images/profile_photos/default-avatar.png";
+
+    function getToken() { return localStorage.getItem("token"); }
+    function getSelectedHouseId() { return localStorage.getItem("selected_house_id"); }
+
+    function redirectToLogin() {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+
+    async function safeReadText(res) {
+      try { return await res.text(); } catch { return ""; }
+    }
+
+    async function apiFetch(path, options = {}) {
+      const token = getToken();
+      const houseId = getSelectedHouseId();
+
+      const headers = new Headers(options.headers || {});
+      headers.set("Accept", "application/json");
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+      if (houseId) headers.set("X-House-Id", houseId);
+      if (!headers.has("Content-Type") && options.body) {
+        headers.set("Content-Type", "application/json");
+      }
+
+      const url = `${API_URL}${path.startsWith("/") ? path : "/" + path}`;
+      const res = await fetch(url, { ...options, headers });
+
+      if (res.status === 401 || res.status === 403) {
+        redirectToLogin();
+        throw new Error(`Unauthorized (${res.status})`);
+      }
+      return res;
+    }
+
+    function setText(id, value, fallback = "--") {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerText = (value === null || value === undefined || value === "") ? fallback : String(value);
+    }
+
+    function setNumber(id, value, digits = 0, fallback = "0") {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const n = Number(value);
+      if (!Number.isFinite(n)) { el.innerText = fallback; return; }
+      el.innerText = n.toFixed(digits);
+    }
+
+    function setCurrencyEURText(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return "0,00";
+      return n.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function normalizePhotoUrl(photoUrl) {
+      if (!photoUrl) return DEFAULT_AVATAR;
+
+      if (/^https?:\/\//i.test(photoUrl)) return photoUrl;
+
+      let p = photoUrl.startsWith("/") ? photoUrl.slice(1) : photoUrl;
+      if (p.startsWith("static/")) return "/" + p;
+      return "/static/" + p;
+    }
+
+    function setProfilePhoto(photoUrl) {
+      const img = document.getElementById("profilePhoto");
+      if (!img) return;
+
+      img.src = normalizePhotoUrl(photoUrl);
+      img.onerror = () => { img.src = DEFAULT_AVATAR; };
+    }
+
+    async function loadProfileAndImpact() {
+      // defaults
+      setText("username", "", "--");
+      setText("description", "", "--");
+      setProfilePhoto(null);
+
+      setNumber("completedAchievements", 0, 0);
+      setText("latestAchievement", "", "--");
+      setNumber("totalEnergy", 0, 2);
+      document.getElementById("totalSaved").innerText = "0,00";
+
+      // profile
+      const resMe = await apiFetch("/users/me");
+      if (!resMe.ok) {
+        console.warn("Erro /users/me:", resMe.status, await safeReadText(resMe));
+        throw new Error("Erro ao carregar perfil.");
+      }
+
+      const me = await resMe.json();
+      setText("username", me.username, "--");
+      setText("description", me.description || "Sem descrição", "Sem descrição");
+      setProfilePhoto(me.photo_url);
+
+      // impact
+      const resImpact = await apiFetch("/users/me/impact");
+      if (!resImpact.ok) return;
+
+      const impactSource = await resImpact.json();
+      const totals = impactSource?.totals ?? {};
+
+      setNumber("completedAchievements", totals.completed_achievements ?? 0, 0);
+      setNumber("totalEnergy", totals.total_energy_kwh ?? 0, 2);
+      document.getElementById("totalSaved").innerText = setCurrencyEURText(totals.total_saved_eur ?? 0);
+
+      const la = impactSource?.latest_achievement;
+      if (la) {
+        const title = la.title ?? "";
+        const desc = la.description ?? "";
+        const text = title && desc ? `${title} – ${desc}` : (title || desc || "--");
+        setText("latestAchievement", text, "--");
+      } else {
+        setText("latestAchievement", "--", "--");
+      }
+    }
+
+    // =========================================================
+    // Pessoas que possas conhecer (dinâmico)
+    // Espera: GET /api/users/suggestions?limit=4
+    // Devolve Array<UserSuggestion>
+    // UserSuggestion: { id|user_id|uuid, username, photo_url?, total_saved_eur? }
+    // =========================================================
+    function peopleState(type, message) {
+      const el = document.getElementById("peopleState");
+      if (!el) return;
+
+      if (!type) { el.innerHTML = ""; return; }
+
+      const cls =
+        type === "loading" ? "alert alert-info" :
+        type === "error"   ? "alert alert-warning" :
+        type === "empty"   ? "alert alert-secondary" :
+                             "alert alert-secondary";
+
+      el.innerHTML = `<div class="${cls}" role="alert">${message}</div>`;
+    }
+
+    function userProfileUrl(userId) {
+      // Troca aqui se a tua rota for outra (ex: /profile/<id> ou /users/view/<id>)
+      return `/users/${encodeURIComponent(String(userId))}`;
+    }
+
+    function createPeopleCard(user) {
+      const userId = user?.id ?? user?.user_id ?? user?.uuid ?? null;
+      const username = (user?.username ?? "Utilizador").trim() || "Utilizador";
+      const photoUrl = normalizePhotoUrl(user?.photo_url ?? null);
+      const savedText = (user?.total_saved_eur === null || user?.total_saved_eur === undefined)
+        ? "--"
+        : setCurrencyEURText(user.total_saved_eur);
+
+      const col = document.createElement("div");
+      col.className = "col-lg-3 col-md-6 mb-4";
+
+      col.innerHTML = `
+        <div class="card text-center card_border h-100">
+          <div class="card-body">
+            <div class="team-main-19">
+              <img class="avatar-sm mb-3" src="${photoUrl}" alt="Foto de ${username}">
+              <h5 class="card__title">${username}</h5>
+              <p>Impacto financeiro: <span>${savedText}</span> €</p>
+              ${
+                userId
+                  ? `<a href="${userProfileUrl(userId)}" class="btn mt-4 profile-btn text-primary">Ver perfil</a>`
+                  : `<a href="#url" class="btn mt-4 profile-btn text-primary disabled" aria-disabled="true">Ver perfil</a>`
+              }
+            </div>
+          </div>
+        </div>
+      `;
+
+      // fallback de imagem (se quebrar)
+      const img = col.querySelector("img");
+      img.addEventListener("error", () => { img.src = DEFAULT_AVATAR; });
+
+      return col;
+    }
+
+    function renderPeople(users) {
+      const row = document.getElementById("peopleRow");
+      if (!row) return;
+
+      row.innerHTML = "";
+
+      if (!Array.isArray(users) || users.length === 0) {
+        peopleState("empty", "Ainda não há sugestões para te mostrar.");
+        return;
+      }
+
+      peopleState(null, "");
+
+      users.slice(0, 4).forEach(u => {
+        row.appendChild(createPeopleCard(u));
+      });
+    }
+
+    async function loadPeopleSuggestions() {
+      peopleState("loading", "A carregar sugestões...");
+      const row = document.getElementById("peopleRow");
+      if (row) row.innerHTML = "";
+
+      const res = await apiFetch("/users/suggestions?limit=4");
+      if (!res.ok) {
+        console.warn("Erro /users/suggestions:", res.status, await safeReadText(res));
+        peopleState("error", "Não foi possível carregar as sugestões. Tenta novamente mais tarde.");
+        return;
+      }
+
+      const data = await res.json();
+
+      // Aceita:
+      //  - array direto: [...]
+      //  - ou { users: [...] }
+      const users = Array.isArray(data) ? data : (Array.isArray(data?.users) ? data.users : []);
+      renderPeople(users);
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const token = getToken();
+      if (!token) { window.location.href = "/login"; return; }
+
+      try {
+        await loadProfileAndImpact();
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao carregar perfil.");
+      }
+
+      try {
+        await loadPeopleSuggestions();
+      } catch (err) {
+        console.error(err);
+        peopleState("error", "Não foi possível carregar as sugestões.");
+      }
+    });
+  </script>
+</body>
+</html>

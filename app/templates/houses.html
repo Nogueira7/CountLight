@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="pt-PT">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>CountLight · Casas</title>
+
+  <link rel="icon" type="image/png" href="/static/images/logo_neon.png">
+  <link rel="stylesheet" href="/static/css/style-liberty.css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+</head>
+
+<body class="sidebar-menu-collapsed">
+  <div class="se-pre-con"></div>
+
+  <section>
+    {% include "sidebar.html" %}
+    {% include "header.html" %}
+
+    <div class="main-content">
+      <div class="container-fluid content-top-gap">
+
+        <div class="welcome-msg pt-3 pb-4">
+          <h1><span class="text-primary">Residências</span></h1>
+          <p>Gestão e visão geral das habitações associadas à sua conta.</p>
+        </div>
+
+        <section class="pricing">
+          <section class="w3l-pricing1">
+            <div class="row px-2" id="housesRow">
+              <div class="col-12">
+                <div class="alert alert-info">A carregar casas...</div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="dashboard">
+    <p>&copy; 2020 Collective. All Rights Reserved.</p>
+  </footer>
+
+  <button onclick="topFunction()" id="movetop" class="bg-primary" title="Go to top">
+    <span class="fa fa-angle-up"></span>
+  </button>
+
+  <!-- libs base -->
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/js/jquery.dataTables.min.js"></script>
+  <script src="/static/js/faq.js"></script>
+  <script src="/static/js/jquery.nicescroll.js"></script>
+  <script src="/static/js/scripts.js"></script>
+  <script src="/static/js/modernizr.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+
+  <script>
+    // LOADER
+    window.addEventListener("load", function () {
+      const loader = document.querySelector(".se-pre-con");
+      if (!loader) return;
+      loader.style.opacity = "0";
+      loader.style.transition = "opacity 0.6s ease";
+      setTimeout(() => { loader.style.display = "none"; }, 600);
+    });
+
+    // SIDEBAR lock
+    jQuery(function () {
+      jQuery(".sidebar-menu-collapsed").on("click", function () {
+        jQuery("body").toggleClass("noscroll");
+      });
+    });
+
+    // MOVE TOP
+    (function () {
+      const btn = document.getElementById("movetop");
+      if (!btn) return;
+
+      window.addEventListener("scroll", () => {
+        const visible = document.body.scrollTop > 20 || document.documentElement.scrollTop > 20;
+        btn.style.display = visible ? "block" : "none";
+      });
+
+      window.topFunction = function () {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      };
+    })();
+
+    // =========================
+    // CONFIG (integrado no FastAPI)
+    // =========================
+    const API_URL = "/api";
+
+    // =========================
+    // HELPERS
+    // =========================
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function setHousesRowHtml(html) {
+      const container = document.getElementById("housesRow");
+      if (container) container.innerHTML = html;
+    }
+
+    function normalizeId(obj) {
+      const id = obj?.id_house ?? obj?.id ?? obj?.house_id ?? null;
+      const n = Number(id);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function safeTextOrDash(v) {
+      const s = String(v ?? "").trim();
+      return s ? s : "—";
+    }
+
+    function formatNumberOrDash(n) {
+      if (n === null || n === undefined) return "—";
+      const x = Number(n);
+      return Number.isFinite(x) ? String(x) : "—";
+    }
+
+    function formatEnumHouseType(v) {
+      if (!v) return "—";
+      if (v === "apartamento") return "Apartamento";
+      if (v === "moradia") return "Moradia";
+      return String(v);
+    }
+
+    function formatEnumOccupancy(v) {
+      if (!v) return "—";
+      if (v === "permanente") return "Permanente";
+      if (v === "parcial") return "Parcial";
+      if (v === "ferias") return "Férias";
+      return String(v);
+    }
+
+    function getAuthTokenOrRedirect() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/login";
+        return null;
+      }
+      return token;
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "/login";
+    }
+
+    function selectHouse(idHouse) {
+      localStorage.setItem("selected_house_id", String(idHouse));
+      window.location.href = "/";
+    }
+    window.selectHouse = selectHouse;
+
+    function getHouseFieldsFromBackend(house) {
+      // GET /api/houses devolve estes nomes (EN)
+      return {
+        id_house: normalizeId(house),
+        name: house?.name ?? "Casa",
+        address: house?.address ?? null,
+        house_type: house?.house_type ?? null,
+        adults: house?.adults ?? 0,
+        children: house?.children ?? 0,
+        occupancy_type: house?.occupancy_type ?? null,
+        provider: house?.provider ?? null,
+        tariff: house?.tariff ?? null,
+        contract_power: house?.contract_power ?? null,
+        monthly_kwh: house?.monthly_kwh ?? null,
+      };
+    }
+
+    // =========================
+    // API
+    // =========================
+    async function apiFetch(path, { method = "GET", token, body } = {}) {
+      const headers = { "Accept": "application/json" };
+      if (token) headers["Authorization"] = "Bearer " + token;
+      if (body !== undefined) headers["Content-Type"] = "application/json";
+
+      const res = await fetch(`${API_URL}${path}`, {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      });
+
+      const contentType = res.headers.get("content-type") || "";
+      let parsed = null;
+
+      if (contentType.includes("application/json")) {
+        parsed = await res.json().catch(() => null);
+      } else {
+        const text = await res.text().catch(() => "");
+        parsed = text ? { raw: text } : null;
+      }
+
+      if (!res.ok) {
+        const detail = parsed?.detail ?? parsed?.raw ?? "";
+        const msg = detail ? `HTTP ${res.status}: ${detail}` : `HTTP ${res.status}`;
+        const err = new Error(msg);
+        err.status = res.status;
+        err.payload = parsed;
+        throw err;
+      }
+
+      return parsed;
+    }
+
+    async function loadHouses() {
+      const token = getAuthTokenOrRedirect();
+      if (!token) return [];
+
+      // /api/me: se falhar 401/403 -> logout. se falhar 404 -> ignora.
+      try {
+        await apiFetch("/me", { token });
+      } catch (e) {
+        if (e?.status === 401 || e?.status === 403) {
+          logout();
+          return [];
+        }
+      }
+
+      const houses = await apiFetch("/houses", { token });
+      return Array.isArray(houses) ? houses : [];
+    }
+
+    // =========================
+    // CREATE HOUSE (PT payload!)
+    // =========================
+    async function createHouseMinimalPT() {
+      const token = getAuthTokenOrRedirect();
+      if (!token) return null;
+
+      const payload = {
+        nome: "Nova casa",
+        tipo_casa: null,
+        tipo_ocupacao: null,
+        morada: null,
+        adultos: 0,
+        criancas: 0,
+        comercializadora: null,
+        tarifa: null,
+        potencia_contratada: null,
+        consumo_kwh_mes: null,
+      };
+
+      const created = await apiFetch("/houses", { method: "POST", token, body: payload });
+
+      const id = Number(created?.id_house);
+      if (!Number.isFinite(id)) throw new Error("Resposta do backend não trouxe id_house.");
+      return id;
+    }
+
+    async function handleAddHouseClick(btn) {
+      try {
+        if (btn) { btn.disabled = true; btn.textContent = "…"; }
+
+        const id = await createHouseMinimalPT();
+        localStorage.setItem("selected_house_id", String(id));
+        window.location.href = `/house-setup?id=${encodeURIComponent(String(id))}`;
+      } catch (err) {
+        console.error(err);
+        alert("Não foi possível adicionar a casa. Vê a consola para detalhes.");
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = "+"; }
+      }
+    }
+    window.handleAddHouseClick = handleAddHouseClick;
+
+    // =========================
+    // RENDER
+    // =========================
+    function renderCardShell({ titleHtml, bodyContentHtml, actionsHtml = "", extraCardClasses = "" }) {
+      return `
+        <div class="col-md-6 px-2 mb-4 house-col">
+          <div class="price-card price-card2 p-lg-4 p-md-3 p-4 house-card ${extraCardClasses}">
+            <div class="card-header p-0 card-heading">
+              <h4 class="mb-4">${titleHtml}</h4>
+            </div>
+
+            <div class="card-body p-0 house-card__body">
+              <div class="house-card__content">
+                ${bodyContentHtml}
+              </div>
+
+              ${actionsHtml ? `<div class="house-card__actions">${actionsHtml}</div>` : ``}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAddHouseCard() {
+      return renderCardShell({
+        titleHtml: "Adicionar casa",
+        bodyContentHtml: `
+          <div class="add-house-layout">
+            <div class="add-house-layout__center">
+              <button type="button"
+                class="btn btn-primary btn-style"
+                onclick="handleAddHouseClick(this)"
+                style="width:110px;height:110px;border-radius:999px;font-size:48px;line-height:1;">
+                +
+              </button>
+            </div>
+
+            <p class="text-muted mb-0 add-house-layout__bottom">
+              Clica para criares uma casa e preencheres os dados.
+            </p>
+          </div>
+        `
+      });
+    }
+
+    function renderPremiumCard() {
+      return renderCardShell({
+        titleHtml: `
+          Adicionar mais casas<br>
+          <span class="label label-popular">Desbloqueie funcionalidades premium</span>
+        `,
+        bodyContentHtml: `
+          <h1 class="card-title pricing-card-title my-price-title">
+            A partir de 6,99 €<small class="text-dull">/mês</small>
+          </h1>
+
+          <p>
+            Expanda o seu sistema para várias habitações e obtenha monitorização
+            avançada, alertas inteligentes e histórico completo de consumo.
+          </p>
+
+          <ul class="list-unstyled list-pricing mt-3 mb-0">
+            <li>Mais casas adicionais</li>
+            <li>Até 50 dispositivos Shelly incluídos</li>
+            <li>Alertas e recomendações avançadas</li>
+            <li>Histórico até 365 dias</li>
+          </ul>
+        `,
+        actionsHtml: `<a href="/pricing" class="btn btn-lg btn-primary btn-style">Ver Planos</a>`,
+        extraCardClasses: "recomemded-price"
+      });
+    }
+
+    function renderHouseCard(house, selectedId, hasMultiple) {
+      const h = getHouseFieldsFromBackend(house);
+      const id = h.id_house;
+
+      const nome = escapeHtml(h.name);
+      const morada = escapeHtml(safeTextOrDash(h.address));
+      const tipoCasa = escapeHtml(formatEnumHouseType(h.house_type));
+      const tipoOcup = escapeHtml(formatEnumOccupancy(h.occupancy_type));
+
+      const adultos = escapeHtml(formatNumberOrDash(h.adults));
+      const criancas = escapeHtml(formatNumberOrDash(h.children));
+
+      const potencia = (h.contract_power === null || h.contract_power === undefined)
+        ? "—"
+        : `${escapeHtml(formatNumberOrDash(h.contract_power))} kVA`;
+
+      const consumo = (h.monthly_kwh === null || h.monthly_kwh === undefined)
+        ? "—"
+        : `${escapeHtml(formatNumberOrDash(h.monthly_kwh))} kWh/mês`;
+
+      const comercializadora = escapeHtml(safeTextOrDash(h.provider));
+      const tarifa = escapeHtml(safeTextOrDash(h.tariff));
+
+      const isSelected = id !== null && String(id) === String(selectedId);
+      const badge = isSelected ? `<span class="badge badge-success ml-2">Ativa</span>` : "";
+
+      const selectBtn = (hasMultiple && id !== null && !isSelected)
+        ? `<button class="btn btn-lg btn-primary btn-style" type="button" onclick="selectHouse(${id})">Selecionar</button>`
+        : "";
+
+      const editBtn = (id !== null)
+        ? `<a href="/house-setup?id=${encodeURIComponent(String(id))}" class="btn btn-lg btn-outline-secondary btn-style border-btn ${selectBtn ? "ml-2" : ""}">Editar</a>`
+        : "";
+
+      return renderCardShell({
+        titleHtml: `${nome} ${badge}`,
+        bodyContentHtml: `
+          <p><strong>Morada:</strong> ${morada}</p>
+          <p><strong>Tipo:</strong> ${tipoCasa}</p>
+          <p><strong>Ocupação:</strong> ${tipoOcup}</p>
+
+          <hr>
+
+          <p class="mb-1"><strong>Pessoas:</strong> ${adultos} adultos, ${criancas} crianças</p>
+          <p class="mb-1"><strong>Potência:</strong> ${potencia}</p>
+          <p class="mb-1"><strong>Consumo:</strong> ${consumo}</p>
+          <p class="mb-1"><strong>Comercializadora:</strong> ${comercializadora}</p>
+          <p class="mb-0"><strong>Tarifa:</strong> ${tarifa}</p>
+        `,
+        actionsHtml: `${selectBtn}${editBtn ? ` ${editBtn}` : ""}`.trim()
+      });
+    }
+
+    function getPlanLimits() {
+      const max = Number(localStorage.getItem("max_houses"));
+      return {
+        max_houses: Number.isFinite(max) ? max : 1
+      };
+    }
+
+    function renderHouses(houses) {
+      if (!Array.isArray(houses)) houses = [];
+
+      const { max_houses } = getPlanLimits();
+      const total = houses.length;
+
+      let selectedId = localStorage.getItem("selected_house_id");
+      const firstId = normalizeId(houses[0]);
+
+      if (!selectedId && firstId !== null) {
+        selectedId = String(firstId);
+        localStorage.setItem("selected_house_id", selectedId);
+      }
+
+      const hasMultiple = houses.length > 1;
+
+      let html = "";
+
+      // =========================
+      // 🔹 CASO 1: SEM CASAS
+      // =========================
+      if (total === 0) {
+        html += renderAddHouseCard(); // 👈 só isto
+        setHousesRowHtml(html);
+        return;
+      }
+
+      // =========================
+      // 🔹 CASO 2: TEM ESPAÇO PARA MAIS
+      // =========================
+      if (total < max_houses) {
+        html += renderAddHouseCard();
+
+        for (const house of houses) {
+          html += renderHouseCard(house, selectedId, hasMultiple);
+        }
+
+        setHousesRowHtml(html);
+        return;
+      }
+
+      // =========================
+      // 🔹 CASO 3: LIMITE ATINGIDO
+      // =========================
+      for (const house of houses) {
+        html += renderHouseCard(house, selectedId, hasMultiple);
+      }
+
+      html += renderPremiumCard(); // 👈 mostrar upgrade
+
+      setHousesRowHtml(html);
+    }
+
+    // =========================
+    // BOOT
+    // =========================
+    async function loadHousesPage() {
+      try {
+        const houses = await loadHouses();
+        renderHouses(houses);
+      } catch (err) {
+        console.error(err);
+        setHousesRowHtml(`
+          <div class="col-12 px-2">
+            <div class="alert alert-danger">
+              Não foi possível carregar as casas.<br>
+              <small class="text-muted">${escapeHtml(err?.message ?? "Erro desconhecido")}</small>
+            </div>
+            <button class="btn btn-primary btn-style" type="button" onclick="location.reload()">
+              Tentar novamente
+            </button>
+          </div>
+        `);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) logoutBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        logout();
+      });
+
+      loadHousesPage();
+    });
+  </script>
+</body>
+
+</html>

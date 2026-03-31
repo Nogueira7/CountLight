@@ -1,0 +1,20 @@
+rever organização, pois tem coisas em branco etc
+verificar melhorias frontend/backend no login/registo
+colocar confirmar palavra pass e erro devido
+iinstalei o arduido ide e com ele um monte de coisas, verificar se afeta o meu projeto
+Consumo em kwh
+
+
+mexer no redirecionamento para o index caso exista uma casa pelo menos no user
+statsroom sidebar não funciona
+depois de um tempo, acho que quando o token acaba as conquistas somem e também os gráficos as vezes no f5 ficam cinza e com outro f5 voltam a funcionar
+
+⭐ Melhor prática (recomendado)
+No topo do script adiciona:
+const API_URL = "/api/v1";
+E depois usa:
+fetch(`${API_URL}/notifications`)
+fetch(`${API_URL}/notifications/read-all`)
+apiFetchJson(`${API_URL}/users/me`)
+apiFetchJson(`${API_URL}/users/search?...`)
+Assim se mudares versão da API no futuro mudas só 1 linha.

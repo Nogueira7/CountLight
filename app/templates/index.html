@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>CountLight Home</title>
+
+  <!-- Favicon (agora via static) -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', path='images/logo_neon.png') }}">
+
+  <!-- Template CSS (agora via static) -->
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style-liberty.css') }}">
+
+  <!-- google fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+</head>
+
+<body class="sidebar-menu-collapsed">
+
+  <script>
+    const API_URL = "/api";
+
+    async function checkAppAccess() {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        window.location.href = "/login";
+        return;
+      }
+
+      // 1) validar token (API agora em /api)
+      const meRes = await fetch(`${API_URL}/me`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      if (!meRes.ok) {
+        localStorage.clear();
+        window.location.href = "/login";
+        return;
+      }
+
+      // 2) verificar se existe casa selecionada
+      const selectedHouse = localStorage.getItem("selected_house_id");
+
+      if (!selectedHouse) {
+        window.location.href = "/houses";
+        return;
+      }
+
+      // 3) validar se a casa pertence ao user (API agora em /api)
+      const houseRes = await fetch(
+        `${API_URL}/houses/${selectedHouse}`,
+        { headers: { Authorization: "Bearer " + token } }
+      );
+
+      if (!houseRes.ok) {
+        localStorage.removeItem("selected_house_id");
+        window.location.href = "/houses";
+      }
+    }
+
+    checkAppAccess();
+  </script>
+
+  <div class="se-pre-con"></div>
+  <section>
+    <!-- sidebar menu start -->
+    {% include "sidebar.html" %}
+    <!-- //sidebar menu end -->
+
+    <!-- header-starts -->
+    {% include "header.html" %}
+    <!-- //header-ends -->
+
+    <!-- main content start -->
+    <div class="main-content">
+      <!-- content -->
+      <div class="container-fluid content-top-gap">
+
+        <div class="welcome-msg pt-3 pb-4">
+          <h1>Olá <span class="text-primary" id="username"></span>, bem vindo</h1>
+          <p>Seu dashboard de energia doméstica.</p>
+        </div>
+
+        <!-- statistics data -->
+        <div class="statistics">
+          <div class="row">
+            <div class="col-xl-6 pr-xl-2">
+              <div class="row">
+                <div class="col-sm-6 pr-sm-2 statistics-grid">
+                  <div class="card card_border border-primary-top p-4">
+                    <h3 class="text-primary number" id="today-kwh">--</h3>
+                    <p class="stat-text">Consumo total hoje</p>
+                  </div>
+                </div>
+                <div class="col-sm-6 pl-sm-2 statistics-grid">
+                  <div class="card card_border border-primary-top p-4">
+                    <h3 class="text-primary number" id="month-kwh">--</h3>
+                    <p class="stat-text">Consumo total neste mês</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-6 pl-xl-2">
+              <div class="row">
+                <div class="col-sm-6 pr-sm-2 statistics-grid">
+                  <div class="card card_border border-primary-top p-4">
+                    <h3 class="text-primary number" id="year-kwh">--</h3>
+                    <p class="stat-text">Consumo total este ano</p>
+                  </div>
+                </div>
+                <div class="col-sm-6 pl-sm-2 statistics-grid">
+                  <div class="card card_border border-secundary-top p-4">
+                    <h3 class="text-secundary number" id="month-cost">--</h3>
+                    <p class="stat-text">Custo mensal estimado atual</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- //statistics data -->
+
+        <div class="chart">
+          <div class="row g-3">
+
+            <div class="col-lg-6 chart-grid">
+              <div class="card text-center card_border">
+                <div class="card-header">Consumo por divisão (kWh)</div>
+                <div class="card-body">
+                  <div id="canvas-holder-pie1">
+                    <canvas id="piechart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6 chart-grid">
+              <div class="card text-center card_border">
+                <div class="card-header">Comparação: Mês Atual vs Mês Anterior (kWh)</div>
+                <div class="card-body">
+                  <div id="container-bar">
+                    <canvas id="barchart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6 chart-grid">
+              <div class="card text-center card_border">
+                <div class="card-header">Consumo ao longo do dia (kWh)</div>
+                <div class="card-body">
+                  <div id="container-line">
+                    <canvas id="linechart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6 chart-grid">
+              <div class="card text-center card_border">
+                <div class="card-header">Consumo por tipo de equipamento (kWh)</div>
+                <div class="card-body">
+                  <div id="canvas-holder-pie2">
+                    <canvas id="piechart2"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- accordion style 2 -->
+          <div class="col-lg-12 mb-4">
+            <div class="card card_border">
+              <div class="card-header">Dashboard Detalhado</div>
+
+              <div class="card-body">
+
+                <!-- Resumo Inteligente do Período (no topo) -->
+                <div class="mb-4">
+                  <ul class="mb-0" id="summary-overview">
+                    <li>Consumo hoje vs média: <strong>--</strong></li>
+                    <li>Principal causa: <strong>--</strong></li>
+                    <li>Impacto estimado: <strong>--</strong></li>
+                  </ul>
+                </div>
+
+                <section class="accordion" role="tablist" aria-live="polite" data-behavior="accordion">
+
+                  <!-- Comparações-Chave -->
+                  <article class="accordion__item js-show-item-default" data-binding="expand-accordion-item">
+                    <span id="tab2" tabindex="0" class="accordion__title" aria-controls="panel2" role="tab"
+                      aria-selected="false" aria-expanded="false" data-binding="expand-accordion-trigger">
+                      <h5>Comparações</h5>
+                    </span>
+                    <div id="panel2" class="accordion__content" role="tabpanel" aria-hidden="true"
+                      aria-labelledby="tab2" data-binding="expand-accordion-container">
+                      <div class="accordion__content-inner">
+                        <ul id="comparison-list">
+                          <li>Diferença vs ontem: <strong>--</strong></li>
+                          <li>Diferença vs média mensal: <strong>--</strong></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </article>
+
+                  <!-- Picos & Comportamentos Anómalos -->
+                  <article class="accordion__item js-show-item-default" data-binding="expand-accordion-item">
+                    <span id="tab3" tabindex="0" class="accordion__title" aria-controls="panel3" role="tab"
+                      aria-selected="false" aria-expanded="false" data-binding="expand-accordion-trigger">
+                      <h5>Picos e comportamentos anómalos</h5>
+                    </span>
+                    <div id="panel3" class="accordion__content" role="tabpanel" aria-hidden="true"
+                      aria-labelledby="tab3" data-binding="expand-accordion-container">
+                      <div class="accordion__content-inner">
+                        <ul id="peaks-list">
+                          <li>Maior pico de hoje: <strong>--</strong> kW às <strong>--</strong></li>
+                        </ul>
+                        <div class="mt-3">
+                          <!-- antes: alertas.html -->
+                          <a href="/alertas" class="btn btn-sm btn-outline-primary btn-style border-btn">
+                            Ver alertas
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <!-- Top Consumos (visão rápida) -->
+                  <article class="accordion__item js-show-item-default" data-binding="expand-accordion-item">
+                    <span id="tab4" tabindex="0" class="accordion__title" aria-controls="panel4" role="tab"
+                      aria-selected="false" aria-expanded="false" data-binding="expand-accordion-trigger">
+                      <h5>Top consumos</h5>
+                    </span>
+                    <div id="panel4" class="accordion__content" role="tabpanel" aria-hidden="true"
+                      aria-labelledby="tab4" data-binding="expand-accordion-container">
+                      <div class="accordion__content-inner">
+                        <h6 class="mb-2">Divisões</h6>
+                        <ul class="mb-3" id="rooms-list">
+                          <li>Cozinha — <strong>34%</strong></li>
+                        </ul>
+
+                        <h6 class="mb-2">Equipamentos</h6>
+                        <ul class="mb-0" id="devices-list">
+                          <li>Aquecedor — <strong>22%</strong></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </article>
+
+                  <!-- Custos & Projeção -->
+                  <article class="accordion__item js-show-item-default" data-binding="expand-accordion-item">
+                    <span id="tab5" tabindex="0" class="accordion__title" aria-controls="panel5" role="tab"
+                      aria-selected="false" aria-expanded="false" data-binding="expand-accordion-trigger">
+                      <h5>Custos e projeção</h5>
+                    </span>
+                    <div id="panel5" class="accordion__content" role="tabpanel" aria-hidden="true"
+                      aria-labelledby="tab5" data-binding="expand-accordion-container">
+                      <div class="accordion__content-inner">
+                        <ul id="costs-list">
+                          <li>Custo atual do mês: <strong id="current-cost">--</strong></li>
+                          <li>Estimativa final do mês: <strong id="projected-cost">--</strong></li>
+                          <li>Diferença vs mês anterior: <strong id="cost-diff">--</strong></li>
+                        </ul>
+                        <div class="mt-3">
+                          <!-- antes: simulation.html -->
+                          <a href="/simulation" class="btn btn-sm btn-primary btn-style">
+                            Simular redução de custos
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <!-- Insight do Dia (1 só!) -->
+                  <article class="accordion__item js-show-item-default" data-binding="expand-accordion-item">
+                    <span id="tab6" tabindex="0" class="accordion__title" aria-controls="panel6" role="tab"
+                      aria-selected="false" aria-expanded="false" data-binding="expand-accordion-trigger">
+                      <h5>Insight do dia</h5>
+                    </span>
+                    <div id="panel6" class="accordion__content" role="tabpanel" aria-hidden="true"
+                      aria-labelledby="tab6" data-binding="expand-accordion-container">
+                      <div class="accordion__content-inner">
+                        <p class="mb-0" id="daily-insight">
+                          --
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+
+                </section>
+              </div>
+            </div>
+          </div>
+          <!-- //accordion style 2 -->
+        </div>
+
+      </div>
+      <!-- //content -->
+    </div>
+    <!-- main content end-->
+  </section>
+
+  <!--footer section start-->
+  <footer class="dashboard">
+    <p>&copy 2026 CountLight. All Rights Reserved.</p>
+  </footer>
+  <!--footer section end-->
+
+  <!-- move top -->
+  <button onclick="topFunction()" id="movetop" class="bg-primary" title="Go to top">
+    <span class="fa fa-angle-up"></span>
+  </button>
+
+  <script>
+    async function loadUserPlan() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const res = await fetch("/api/plans/me", {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      if (!res.ok) {
+        console.error("Erro ao obter plano");
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Plano do user:", data);
+
+      // 👉 Guarda para usar noutras páginas
+      localStorage.setItem("user_plan", data.plan);
+      localStorage.setItem("max_houses", data.max_houses);
+    }
+  </script>
+
+  <script>
+    window.onscroll = function () { scrollFunction() };
+
+    function scrollFunction() {
+      if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        document.getElementById("movetop").style.display = "block";
+      } else {
+        document.getElementById("movetop").style.display = "none";
+      }
+    }
+
+    function topFunction() {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+  </script>
+
+  <script>
+    const username = localStorage.getItem("username");
+    if (username) {
+      document.getElementById("username").innerText = username;
+    }
+  </script>
+
+  <!-- JS (agora via static) -->
+  <script src="{{ url_for('static', path='js/jquery-3.3.1.min.js') }}"></script>
+  <script src="{{ url_for('static', path='js/jquery-1.10.2.min.js') }}"></script>
+
+  <!-- chart js -->
+  <script src="{{ url_for('static', path='js/Chart.min.js') }}"></script>
+  <script src="{{ url_for('static', path='js/utils.js') }}"></script>
+
+  <!-- charts (✅ usar externos para evitar conflito/duplicação) -->
+  <script src="{{ url_for('static', path='js/bar.js') }}"></script>
+  <script src="{{ url_for('static', path='js/linechart.js') }}"></script>
+
+  <script>
+    // =====================================================
+    // Helpers (mantidos porque são usados no loadDashboardData para o LINE)
+    // =====================================================
+    function safeNumber(n, fallback = 0) {
+      const x = Number(n);
+      return Number.isFinite(x) ? x : fallback;
+    }
+
+    function normalizeSeriesArray(arr, labelKey, valueKey) {
+      const a = Array.isArray(arr) ? arr : [];
+      return {
+        labels: a.map(it => String(it?.[labelKey] ?? "")),
+        values: a.map(it => safeNumber(it?.[valueKey], 0))
+      };
+    }
+  </script>
+
+  <script>
+    async function loadDashboardData() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const res = await fetch("/api/dashboard/summary", {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      if (!res.ok) {
+        console.error("Erro ao carregar dashboard");
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Dados recebidos:", data);
+
+      // 👉 Atualizar gráfico por divisão
+      const roomSummary = data.summary_by_room?.data || [];
+      const roomLabels = roomSummary.map(item => item.label);
+      const roomValues = roomSummary.map(item => item.value);
+      updatePieChart(window.pieChartInstance, roomLabels, roomValues);
+
+      // 👉 Atualizar gráfico por tipo de equipamento
+      const typeSummary = data.summary_by_type || [];
+      const typeLabels = typeSummary.map(item => item.label);
+      const typeValues = typeSummary.map(item => item.value);
+      updatePieChart(window.pieChart2Instance, typeLabels, typeValues);
+
+      // 👉 KPIs
+      document.getElementById("today-kwh").innerText = data.today_kwh + " kWh";
+      document.getElementById("month-kwh").innerText = data.month_kwh + " kWh";
+      document.getElementById("year-kwh").innerText = data.year_kwh + " kWh";
+      document.getElementById("month-cost").innerText = data.estimated_month_cost + " €";
+
+      // ✅ IMPORTANTE: NÃO atualizar o bar aqui (evita conflito com month-comparison)
+
+      // LINE ao longo do dia
+      const hourly = normalizeSeriesArray(data.consumption_by_hour, "label", "value");
+      if (window.lineChartInstance && window.updateLineChart) {
+        updateLineChart(window.lineChartInstance, hourly.labels, hourly.values, "kWh por hora");
+      }
+    }
+
+    async function loadMonthComparisonChart() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const res = await fetch("/api/dashboard/energy/month-comparison", {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      if (!res.ok) {
+        console.error("Erro ao carregar comparação mensal");
+        return;
+      }
+
+      const data = await res.json();
+
+      if (window.barChartInstance && window.updateBarComparisonChart) {
+        updateBarComparisonChart(
+          window.barChartInstance,
+          data.labels,
+          data.current_month,
+          data.previous_month
+        );
+      }
+    }
+
+    async function loadDashboardDetailed() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const res = await fetch("/api/dashboard/detailed", {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      if (!res.ok) {
+        console.error("Erro ao carregar dashboard detalhado");
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Dashboard detalhado:", data);
+
+      // KPIs BASE
+      document.getElementById("today-kwh").innerText = data.consumption.today_kwh + " kWh";
+      document.getElementById("month-kwh").innerText = data.consumption.month_kwh + " kWh";
+
+      // Resumo do topo (mantendo layout)
+      const summary = document.getElementById("summary-overview");
+      if (summary) {
+        const percentDiff = data.comparisons.vs_month_average_percent;
+        const status = percentDiff > 0 ? "⬆ acima" : percentDiff < 0 ? "⬇ abaixo" : "normal";
+        summary.innerHTML = `
+          <li>Consumo hoje vs média: <strong>${Math.abs(percentDiff)}% ${status}</strong></li>
+          <li>Principal causa: <strong>${data.principal_cause.room ?? "--"}</strong> às <strong>${data.principal_cause.time_range ?? "--"}</strong></li>
+          <li>Impacto estimado: <strong>${data.principal_cause.impact_eur} €</strong> hoje</li>
+        `;
+      }
+
+      // PIE - Divisões
+      if (window.pieChartInstance && window.updatePieChart) {
+        const labels = (data.top_rooms || []).map(r => r.label);
+        const values = (data.top_rooms || []).map(r => r.value_kwh);
+        updatePieChart(window.pieChartInstance, labels, values);
+      }
+
+      // PIE - Equipamentos
+      if (window.pieChart2Instance && window.updatePieChart) {
+        const labels = (data.top_devices || []).map(d => d.label);
+        const values = (data.top_devices || []).map(d => d.value_kwh);
+        updatePieChart(window.pieChart2Instance, labels, values);
+      }
+
+      // Comparações (accordion)
+      const compUl = document.getElementById("comparison-list");
+      if (compUl) {
+        const vsDiffPercent = data.comparisons.vs_month_average_percent;
+        const vsDiffKwh = data.comparisons.vs_month_average_kwh;
+        const sign = vsDiffPercent > 0 ? "+" : "";
+        const vsText = vsDiffPercent > 0 ? "acima" : vsDiffPercent < 0 ? "abaixo" : "no padrão de";
+        compUl.innerHTML = `
+          <li>Diferença vs ontem: <strong>${data.comparisons.vs_yesterday_percent > 0 ? "+" : ""}${data.comparisons.vs_yesterday_percent}%</strong></li>
+          <li>Consumo ${vsText} da média mensal: <strong>${sign}${Math.abs(vsDiffPercent)}%</strong> (<strong>${sign}${vsDiffKwh} kWh</strong>)</li>
+        `;
+      }
+
+      // Picos (accordion)
+      const peakUl = document.getElementById("peaks-list");
+      if (peakUl) {
+        peakUl.innerHTML = `
+          <li>Maior pico de hoje: <strong>${data.peaks.today_peak_kwh} kW</strong> às <strong>${data.peaks.today_peak_hour ?? "--"}</strong></li>
+        `;
+      }
+
+      // Top Consumos - Divisões (accordion)
+      const roomsUl = document.getElementById("rooms-list");
+      if (roomsUl && data.top_rooms) {
+        roomsUl.innerHTML = data.top_rooms
+          .map(r => `<li>${r.label} — <strong>${r.percentage}%</strong></li>`)
+          .join("");
+      }
+
+      // Top Consumos - Equipamentos (accordion)
+      const devicesUl = document.getElementById("devices-list");
+      if (devicesUl && data.top_devices) {
+        devicesUl.innerHTML = data.top_devices
+          .map(d => `<li>${d.label} — <strong>${d.percentage}%</strong></li>`)
+          .join("");
+      }
+
+      // Custos (accordion)
+      const currentCostEl = document.getElementById("current-cost");
+      if (currentCostEl) currentCostEl.innerText = data.costs.current_month_cost + " €";
+
+      const projectedCostEl = document.getElementById("projected-cost");
+      if (projectedCostEl) projectedCostEl.innerText = data.costs.projected_month_cost + " €";
+
+      const costDiffEl = document.getElementById("cost-diff");
+      if (costDiffEl) costDiffEl.innerText = (data.costs.difference_vs_previous_month >= 0 ? "+" : "") + data.costs.difference_vs_previous_month + " €";
+
+      // Insight (accordion)
+      const insightP = document.getElementById("daily-insight");
+      if (insightP) insightP.innerHTML = data.daily_insight;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      loadUserPlan(); // 👈 NOVO
+      loadDashboardData();
+      loadMonthComparisonChart();
+      loadDashboardDetailed();
+    });
+  </script>
+
+  <script src="{{ url_for('static', path='js/pie.js') }}"></script>
+
+  <script>
+    $(document).ready(function () {
+      $('#example').DataTable();
+    });
+  </script>
+
+  <script src="{{ url_for('static', path='js/jquery.dataTables.min.js') }}"></script>
+  <script src="{{ url_for('static', path='js/faq.js') }}"></script>
+  <script src="{{ url_for('static', path='js/jquery.nicescroll.js') }}"></script>
+  <script src="{{ url_for('static', path='js/scripts.js') }}"></script>
+
+  <script>
+    var closebtns = document.getElementsByClassName("close-grid");
+    var i;
+
+    for (i = 0; i < closebtns.length; i++) {
+      closebtns[i].addEventListener("click", function () {
+        this.parentElement.style.display = 'none';
+      });
+    }
+  </script>
+
+  <script>
+    $(function () {
+      $('.sidebar-menu-collapsed').click(function () {
+        $('body').toggleClass('noscroll');
+      })
+    });
+  </script>
+
+  <script src="{{ url_for('static', path='js/modernizr.js') }}"></script>
+  <script>
+    $(window).load(function () {
+      $(".se-pre-con").fadeOut("slow");
+    });
+  </script>
+
+  <script src="{{ url_for('static', path='js/bootstrap.min.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,327 @@
+Perfeito 👍
+Vou fazer **um resumo completo, em texto simples**, de **tudo o que implementámos hoje**, explicando **o quê, porquê e como**, para que possas reler daqui a uns dias e continuar sem te perderes.
+
+Guarda isto como **documentação do teu projeto**.
+
+---
+
+# 📌 RESUMO COMPLETO DO QUE FOI FEITO NO PROJETO (HOJE)
+
+## 1️⃣ Objetivo do projeto
+
+Criar um **website com dashboards de gastos energéticos**, usando:
+
+* dados recolhidos por **Shelly**
+* uma **base de dados MySQL**
+* um **sistema de login**
+* frontend separado do backend
+
+Este modelo permite no futuro:
+
+* crescer (mais gráficos, utilizadores)
+* colocar online sem reescrever tudo
+* ligar apps móveis ou outros sistemas
+
+---
+
+## 2️⃣ Arquitetura escolhida (a ideia principal)
+
+### Arquitetura moderna em 2 partes:
+
+### 🔹 Frontend
+
+* HTML
+* CSS
+* JavaScript
+* Chart.js (gráficos)
+* Ficheiros estáticos (`login.html`, `index.html`)
+
+👉 Responsável por:
+
+* mostrar o site
+* recolher dados do utilizador
+* enviar pedidos ao backend
+
+---
+
+### 🔹 Backend
+
+* **Python**
+* **FastAPI**
+* **Uvicorn**
+* **MySQL**
+
+👉 Responsável por:
+
+* autenticação (login)
+* acesso à base de dados
+* lógica de negócio
+* segurança
+
+---
+
+## 3️⃣ Ferramentas utilizadas
+
+### Desenvolvimento
+
+* **Visual Studio Code**
+* **Terminal integrado do VS Code**
+* **Python 3.10**
+
+### Backend
+
+* `fastapi` → framework web
+* `uvicorn` → servidor (equivalente ao Tomcat)
+* `mysql-connector-python` → ligação ao MySQL
+
+Instalação:
+
+```bash
+pip install fastapi uvicorn mysql-connector-python
+```
+
+---
+
+## 4️⃣ Estrutura de pastas (simplificada)
+
+```
+countlight/
+│
+├── backend/
+│   └── main.py
+│
+├── login.html
+├── index.html
+├── pie.js
+└── outros ficheiros frontend
+```
+
+* **Frontend**: ficheiros HTML/JS
+* **Backend**: só Python (API)
+
+---
+
+## 5️⃣ Backend (`main.py`) — o que faz
+
+### 🔹 Criação da API
+
+```python
+app = FastAPI()
+```
+
+### 🔹 Ativação do CORS
+
+Permite que o browser comunique com o backend mesmo sendo ficheiros locais.
+
+```python
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+Sem isto o browser bloqueia pedidos (`OPTIONS 405`).
+
+---
+
+### 🔹 Ligação à base de dados MySQL
+
+```python
+import mysql.connector
+
+db = mysql.connector.connect(
+    host="localhost",
+    user="energia_user",
+    password="energia_pass",
+    database="energia"
+)
+```
+
+---
+
+### 🔹 Endpoint de login
+
+```python
+@app.post("/login")
+def login(data: LoginData):
+```
+
+* Recebe `username` e `password`
+* Faz hash da password
+* Verifica na base de dados
+* Responde:
+
+  * sucesso → `200 OK`
+  * erro → `401 Login inválido`
+
+---
+
+## 6️⃣ Segurança da password
+
+### O problema inicial
+
+* Password estava em texto simples na base de dados
+* Backend usa hash SHA-256
+
+### Solução aplicada
+
+Atualização da password no MySQL:
+
+```sql
+UPDATE users
+SET password_hash = SHA2('1234', 256)
+WHERE username = 'tomas';
+```
+
+👉 Backend e base de dados passaram a falar a mesma “língua”.
+
+---
+
+## 7️⃣ Frontend (`login.html`) — o que faz
+
+### 🔹 Formulário HTML
+
+Recolhe:
+
+* username
+* password
+
+---
+
+### 🔹 JavaScript com `fetch`
+
+```javascript
+fetch("http://127.0.0.1:8000/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+})
+```
+
+* Envia dados ao backend
+* Recebe resposta
+* Decide:
+
+  * login válido → redireciona para `index.html`
+  * login inválido → mostra erro
+
+---
+
+## 8️⃣ Como o backend é iniciado
+
+No terminal (dentro da pasta `backend`):
+
+```bash
+python -m uvicorn main:app --reload
+```
+
+* `uvicorn` é o servidor
+* `--reload` reinicia automaticamente quando mudas código
+* Substitui:
+
+  * Tomcat
+  * Apache do XAMPP
+
+Enquanto o backend estiver ligado:
+
+* o site funciona
+* a API responde
+
+---
+
+## 9️⃣ FastAPI `/docs` — para que serve
+
+URL:
+
+```
+http://127.0.0.1:8000/docs
+```
+
+Serve para:
+
+* testar endpoints
+* confirmar que o backend está ativo
+* documentação automática
+
+👉 **Não é o site**
+👉 **Não é para o utilizador final**
+
+---
+
+## 🔟 Porque isto é diferente de PHP / Java antigos
+
+### Antes
+
+* HTML + lógica misturados
+* páginas `.php`, `.jsp`
+
+### Agora
+
+* HTML é só visual
+* backend é só lógica
+* comunicação por API (JSON)
+
+👉 Mais seguro
+👉 Mais escalável
+👉 Mais profissional
+
+---
+
+## 1️⃣1️⃣ Quando fores colocar online
+
+### NÃO muda:
+
+* Python
+* FastAPI
+* JavaScript
+* SQL
+* arquitetura
+
+### MUDA apenas:
+
+* `localhost` → domínio/IP
+* credenciais
+* servidor (cloud)
+
+👉 O código fica praticamente igual.
+
+---
+
+## 1️⃣2️⃣ O que já sabes fazer agora
+
+Sem exagero, já sabes:
+
+* criar uma API
+* ligar frontend a backend
+* usar MySQL com segurança
+* implementar login real
+* trabalhar como projetos profissionais modernos
+
+---
+
+## 📍 Conclusão final
+
+Hoje implementámos:
+✔ arquitetura moderna
+✔ backend em Python
+✔ login funcional
+✔ ligação à base de dados
+✔ segurança básica
+✔ base sólida para dashboards energéticos
+
+Este projeto **já não é académico**, é **evolutivo**.
+
+---
+
+Quando quiseres, próximos passos possíveis:
+
+* proteger páginas sem login
+* guardar sessão/token
+* ligar gráficos aos dados Shelly
+* preparar deploy online
+
+Diz-me o próximo passo e seguimos 🚀
