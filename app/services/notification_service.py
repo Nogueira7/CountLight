@@ -71,6 +71,9 @@ def notify_achievement_completed(
     house_id: int,
     achievement_title: str
 ):
+
+    print("🔔 NOTIFICATION FUNCTION CHAMADA")  # 👈 AQUI
+
     notify(
         db=db,
         user_id=user_id,

@@ -31,6 +31,12 @@ from app.core.security import hash_password
 
 from fastapi import APIRouter, Depends, HTTPException, Form
 
+from fastapi import Request
+from app.services.auth_service import login_google_user
+from app.core.security import verify_password
+
+import traceback
+
 router = APIRouter()
 
 
@@ -97,7 +103,8 @@ def refresh(token: str, db=Depends(get_db)):
     finally:
         cursor.close()
 
-    if not user or user["refresh_token"] != token:
+
+    if not user or not verify_password(token, user["refresh_token"]):
         raise HTTPException(status_code=401, detail="Refresh token inválido")
 
     new_access = create_access_token(user_id)
@@ -211,3 +218,29 @@ def reset_password(
         return {"message": "Password atualizada"}
     finally:
         cursor.close()
+
+from pydantic import BaseModel
+
+class GoogleAuthRequest(BaseModel):
+    token: str
+
+
+@router.post("/google")
+async def google_login(data: GoogleAuthRequest, db=Depends(get_db)):
+    token = data.token
+
+    if not token:
+        raise HTTPException(status_code=400, detail="Token Google em falta")
+
+    try:
+        access_token, refresh_token = login_google_user(db, token)
+
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+        }
+
+    except Exception as e:
+        traceback.print_exc()  # 🔥 aparece no journalctl
+        raise HTTPException(status_code=500, detail=str(e))

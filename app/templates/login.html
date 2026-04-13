@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" href="/static/images/logo_neon.png">
   <link rel="stylesheet" href="/static/css/style-liberty.css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
 </head>
 
 <body class="sidebar-menu-collapsed">
@@ -24,7 +25,7 @@
               </div>
 
               <div class="form-group">
-                <label class="input__label">Username</label>
+                <label class="input__label">Username ou Email</label>
                 <input type="text" class="form-control login_text_field_bg input-style" id="username" required>
               </div>
 
@@ -38,6 +39,14 @@
               <button type="submit" id="loginBtn" class="btn btn-primary btn-style mt-4">
                 Login
               </button>
+
+              <div class="text-center mt-3">
+                <div style="margin: 15px 0; font-size: 14px; color: #6b7280;">
+                  ou
+                </div>
+
+                <div id="googleBtn"></div>
+              </div>
 
               <p class="signup mt-4">
                 Esqueceu-se da sua palavra-passe?
@@ -205,7 +214,68 @@
         loginBtn.innerText = originalText;
       }
     });
+
+
+    window.onload = function () {
+      google.accounts.id.initialize({
+        client_id: "513810347368-aci72pjbrbbpk7enga2h44rfc1amup17.apps.googleusercontent.com",
+        callback: handleGoogleLogin
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById("googleBtn"),
+        { theme: "outline", size: "large" }
+      );
+    };
+
+
+    async function handleGoogleLogin(response) {
+      const token = response.credential;
+
+      try {
+        const res = await fetch("/api/google", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ token })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError("Erro no login com Google");
+          return;
+        }
+
+        // guardar sessão (igual ao login normal)
+        const accessToken = data.access_token;
+
+        // obter user_id
+        const meRes = await fetch("/api/me", {
+          headers: { Authorization: "Bearer " + accessToken }
+        });
+
+        const meData = await meRes.json();
+
+        if (!meRes.ok) {
+          showError("Erro ao obter dados do utilizador");
+          return;
+        }
+
+        // guardar sessão
+        setSession(accessToken, "google_user", meData.user_id);
+
+        // redirecionar
+        window.location.href = "/dashboard";
+
+      } catch (err) {
+        console.error(err);
+        showError("Erro ao autenticar com Google");
+      }
+    }
   </script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 
 </html>

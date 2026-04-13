@@ -78,38 +78,29 @@ def _maybe_notify_completed(
     status: str,
     progress: float,
 ) -> None:
-    """
-    Replica o padrão das metas: notificar apenas quando muda para completed.
-    Usa idempotência pelo estado guardado em user_achievements.
-    """
+
     if status != "completed":
         return
 
-    # Verifica estado anterior
-    previous = get_user_achievement(
-        db=db,
-        user_id=user_id,
-        house_id=house_id,
-        achievement_id=int(achievement["id_achievement"]),
-        period_reference=period_reference,
+    # 🔍 VER ANTES DE GUARDAR
+    current = get_user_achievement(
+        db,
+        user_id,
+        house_id,
+        int(achievement["id_achievement"]),
+        period_reference,
     )
 
-    if previous and previous.get("status") == "completed":
-        return  # já estava concluída neste período
+    # 🆕 Só notifica se ainda não estava completed
+    if not current or current.get("status") != "completed":
+        print("🔥 VOU NOTIFICAR:", achievement["title"])
 
-    # Para evitar corrida entre requests, marca como completed de forma idempotente
-    changed, _ = mark_user_achievement_completed(
-        db=db,
-        user_id=user_id,
-        house_id=house_id,
-        achievement_id=int(achievement["id_achievement"]),
-        period_reference=period_reference,
-        progress=float(progress),
-    )
-
-    if changed:
-        title = str(achievement.get("title") or "Conquista")
-        notify_achievement_completed(db, user_id, house_id, title)
+        notify_achievement_completed(
+            db,
+            user_id,
+            house_id,
+            str(achievement.get("title") or "Conquista"),
+        )
 
 
 def _build_response(
@@ -156,15 +147,7 @@ def evaluate_monthly_reduction(
     status = _status_from_completed(is_completed)
 
     # Persistir primeiro, depois notificar (evita notificação sem commit)
-    _persist_progress(
-        db,
-        user_id=user_id,
-        house_id=house_id,
-        achievement=achievement,
-        period_reference=period_reference,
-        progress=reduction,
-        status=status,
-    )
+
     _maybe_notify_completed(
         db,
         user_id=user_id,
@@ -174,6 +157,16 @@ def evaluate_monthly_reduction(
         status=status,
         progress=reduction,
     )
+    _persist_progress(
+        db,
+        user_id=user_id,
+        house_id=house_id,
+        achievement=achievement,
+        period_reference=period_reference,
+        progress=reduction,
+        status=status,
+    )
+    
 
     return _build_response(achievement=achievement, progress=reduction, status=status, target=target)
 
@@ -213,15 +206,6 @@ def evaluate_monthly_limit(
     is_completed = current <= float(limit)
     status = _status_from_completed(is_completed)
 
-    _persist_progress(
-        db,
-        user_id=user_id,
-        house_id=house_id,
-        achievement=achievement,
-        period_reference=period_reference,
-        progress=progress,
-        status=status,
-    )
     _maybe_notify_completed(
         db,
         user_id=user_id,
@@ -231,6 +215,17 @@ def evaluate_monthly_limit(
         status=status,
         progress=progress,
     )
+
+    _persist_progress(
+        db,
+        user_id=user_id,
+        house_id=house_id,
+        achievement=achievement,
+        period_reference=period_reference,
+        progress=progress,
+        status=status,
+    )
+    
 
     return _build_response(achievement=achievement, progress=progress, status=status, target=float(limit))
 
@@ -359,15 +354,6 @@ def evaluate_streak_days(
     is_completed = streak >= target
     status = _status_from_completed(is_completed)
 
-    _persist_progress(
-        db,
-        user_id=user_id,
-        house_id=house_id,
-        achievement=achievement,
-        period_reference=period_reference,
-        progress=progress,
-        status=status,
-    )
     _maybe_notify_completed(
         db,
         user_id=user_id,
@@ -377,6 +363,17 @@ def evaluate_streak_days(
         status=status,
         progress=progress,
     )
+
+    _persist_progress(
+        db,
+        user_id=user_id,
+        house_id=house_id,
+        achievement=achievement,
+        period_reference=period_reference,
+        progress=progress,
+        status=status,
+    )
+    
 
     return _build_response(achievement=achievement, progress=progress, status=status, target=float(target))
 
@@ -482,5 +479,7 @@ def update_and_get_user_achievements(db, user_id: int, house_id: int) -> List[Di
             )
 
         results.append(result)
+
+    print("RESULTS:", results)
 
     return results

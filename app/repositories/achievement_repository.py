@@ -221,31 +221,28 @@ def mark_user_achievement_completed(
     *,
     progress: Optional[float] = None,
 ) -> Tuple[bool, int]:
-    """
-    Marca a conquista como 'completed' de forma idempotente.
 
-    Retorna (changed, id_user_achievement):
-      - changed=True se este call tiver criado ou mudado o estado para completed
-      - changed=False se já estava completed (não deve disparar notificação novamente)
-    """
+    # 🔍 Buscar estado atual
     current = get_user_achievement(
-        db=db,
-        user_id=user_id,
-        house_id=house_id,
-        achievement_id=achievement_id,
-        period_reference=period_reference,
+        db,
+        user_id,
+        house_id,
+        achievement_id,
+        period_reference,
     )
 
+    # 🛑 Já estava completed → não mudou
     if current and current.get("status") == "completed":
         return False, int(current["id_user_achievement"])
 
-    # Se não vier progress, tenta manter o existente
+    # 👉 Se não houver progress, usa o existente
     if progress is None:
         if current and current.get("progress") is not None:
             progress = float(current["progress"])
         else:
             progress = 0.0
 
+    # 💾 Atualiza para completed
     user_achievement_id = upsert_user_achievement(
         db=db,
         user_id=user_id,
@@ -255,6 +252,7 @@ def mark_user_achievement_completed(
         status="completed",
         progress=float(progress),
     )
+
     return True, user_achievement_id
 
 

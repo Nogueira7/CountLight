@@ -28,6 +28,7 @@ from app.routes.dashboard import router as dashboard_router
 from app.routes.achievement import router as achievement_router
 from app.routes.goal import router as goal_router
 from app.routes.notification import router as notification_router  # 🔔 NOVO
+from app.routes import dev
 
 # =====================================================
 # REPOSITORIES (Dashboard Summary)
@@ -50,10 +51,7 @@ from app.repositories.energy_repository import (
 
 app = FastAPI(
     title="CountLight",
-    version="2.3.0",
-    docs_url=None,
-    redoc_url=None,
-    openapi_url=None
+    version="2.3.0"
 )
 
 # =====================================================
@@ -66,7 +64,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 # TEMPLATES
 # =====================================================
 
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory="/root/CountLight/backend/app/templates")
 
 # =====================================================
 # CORS
@@ -98,6 +96,7 @@ app.include_router(recommendations_router, prefix="/api")
 app.include_router(alerts_router, prefix="/api")
 app.include_router(reports_router, prefix="/api")
 app.include_router(plans_router, prefix="/api")
+app.include_router(dev.router, prefix="/api/dev", tags=["dev"])
 
 # =====================================================
 # DASHBOARD SUMMARY API

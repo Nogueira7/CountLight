@@ -33,6 +33,28 @@ def get_user_by_email(db, email: str) -> Optional[Dict[str, Any]]:
         cursor.close()
 
 
+def get_user_by_google_id(db, google_id: str):
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            """
+            SELECT
+                id_user,
+                username,
+                email,
+                is_active,
+                is_verified,
+                google_id
+            FROM users
+            WHERE google_id = %s
+            """,
+            (google_id,),
+        )
+        return cursor.fetchone()
+    finally:
+        cursor.close()
+
+
 def get_user_by_username(db, username: str) -> Optional[Dict[str, Any]]:
     cursor = db.cursor(dictionary=True)
     try:
@@ -86,6 +108,38 @@ def create_user(
                 False,  # conta NÃO verificada
                 verification_token,
                 verification_expires,
+            ),
+        )
+        user_id = int(cursor.lastrowid)
+        db.commit()
+        return user_id
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        cursor.close()
+
+
+def create_google_user(db, username: str, email: str, google_id: str) -> int:
+    cursor = db.cursor()
+    try:
+        cursor.execute(
+            """
+            INSERT INTO users (
+                username,
+                email,
+                google_id,
+                is_verified,
+                is_active
+            )
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (
+                username,
+                email,
+                google_id,
+                True,   # 🔥 Google já é verificado
+                True,
             ),
         )
         user_id = int(cursor.lastrowid)

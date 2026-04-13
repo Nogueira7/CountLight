@@ -15,6 +15,7 @@
 
     <!-- google fonts -->
     <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
 </head>
 
 <body class="sidebar-menu-collapsed">
@@ -26,7 +27,7 @@
 
                         <form id="registerForm">
                             <div class="register__header text-center mb-lg-5 mb-4">
-                                <h3 class="register__title mb-2">Signup</h3>
+                                <h3 class="register__title mb-2">Registo</h3>
                                 <p>Crie sua conta</p>
                             </div>
 
@@ -40,14 +41,43 @@
                                 <input type="email" id="email" class="form-control input-style" required>
                             </div>
 
-                            <div class="form-group">
+                            <div class="form-group position-relative">
                                 <label class="input__label">Password</label>
                                 <input type="password" id="password" class="form-control input-style" required>
+
+                                <button type="button" class="toggle-password-text"
+                                    onclick="togglePassword('password', this)">
+                                    Mostrar
+                                </button>
+                            </div>
+
+                            <div class="form-group position-relative">
+                                <label class="input__label">Confirmar Password</label>
+                                <input type="password" id="confirmPassword" class="form-control input-style" required>
+
+                                <button type="button" class="toggle-password-text"
+                                    onclick="togglePassword('confirmPassword', this)">
+                                    Mostrar
+                                </button>
+                            </div>
+
+                            <div id="passwordRequirements" style="margin-top:10px; font-size:14px;">
+                                <div id="req-length">❌ Mínimo 8 caracteres</div>
+                                <div id="req-upper">❌ Uma letra maiúscula</div>
+                                <div id="req-number">❌ Um número</div>
+                                <div id="req-symbol">❌ Um símbolo</div>
                             </div>
 
                             <div id="error" class="form-error"></div>
                             <div id="success" class="form-success"></div>
 
+                            <div class="text-center mt-3">
+                                <div style="margin: 15px 0; font-size: 14px; color: #6b7280;">
+                                    ou
+                                </div>
+
+                                <div id="googleBtn"></div>
+                            </div>
 
                             <button type="submit" class="btn btn-primary btn-style mt-4">
                                 Criar Conta
@@ -74,12 +104,49 @@
         const usernameInput = document.getElementById("username");
         const emailInput = document.getElementById("email");
         const passwordInput = document.getElementById("password");
+        const confirmPasswordInput = document.getElementById("confirmPassword");
+
+        // 🔐 elementos visuais dos requisitos
+        const reqLength = document.getElementById("req-length");
+        const reqUpper = document.getElementById("req-upper");
+        const reqNumber = document.getElementById("req-number");
+        const reqSymbol = document.getElementById("req-symbol");
+
+        // estado da password
+        let passwordValid = {
+            length: false,
+            upper: false,
+            number: false,
+            symbol: false
+        };
+
+        // verificar password em tempo real
+        passwordInput.addEventListener("input", () => {
+            const value = passwordInput.value;
+
+            passwordValid.length = value.length >= 8;
+            passwordValid.upper = /[A-Z]/.test(value);
+            passwordValid.number = /[0-9]/.test(value);
+            passwordValid.symbol = /[^A-Za-z0-9]/.test(value);
+
+            updateRequirement(reqLength, passwordValid.length);
+            updateRequirement(reqUpper, passwordValid.upper);
+            updateRequirement(reqNumber, passwordValid.number);
+            updateRequirement(reqSymbol, passwordValid.symbol);
+        });
+
+        // atualizar UI
+        function updateRequirement(element, valid) {
+            if (valid) {
+                element.innerHTML = "✅ " + element.innerText.slice(2);
+                element.style.color = "#16a34a";
+            } else {
+                element.innerHTML = "❌ " + element.innerText.slice(2);
+                element.style.color = "#dc2626";
+            }
+        }
 
         const registerBtn = form.querySelector("button[type='submit']");
-
-        // Estado inicial
-        hideError();
-        hideSuccess();
 
         // Helpers
         function showError(message) {
@@ -102,8 +169,26 @@
             successDiv.style.display = "none";
         }
 
+        // Estado inicial
+        hideError();
+        hideSuccess();
+
+        // Mostrar/esconder password (para password e confirmPassword)
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                btn.innerText = "Ocultar";
+            } else {
+                input.type = "password";
+                btn.innerText = "Mostrar";
+            }
+        }
+        window.togglePassword = togglePassword;
+
         // Limpa mensagens quando o user escreve
-        [usernameInput, emailInput, passwordInput].forEach(input => {
+        [usernameInput, emailInput, passwordInput, confirmPasswordInput].forEach((input) => {
             input.addEventListener("input", () => {
                 hideError();
                 hideSuccess();
@@ -118,10 +203,22 @@
             const username = usernameInput.value.trim();
             const email = emailInput.value.trim();
             const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
 
             // Validação básica frontend
-            if (!username || !email || !password) {
+            if (!username || !email || !password || !confirmPassword) {
                 showError("Preencha todos os campos.");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError("As palavras-passe não coincidem.");
+                return;
+            }
+
+            // 🚫 validar requisitos da password
+            if (!passwordValid.length || !passwordValid.upper || !passwordValid.number || !passwordValid.symbol) {
+                showError("A palavra-passe não cumpre os requisitos.");
                 return;
             }
 
@@ -133,35 +230,36 @@
             try {
                 const response = await fetch("/api/register", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ username, email, password })
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, email, password }),
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (!response.ok) {
-                    // Erros de validação (Pydantic)
                     if (Array.isArray(data.detail)) {
-                        showError(
-                            data.detail.map(err => err.msg).join("\n")
-                        );
-                    }
-                    // Erro normal (HTTPException)
-                    else if (typeof data.detail === "string") {
+                        showError(data.detail.map((err) => err.msg).join("\n"));
+                    } else if (typeof data.detail === "string") {
                         showError(data.detail);
-                    }
-                    // Fallback
-                    else {
+                    } else {
                         showError("Dados inválidos.");
                     }
                     return;
                 }
 
-                // Sucesso
                 showSuccess("Conta criada com sucesso. Para fazer login por favor confirme no seu email.");
                 form.reset();
+
+                // opcional: repor os ícones/inputs para estado password após reset
+                // repor inputs e ícones para estado "escondido" após reset
+                passwordInput.type = "password";
+                confirmPasswordInput.type = "password";
+
+                document.querySelectorAll(".toggle-password").forEach((btn) => {
+                    btn.classList.remove("is-on");
+                    btn.setAttribute("aria-pressed", "false");
+                    btn.setAttribute("aria-label", "Mostrar palavra-passe");
+                });
 
             } catch (error) {
                 showError("Erro de ligação ao servidor.");
@@ -171,13 +269,68 @@
                 registerBtn.innerText = originalText;
             }
         });
+
+        window.onload = function () {
+            google.accounts.id.initialize({
+                client_id: "513810347368-aci72pjbrbbpk7enga2h44rfc1amup17.apps.googleusercontent.com",
+                callback: handleGoogleRegister
+            });
+
+            google.accounts.id.renderButton(
+                document.getElementById("googleBtn"),
+                { theme: "outline", size: "large" }
+            );
+        };
+
+        async function handleGoogleRegister(response) {
+            const token = response.credential;
+
+            try {
+                const res = await fetch("/api/google", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ token })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError("Erro no registo com Google");
+                    return;
+                }
+
+                const accessToken = data.access_token;
+
+                // obter user_id
+                const meRes = await fetch("/api/me", {
+                    headers: { Authorization: "Bearer " + accessToken }
+                });
+
+                const meData = await meRes.json();
+
+                if (!meRes.ok) {
+                    showError("Erro ao obter dados do utilizador");
+                    return;
+                }
+
+                // guardar sessão (igual ao login)
+                localStorage.setItem("access_token", accessToken);
+                localStorage.setItem("user_id", meData.user_id);
+
+                // redirecionar
+                window.location.href = "/dashboard";
+
+            } catch (err) {
+                console.error(err);
+                showError("Erro ao autenticar com Google");
+            }
+        }
     </script>
 
 
-
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 </body>
-
-
-
 </html>

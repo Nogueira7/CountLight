@@ -14904,3 +14904,66 @@ img {
   background-color: #eeaa55;
   color: #fff;
 }
+
+
+.form-group.position-relative {
+  position: relative;
+}
+
+.form-group.position-relative .form-control {
+  padding-right: 70px; /* mais espaço para texto */
+}
+
+.toggle-password-text {
+  position: absolute;
+  right: 12px;
+  top: 38px;
+
+  background: none;
+  border: none;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  color: #2563eb;
+  cursor: pointer;
+
+  padding: 0;
+}
+
+.toggle-password-text:hover {
+  text-decoration: underline;
+}
+
+
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  width: 100%;
+  padding: 10px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.google-btn:hover {
+  background: #f9fafb;
+}
+
+.google-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+#passwordRequirements div {
+    transition: 0.3s;
+}

@@ -56,7 +56,7 @@
             </div>
           </div>
 
-          <!-- Eliminarconta -->
+          <!-- Eliminar conta -->
           <div class="col-lg-6 mb-4">
             <div class="card card_border">
               <div class="card-header">Eliminar conta</div>
@@ -82,6 +82,27 @@
               </div>
             </div>
           </div>
+        </div> <!-- fecha danger-actions -->
+
+        <div class="row mt-4">
+          <div class="col-lg-12">
+            <div class="card card_border">
+              <div class="card-header">Modo Desenvolvimento</div>
+              <div class="card-body">
+
+                <p class="mb-3">
+                  Gerar dados simulados para todos os dispositivos (último mês + atual com redução de consumo).
+                </p>
+
+                <button class="btn btn-primary btn-style" id="btnGenerateData">
+                  Gerar dados de teste
+                </button>
+
+                <div id="devMsg" class="mt-3" style="display:none;"></div>
+
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -90,7 +111,7 @@
   </section>
 
   <footer class="dashboard">
-    <p>&copy; 2020 Collective. All Rights Reserved.</p>
+    <p>&copy; 2026 CountLight. All Rights Reserved.</p>
   </footer>
 
   <button onclick="topFunction()" id="movetop" class="bg-primary" title="Go to top">
@@ -140,7 +161,7 @@
     // =========================
     // API helpers
     // =========================
-    const API_URL = "http://127.0.0.1:8000";
+    const API_URL = "/api";
 
     function getToken() {
       return localStorage.getItem("token") || localStorage.getItem("access_token");
@@ -148,7 +169,7 @@
 
     function logout() {
       localStorage.clear();
-      window.location.href = "login.html";
+      window.location.href = "/login";
     }
 
     async function apiFetch(path, { method = "GET", token, body } = {}) {
@@ -189,6 +210,7 @@
       el.className = "mt-3 alert " + (type === "success" ? "alert-success" : "alert-danger");
       el.textContent = text;
     }
+
     function clearMsg(id) {
       const el = document.getElementById(id);
       if (!el) return;
@@ -196,6 +218,7 @@
       el.textContent = "";
       el.className = "mt-3";
     }
+
     function setBusy(btnId, busy) {
       const btn = document.getElementById(btnId);
       if (!btn) return;
@@ -358,7 +381,7 @@
         localStorage.removeItem("selectedHouseName");
 
         showMsg("houseMsg", "success", "Casa desativada com sucesso. A redirecionar...");
-        window.location.href = "houses.html";
+        window.location.href = "/houses";
       } catch (e) {
         console.error(e);
         const msg = e?.message || "Erro inesperado";
@@ -402,6 +425,54 @@
       }
     }
 
+    async function generateTestData() {
+      clearMsg("devMsg");
+
+      const token = getToken();
+      if (!token) return logout();
+
+      try {
+        setBusy("btnGenerateData", true);
+
+        const res = await apiFetch("/dev/generate-data", {
+          method: "POST",
+          token
+        });
+
+        if (res.already_exists) {
+          showMsg("devMsg", "error", "Já existem dados.");
+          return;
+        }
+
+        showMsg("devMsg", "success", "Dados gerados! A atualizar...");
+        setTimeout(() => location.reload(), 1000);
+
+      } catch (e) {
+        console.error(e);
+        if (e?.status === 401) return logout();
+        showMsg("devMsg", "error", "Erro ao gerar dados: " + (e?.message || ""));
+      } finally {
+        setBusy("btnGenerateData", false);
+      }
+    }
+
+    async function checkGenerateDataStatus() {
+      const token = getToken();
+      if (!token) return;
+
+      try {
+        const res = await apiFetch("/dev/generate-data-status", { token });
+
+        // ❌ não pode gerar → esconder botão
+        if (!res.can_generate) {
+          document.getElementById("btnGenerateData")?.closest(".card")?.remove();
+        }
+
+      } catch (e) {
+        console.warn("Erro ao verificar estado:", e);
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("logoutBtn")?.addEventListener("click", function (e) {
         e.preventDefault();
@@ -410,10 +481,16 @@
 
       document.getElementById("btnDeleteHouse")?.addEventListener("click", deactivateSelectedHouse);
       document.getElementById("btnDeleteUser")?.addEventListener("click", deactivateCurrentUser);
+      document.getElementById("btnGenerateData")?.addEventListener("click", generateTestData);
+
+      if (![31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47].includes(getUserId())) {
+        document.getElementById("btnGenerateData")?.closest(".card")?.remove();
+      }
 
       fillUserName();
       fillHouseName();
       wireConfirmations();
+      checkGenerateDataStatus();
     });
   </script>
 </body>

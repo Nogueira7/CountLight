@@ -203,21 +203,30 @@ def create_kpi_card(label: str, value: str, chip_color=THEME_BLUE, trend: str | 
         ParagraphStyle("tmpTrend", fontName="Helvetica-Bold", fontSize=9, textColor=chip_color, alignment=TA_RIGHT),
     )
 
-    inner = Table([[label_p, trend_p], [value_p, ""]], colWidths=[120, 40])
+    inner = Table(
+    [
+        [label_p, trend_p],
+        [value_p, ""],
+    ],
+    colWidths=[110, 50],  # 👉 mais espaço para o número
+)
+
     inner.setStyle(
         TableStyle(
             [
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 8),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-                ("TOPPADDING", (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-                ("SPAN", (1, 1), (1, 1)),
+                ("LEFTPADDING", (0, 0), (-1, -1), 10),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+                ("TOPPADDING", (0, 0), (-1, -1), 12),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+
+                # 👉 garante que o valor ocupa linha inteira
+                ("SPAN", (0, 1), (1, 1)),
             ]
         )
     )
 
-    card = Table([[chip, inner]], colWidths=[10, 160], rowHeights=[40])
+    card = Table([[chip, inner]], colWidths=[10, 170])  # 👉 mais largo
     card.setStyle(
         TableStyle(
             [
@@ -677,38 +686,66 @@ def create_pie_chart(data, title):
     labels = [d.get("label") for d in data]
     values = [d.get("value", 0) for d in data]
 
-    palette = [
-        "#113d9e",
-        "#1f57cc",
-        "#2d74ff",
-        "#5b93ff",
-        "#88b0ff",
-        "#eeaa55",
-        "#f2c07f",
-        "#f6d6aa",
-    ]
-    colors_list = [palette[i % len(palette)] for i in range(len(values))]
+    total = sum(values)
 
-    fig, ax = plt.subplots(figsize=(7.0, 3.2), dpi=140)
-    ax.set_title(title, fontweight="bold", color=MPL_THEME_BLUE)
+    # 🎨 paleta premium (mais suave)
+    colors_list = [
+        "#1d4ed8",  # azul forte
+        "#3b82f6",
+        "#60a5fa",
+        "#93c5fd",
+        "#f59e0b",  # accent
+        "#fbbf24",
+        "#fde68a",
+    ]
+
+    colors_list = colors_list[:len(values)]
+
+    # 💥 ligeiro destaque nas fatias
+    explode = [0.03] * len(values)
+
+    fig, ax = plt.subplots(figsize=(7.0, 3.5), dpi=140)
 
     wedges, texts, autotexts = ax.pie(
         values,
-        labels=labels,
-        autopct="%1.1f%%",
+        labels=None,  # ❗ vamos controlar manualmente
+        autopct=lambda p: f"{p:.0f}%" if p > 5 else "",  # limpa percentagens pequenas
         startangle=90,
         colors=colors_list,
-        textprops={"color": MPL_TEXT_DARK},
+        explode=explode,
+        wedgeprops=dict(width=0.38, edgecolor="white"),  # 🔥 DONUT
+        pctdistance=0.75,
+        textprops={"color": "white", "fontsize": 9, "weight": "bold"},
     )
-    for t in autotexts:
-        t.set_color("white")
-        t.set_fontweight("bold")
-        t.set_fontsize(9)
+
+    # 🧠 legenda bonita (em vez de labels colados)
+    ax.legend(
+        wedges,
+        [f"{l} ({v} kWh)" for l, v in zip(labels, values)],
+        loc="center left",
+        bbox_to_anchor=(1, 0.5),
+        frameon=False,
+        fontsize=9,
+    )
+
+    # 🔥 TEXTO CENTRAL (premium feel)
+    ax.text(
+        0,
+        0,
+        f"{total:.0f}\nkWh",
+        ha="center",
+        va="center",
+        fontsize=14,
+        fontweight="bold",
+        color=MPL_THEME_BLUE,
+    )
+
+    ax.set_title(title, fontweight="bold", color=MPL_THEME_BLUE, pad=15)
 
     ax.axis("equal")
 
     fig.tight_layout()
-    fig.savefig(buffer, format="png", transparent=False)
+    fig.savefig(buffer, format="png", bbox_inches="tight")
     plt.close(fig)
 
     buffer.seek(0)
