@@ -45,6 +45,8 @@ from app.repositories.energy_repository import (
     get_daily_consumption_month_comparison,
 )
 
+from app.routes.admin import router as admin_router
+
 # =====================================================
 # APP
 # =====================================================
@@ -97,6 +99,7 @@ app.include_router(alerts_router, prefix="/api")
 app.include_router(reports_router, prefix="/api")
 app.include_router(plans_router, prefix="/api")
 app.include_router(dev.router, prefix="/api/dev", tags=["dev"])
+app.include_router(admin_router, prefix="/api")
 
 # =====================================================
 # DASHBOARD SUMMARY API
@@ -214,8 +217,6 @@ def profile(request: Request):
     return templates.TemplateResponse("profile.html", {"request": request})
 
 
-# ✅ NOVO: perfil público (ou de outros utilizadores)
-# Ex: http://127.0.0.1:8000/users/3
 @app.get("/users/{user_id}", response_class=HTMLResponse)
 def user_profile(request: Request, user_id: int):
     return templates.TemplateResponse(
@@ -227,7 +228,6 @@ def user_profile(request: Request, user_id: int):
     )
 
 
-# ✅ NOVO: Profile Setup
 @app.get("/profile_setup", response_class=HTMLResponse)
 def profile_setup(request: Request):
     # certifica-te que existe: app/templates/profile_setup.html
@@ -251,6 +251,28 @@ def goal_setup_page(request: Request):
 @app.get("/reports", response_class=HTMLResponse)
 def reports_page(request: Request):
     return templates.TemplateResponse("reports.html", {"request": request})
+
+@app.get("/verify-code", response_class=HTMLResponse)
+def verify_code_page(request: Request):
+    return templates.TemplateResponse("verify-code.html", {"request": request})
+
+@app.get("/admin", response_class=HTMLResponse)
+def verify_code_page(request: Request):
+    return templates.TemplateResponse("admin_dashboard.html", {"request": request})
+
+@app.get("/admin/users", response_class=HTMLResponse)
+def verify_code_page(request: Request):
+    return templates.TemplateResponse("admin_users.html", {"request": request})
+
+@app.get("/admin/user/{user_id}", response_class=HTMLResponse)
+def admin_user_page(request: Request, user_id: int):
+    return templates.TemplateResponse(
+        "admin_user.html",
+        {
+            "request": request,
+            "user_id": user_id
+        }
+    )
 
 
 # =====================================================

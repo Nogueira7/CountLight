@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>CountLight · Admin</title>
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', path='images/logo_neon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style-liberty.css') }}">
+
+    <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900&display=swap" rel="stylesheet">
+</head>
+
+<body class="sidebar-menu-collapsed">
+
+    <!-- 🔒 PROTEÇÃO ADMIN -->
+    <script>
+        const role = localStorage.getItem("role");
+
+        if (!role) {
+            window.location.href = "/login";
+        }
+
+        if (role !== "admin") {
+            window.location.href = "/dashboard";
+        }
+
+        const API_URL = "/api";
+
+        async function checkAdminAccess() {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                window.location.href = "/login";
+                return;
+            }
+
+            const res = await fetch(`${API_URL}/me`, {
+                headers: { Authorization: "Bearer " + token }
+            });
+
+            if (!res.ok) {
+                localStorage.clear();
+                window.location.href = "/login";
+            }
+        }
+
+        checkAdminAccess();
+    </script>
+
+    <div class="se-pre-con"></div>
+
+    <section>
+
+        {% include "admin_sidebar.html" %}
+        {% include "header.html" %}
+
+        <div class="main-content">
+            <div class="container-fluid content-top-gap">
+
+                <!-- HEADER -->
+                <div class="welcome-msg pt-3 pb-4">
+                    <h1>Painel de Administração</h1>
+                    <p>Visão geral da plataforma CountLight.</p>
+                </div>
+
+                <!-- 📊 KPIs -->
+                <div class="statistics">
+                    <div class="row">
+
+                        <!-- 👤 USERS -->
+                        <div class="col-sm-3 statistics-grid">
+                            <div class="card card_border border-primary-top p-4">
+                                <h3 class="text-primary number" id="total-users">--</h3>
+                                <p class="stat-text">Utilizadores</p>
+                            </div>
+                        </div>
+
+                        <!-- 🏠 HOUSES -->
+                        <div class="col-sm-3 statistics-grid">
+                            <div class="card card_border border-primary-top p-4">
+                                <h3 class="text-primary number" id="total-houses">--</h3>
+                                <p class="stat-text">Casas</p>
+                            </div>
+                        </div>
+
+                        <!-- 🧱 ROOMS -->
+                        <div class="col-sm-3 statistics-grid">
+                            <div class="card card_border border-primary-top p-4">
+                                <h3 class="text-primary number" id="total-rooms">--</h3>
+                                <p class="stat-text">Divisões</p>
+                            </div>
+                        </div>
+
+                        <!-- ⚡ DEVICES -->
+                        <div class="col-sm-3 statistics-grid">
+                            <div class="card card_border border-primary-top p-4">
+                                <h3 class="text-primary number" id="total-devices">--</h3>
+                                <p class="stat-text">Dispositivos</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 👤 ÚLTIMOS USERS -->
+                <div class="card card_border mt-4">
+                    <div class="card-header">Últimos utilizadores registados</div>
+                    <div class="card-body">
+                        <ul id="latest-users">
+                            <li>--</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="dashboard">
+        <p>&copy; 2026 CountLight. All Rights Reserved.</p>
+    </footer>
+
+    <!-- MOVE TOP -->
+    <button onclick="topFunction()" id="movetop" class="bg-primary" title="Go to top">
+        <span class="fa fa-angle-up"></span>
+    </button>
+
+    <!-- SCRIPTS -->
+    <script src="{{ url_for('static', path='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', path='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', path='js/jquery.nicescroll.js') }}"></script>
+    <script src="{{ url_for('static', path='js/scripts.js') }}"></script>
+
+    <!-- SCROLL -->
+    <script>
+        window.onscroll = function () {
+            const btn = document.getElementById("movetop");
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                btn.style.display = "block";
+            } else {
+                btn.style.display = "none";
+            }
+        };
+
+        function topFunction() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+    </script>
+
+    <!-- LOADER -->
+    <script>
+        window.addEventListener("load", function () {
+            const loader = document.querySelector(".se-pre-con");
+            if (!loader) return;
+            loader.style.opacity = "0";
+            loader.style.transition = "opacity 0.6s ease";
+            setTimeout(() => { loader.style.display = "none"; }, 600);
+        });
+    </script>
+
+    <!-- 📡 ADMIN DATA -->
+    <script>
+        async function loadAdminDashboard() {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            try {
+                const res = await fetch("/api/admin/dashboard", {
+                    headers: { Authorization: "Bearer " + token }
+                });
+
+                if (!res.ok) {
+                    console.error("Erro ao carregar dashboard admin");
+                    return;
+                }
+
+                const data = await res.json();
+                console.log("Admin dashboard:", data);
+
+                document.getElementById("total-users").innerText = data.total_users ?? "--";
+                document.getElementById("total-houses").innerText = data.total_houses ?? "--";
+                document.getElementById("total-rooms").innerText = data.total_rooms ?? "--";
+                document.getElementById("total-devices").innerText = data.total_devices ?? "--";
+
+                const ul = document.getElementById("latest-users");
+                if (ul && Array.isArray(data.latest_users)) {
+                    ul.innerHTML = data.latest_users
+                        .map(u => `<li>${u.email}</li>`)
+                        .join("");
+                }
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadAdminDashboard();
+        });
+    </script>
+
+    <script>
+        $(function () {
+            $('.sidebar-menu-collapsed').click(function () {
+                $('body').toggleClass('noscroll');
+            });
+        });
+    </script>
+
+</body>
+
+</html>

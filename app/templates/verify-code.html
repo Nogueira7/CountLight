@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Verificar Código - CountLight</title>
+
+    <link rel="icon" type="image/png" href="/static/images/logo_neon.png">
+    <link rel="stylesheet" href="/static/css/style-liberty.css">
+
+    <style>
+        .code-input {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <section>
+        <div class="">
+            <section class="login-form py-md-5 py-3">
+                <div class="card card_border p-md-4">
+                    <div class="card-body text-center">
+
+                        <h3 class="mb-3">Verificação de Segurança</h3>
+                        <p>Introduz o código enviado para o teu email</p>
+
+                        <form id="codeForm">
+                            <div class="form-group mt-4">
+                                <input type="text" id="code" maxlength="6" class="form-control code-input"
+                                    placeholder="------" required>
+                            </div>
+
+                            <div id="error" class="form-error mt-2"></div>
+
+                            <button type="submit" class="btn btn-primary btn-style mt-4">
+                                Confirmar
+                            </button>
+                        </form>
+
+                        <button id="resendBtn" class="btn btn-link mt-3">
+                            Reenviar código
+                        </button>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = "/api";
+
+        const form = document.getElementById("codeForm");
+        const codeInput = document.getElementById("code");
+        const errorDiv = document.getElementById("error");
+        const resendBtn = document.getElementById("resendBtn");
+
+        function showError(msg) {
+            errorDiv.innerText = msg;
+            errorDiv.style.display = "block";
+        }
+
+        function hideError() {
+            errorDiv.innerText = "";
+            errorDiv.style.display = "none";
+        }
+
+        function setSession(accessToken, userId) {
+            localStorage.setItem("access_token", accessToken);
+            localStorage.setItem("user_id", userId);
+        }
+
+        // 🔐 SUBMIT CÓDIGO
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            hideError();
+
+            const code = codeInput.value.trim();
+            const userId = localStorage.getItem("2fa_user_id");
+
+            if (!code || code.length !== 6) {
+                showError("Código inválido.");
+                return;
+            }
+
+            if (!userId) {
+                showError("Sessão inválida. Volta a fazer login.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/verify-login`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        user_id: parseInt(userId),
+                        code: code
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError(data?.detail || "Erro ao validar código.");
+                    return;
+                }
+
+                // ✅ LOGIN COMPLETO
+                const accessToken = data.access_token;
+
+                if (!accessToken) {
+                    showError("Erro: sem token.");
+                    return;
+                }
+
+                // 🔐 validar token e obter user_id real
+                const meRes = await fetch(`${API_URL}/users/me`, {
+                    headers: { Authorization: "Bearer " + accessToken }
+                });
+
+                const meData = await meRes.json();
+
+                if (!meRes.ok) {
+                    showError("Sessão inválida.");
+                    return;
+                }
+
+                // 🔐 guardar sessão COMPLETA (CORRETO)
+                localStorage.setItem("access_token", accessToken);
+                localStorage.setItem("token", accessToken);
+                localStorage.setItem("user_id", meData.id_user);
+                localStorage.setItem("role", meData.role);
+
+                // limpar dados temporários
+                localStorage.removeItem("2fa_user_id");
+                localStorage.removeItem("2fa_username");
+
+                // 👉 AQUI
+                if (meData.role === "admin") {
+                    window.location.href = "/admin";
+                    return;
+                }
+
+                // 🚀 redirecionar
+                // 🔐 obter casas
+                const housesRes = await fetch(`${API_URL}/houses`, {
+                    headers: { Authorization: "Bearer " + accessToken }
+                });
+
+                const housesData = await housesRes.json();
+
+                if (housesRes.ok) {
+                    const houses = Array.isArray(housesData)
+                        ? housesData
+                        : (housesData?.houses ?? []);
+
+                    if (houses.length > 0) {
+                        const first = houses[0];
+
+                        const firstHouseId = first?.id_house ?? first?.id;
+                        const firstHouseName = (first?.name ?? first?.nome ?? "").toString().trim();
+
+                        // guardar casa selecionada
+                        if (firstHouseId) localStorage.setItem("selected_house_id", String(firstHouseId));
+                        if (firstHouseName) localStorage.setItem("selected_house_name", firstHouseName);
+
+                        window.location.href = "/dashboard";
+                    } else {
+                        window.location.href = "/houses";
+                    }
+                } else {
+                    window.location.href = "/houses";
+                }
+
+            } catch (err) {
+                console.error(err);
+                showError("Erro de ligação ao servidor.");
+            }
+        });
+
+        // 🔁 REENVIAR CÓDIGO
+        resendBtn.addEventListener("click", async () => {
+            const userId = localStorage.getItem("2fa_user_id");
+            const username = localStorage.getItem("2fa_username");
+
+            if (!username) {
+                showError("Erro ao reenviar. Faz login novamente.");
+                return;
+            }
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append("username", username);
+                formData.append("password", ""); // não necessário mas mantém formato
+
+                await fetch(`${API_URL}/resend-code`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username: username
+                    })
+                });
+
+                alert("Código reenviado para o teu email.");
+
+            } catch (err) {
+                console.error(err);
+                showError("Erro ao reenviar código.");
+            }
+        });
+
+        // UX: só números
+        codeInput.addEventListener("input", () => {
+            codeInput.value = codeInput.value.replace(/\D/g, "");
+        });
+    </script>
+
+</body>
+
+</html>

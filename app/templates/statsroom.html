@@ -151,37 +151,37 @@
                 document.getElementById("room-month").textContent = data.consumption.month.toFixed(2) + " kWh";
                 document.getElementById("room-year").textContent = data.consumption.year.toFixed(2) + " kWh";
                 document.getElementById("room-cost").textContent = data.cost.estimated.toFixed(2) + " €";
-// 📊 Construir resumo inteligente
+                // 📊 Construir resumo inteligente
 
-const percentage = Number(data.percentage_of_house ?? 0).toFixed(0);
-const comparison = Number(data.comparison_last_month ?? 0).toFixed(1);
-const peakHour = data.peak_hour ?? "--";
+                const percentage = Number(data.percentage_of_house ?? 0).toFixed(0);
+                const comparison = Number(data.comparison_last_month ?? 0).toFixed(1);
+                const peakHour = data.peak_hour ?? "--";
 
-// 🔎 Descobrir equipamento com maior consumo
-let topDevice = "equipamentos diversos";
+                // 🔎 Descobrir equipamento com maior consumo
+                let topDevice = "equipamentos diversos";
 
-if (data.devices && data.devices.length > 0) {
-    const sorted = [...data.devices].sort((a, b) => 
-        (b.value ?? 0) - (a.value ?? 0)
-    );
+                if (data.devices && data.devices.length > 0) {
+                    const sorted = [...data.devices].sort((a, b) =>
+                        (b.value ?? 0) - (a.value ?? 0)
+                    );
 
-    if ((sorted[0].value ?? 0) > 0) {
-        topDevice = sorted[0].label;
-    }
-}
+                    if ((sorted[0].value ?? 0) > 0) {
+                        topDevice = sorted[0].label;
+                    }
+                }
 
-// 📈 Texto de tendência
-let trendText = "";
-if (comparison > 0) {
-    trendText = `registou-se um aumento de cerca de ${comparison}% no consumo energético.`;
-} else if (comparison < 0) {
-    trendText = `registou-se uma redução de cerca de ${Math.abs(comparison)}% no consumo energético.`;
-} else {
-    trendText = `não houve variação significativa no consumo energético.`;
-}
+                // 📈 Texto de tendência
+                let trendText = "";
+                if (comparison > 0) {
+                    trendText = `registou-se um aumento de cerca de ${comparison}% no consumo energético.`;
+                } else if (comparison < 0) {
+                    trendText = `registou-se uma redução de cerca de ${Math.abs(comparison)}% no consumo energético.`;
+                } else {
+                    trendText = `não houve variação significativa no consumo energético.`;
+                }
 
-// 📝 Frase final
-const summaryText = `
+                // 📝 Frase final
+                const summaryText = `
 <p>
 Esta divisão representa aproximadamente <strong>${percentage}%</strong> do consumo total da habitação.
 Em comparação com o mês passado, ${trendText}
@@ -193,22 +193,15 @@ especialmente durante o período <strong>${peakHour}</strong>.
 </p>
 `;
 
-document.getElementById("room-summary-text").innerHTML = summaryText;
+                document.getElementById("room-summary-text").innerHTML = summaryText;
 
                 // 🥧 Atualizar Pie Chart (usar consumo por TIPO de dispositivo da divisão)
                 try {
-                    const typesRes = await fetch(`/api/rooms/${roomId}/device-types`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
+                    const labels = (data.devices || []).map(d => d.name || d.label);
+                    const values = (data.devices || []).map(d => d.kwh ?? d.value ?? 0);
 
-                    if (typesRes.ok) {
-                        const types = await typesRes.json();
-                        const labels = (types || []).map(t => t.label);
-                        const values = (types || []).map(t => t.value);
-
-                        if (window.updatePieChart && window.pieChart3Instance) {
-                            window.updatePieChart(window.pieChart3Instance, labels, values);
-                        }
+                    if (window.updatePieChart && window.pieChart3Instance) {
+                        window.updatePieChart(window.pieChart3Instance, labels, values);
                     } else {
                         console.warn('Não foi possível obter tipos de dispositivo para a divisão');
                     }

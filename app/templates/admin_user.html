@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin · Detalhes do Utilizador</title>
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', path='images/logo_neon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style-liberty.css') }}">
+</head>
+
+<body class="sidebar-menu-collapsed">
+
+<script>
+    const API_URL = "/api";
+
+    async function checkAdminAccess() {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            window.location.href = "/login";
+            return;
+        }
+
+        const res = await fetch(`${API_URL}/me`, {
+            headers: { Authorization: "Bearer " + token }
+        });
+
+        if (!res.ok) {
+            localStorage.clear();
+            window.location.href = "/login";
+            return;
+        }
+
+        const user = await res.json();
+
+        if (user.role !== "admin") {
+            window.location.href = "/dashboard";
+        }
+    }
+
+    checkAdminAccess();
+</script>
+
+<section>
+    {% include "admin_sidebar.html" %}
+    {% include "header.html" %}
+
+    <div class="main-content">
+        <div class="container-fluid content-top-gap">
+
+            <div class="welcome-msg pt-3 pb-4">
+                <h1>Detalhes do Utilizador</h1>
+                <p id="user-info">A carregar...</p>
+            </div>
+
+            <!-- 🏠 CASAS -->
+            <div class="card card_border mb-4">
+                <div class="card-header">Casas</div>
+                <div class="card-body" id="housesContainer"></div>
+            </div>
+
+            <!-- 🧱 DIVISÕES -->
+            <div class="card card_border mb-4">
+                <div class="card-header">Divisões</div>
+                <div class="card-body" id="roomsContainer"></div>
+            </div>
+
+            <!-- ⚡ DISPOSITIVOS -->
+            <div class="card card_border">
+                <div class="card-header">Dispositivos</div>
+                <div class="card-body" id="devicesContainer"></div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    function getUserIdFromURL() {
+        const parts = window.location.pathname.split("/");
+        return parts[parts.length - 1];
+    }
+
+    async function loadUserDetails() {
+        const token = localStorage.getItem("token");
+        const userId = getUserIdFromURL();
+
+        try {
+            const res = await fetch(`/api/admin/users/${userId}`, {
+                headers: { Authorization: "Bearer " + token }
+            });
+
+            if (res.status === 401) {
+                window.location.href = "/login";
+                return;
+            }
+
+            const data = await res.json();
+
+            // 👤 USER INFO
+            document.getElementById("user-info").innerText =
+                `ID: ${data.user.id_user} | ${data.user.email} | ${data.user.active == 1 ? "Ativo" : "Bloqueado"}`;
+
+            // 🏠 CASAS
+            const housesHTML = data.houses.length
+                ? data.houses.map(h => `<div>🏠 ${h.name} (ID: ${h.id_house})</div>`).join("")
+                : "Sem casas";
+
+            document.getElementById("housesContainer").innerHTML = housesHTML;
+
+            // 🧱 ROOMS
+            const roomsHTML = data.rooms.length
+                ? data.rooms.map(r => `<div>🧱 ${r.name} (Casa ${r.id_house})</div>`).join("")
+                : "Sem divisões";
+
+            document.getElementById("roomsContainer").innerHTML = roomsHTML;
+
+            // ⚡ DEVICES
+            const devicesHTML = data.devices.length
+                ? data.devices.map(d => `
+                    <div>
+                        ⚡ ${d.name} 
+                        (Room ${d.id_room}) 
+                        ID: ${d.id_device}
+                    </div>
+                `).join("")
+                : "Sem dispositivos";
+
+            document.getElementById("devicesContainer").innerHTML = devicesHTML;
+
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadUserDetails);
+</script>
+
+</body>
+</html>

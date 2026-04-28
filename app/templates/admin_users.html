@@ -1,0 +1,223 @@
+<!doctype html>
+
+<html lang="pt-PT">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin · Utilizadores</title>
+
+```
+<link rel="icon" type="image/png" href="{{ url_for('static', path='images/logo_neon.png') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='css/style-liberty.css') }}">
+```
+
+</head>
+
+<body class="sidebar-menu-collapsed">
+
+<script>
+    const API_URL = "/api";
+
+    // 🔒 VERIFICAÇÃO SEGURA (igual ao dashboard)
+    async function checkAdminAccess() {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            window.location.href = "/login";
+            return;
+        }
+
+        const res = await fetch(`${API_URL}/me`, {
+            headers: { Authorization: "Bearer " + token }
+        });
+
+        if (!res.ok) {
+            localStorage.clear();
+            window.location.href = "/login";
+            return;
+        }
+
+        const user = await res.json();
+
+        if (user.role !== "admin") {
+            window.location.href = "/dashboard";
+        }
+    }
+
+    checkAdminAccess();
+</script>
+
+<section>
+    {% include "admin_sidebar.html" %}
+    {% include "header.html" %}
+
+```
+<div class="main-content">
+    <div class="container-fluid content-top-gap">
+
+        <div class="welcome-msg pt-3 pb-4">
+            <h1>Gestão de Utilizadores</h1>
+            <p>Lista completa de utilizadores da plataforma</p>
+        </div>
+
+        <!-- 🔍 PESQUISA -->
+        <div class="card card_border p-3 mb-4">
+            <input type="text" id="searchInput" class="form-control"
+                placeholder="Pesquisar por username ou ID...">
+        </div>
+
+        <!-- 📋 TABELA -->
+        <div class="card card_border">
+            <div class="card-header">Utilizadores</div>
+
+            <div class="card-body table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Estado</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTable">
+                        <tr>
+                            <td colspan="5">A carregar...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+```
+
+</section>
+
+<script>
+    let users = [];
+
+    // =========================
+    // CARREGAR UTILIZADORES
+    // =========================
+    async function loadUsers() {
+        const token = localStorage.getItem("token");
+
+        try {
+            const res = await fetch("/api/admin/users", {
+                headers: { Authorization: "Bearer " + token }
+            });
+
+            if (res.status === 401) {
+                window.location.href = "/login";
+                return;
+            }
+
+            const tbody = document.getElementById("usersTable");
+
+            if (!res.ok) {
+                tbody.innerHTML = "<tr><td colspan='5'>Erro ao carregar utilizadores</td></tr>";
+                return;
+            }
+
+            users = await res.json();
+            renderUsers(users);
+
+        } catch (err) {
+            console.error("Erro:", err);
+        }
+    }
+
+    // =========================
+    // RENDER TABELA
+    // =========================
+    function renderUsers(list) {
+        const tbody = document.getElementById("usersTable");
+
+        if (!list || list.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5'>Sem utilizadores</td></tr>";
+            return;
+        }
+
+        tbody.innerHTML = list.map(u => `
+        <tr>
+            <td>${u.id_user}</td>
+            <td>${u.username || "-"}</td>
+            <td>${u.email}</td>
+            <td>
+                ${u.active == 1
+                ? '<span style="color:green">Ativo</span>'
+                : '<span style="color:red">Bloqueado</span>'}
+            </td>
+            <td>
+                <button onclick="toggleUser(${u.id_user})">
+                    ${u.active == 1 ? "Bloquear" : "Ativar"}
+                </button>
+
+                <button onclick="viewUser(${u.id_user})">
+                    Ver Dados
+                </button>
+            </td>
+        </tr>
+        `).join("");
+    }
+
+    // =========================
+    // TOGGLE USER
+    // =========================
+    async function toggleUser(userId) {
+        const token = localStorage.getItem("token");
+
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/toggle`, {
+                method: "PUT",
+                headers: { Authorization: "Bearer " + token }
+            });
+
+            if (res.status === 401) {
+                window.location.href = "/login";
+                return;
+            }
+
+            if (!res.ok) {
+                alert("Erro ao atualizar utilizador");
+                return;
+            }
+
+            await loadUsers();
+
+        } catch (err) {
+            console.error("Erro:", err);
+        }
+    }
+
+    function viewUser(userId) {
+        window.location.href = `/admin/user/${userId}`;
+    }
+
+    // =========================
+    // PESQUISA
+    // =========================
+    document.addEventListener("DOMContentLoaded", () => {
+        loadUsers();
+
+        const input = document.getElementById("searchInput");
+
+        input.addEventListener("input", function () {
+            const value = this.value.toLowerCase();
+
+            const filtered = users.filter(u =>
+                (u.username || "").toLowerCase().includes(value) ||
+                String(u.id_user).includes(value)
+            );
+
+            renderUsers(filtered);
+        });
+    });
+</script>
+
+</body>
+</html>

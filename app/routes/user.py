@@ -162,6 +162,8 @@ def get_me(
         "description": profile.get("description"),
         "photo_url": profile.get("photo_url"),
         "is_active": profile.get("is_active", 1),
+        "id_role": profile.get("id_role"),
+        "role": profile.get("role", "user"),
     }
 
 

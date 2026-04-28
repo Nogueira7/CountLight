@@ -216,9 +216,12 @@ def get_user_profile(db, user_id: int) -> Optional[Dict[str, Any]]:
                 u.username,
                 u.email,
                 u.is_active,
+                u.id_role,
+                r.name AS role,
                 up.description,
                 up.photo_url
             FROM users u
+            LEFT JOIN roles r ON u.id_role = r.id_role
             LEFT JOIN user_profiles up ON up.id_user = u.id_user
             WHERE u.id_user = %s
             """,
