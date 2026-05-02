@@ -1,9 +1,0 @@
-No teu código tens:
-
-SECRET_KEY = "MUDA_ISTO_PARA_UMA_CHAVE_BEM_SECRETA"
-
-⚠️ Antes de pôr online:
-
-isto NÃO pode ficar hardcoded
-
-deve vir de variável de ambiente (.env)
