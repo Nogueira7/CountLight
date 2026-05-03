@@ -24,9 +24,9 @@ def get_recommendation(
     user_id: int = Depends(get_current_user),
 ):
     try:
-        # ============================
+
         # Buscar dados da casa
-        # ============================
+
         user_data = get_user_house_data(db, user_id)
 
         logger.info(f"user_data keys: {list(user_data.keys()) if user_data else 'None'}")
@@ -37,17 +37,17 @@ def get_recommendation(
                 detail="House data not found for this user",
             )
 
-        # ============================
+
         # Recomendações
-        # ============================
+
         tariff = get_energy_recommendation(user_data)
         appliance = get_appliance_recommendation(db, user_id)
         time_of_use = get_time_of_use_recommendation(user_data)
         cost = get_cost_recommendation(user_data)
 
-        # ============================
+
         # Garantir estrutura correta
-        # ============================
+
         def format_message(value, default_msg):
             if not value:
                 return {"message": default_msg}
@@ -57,9 +57,9 @@ def get_recommendation(
 
             return {"message": str(value)}
 
-        # ============================
+
         # Resposta final
-        # ============================
+
         return {
             "tariff": format_message(
                 tariff,
