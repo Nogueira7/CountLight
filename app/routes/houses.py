@@ -23,9 +23,7 @@ HOUSE_TYPES = {"apartamento", "moradia"}
 OCCUPANCY_TYPES = {"permanente", "parcial", "ferias"}
 
 
-# =========================
-# Helpers — aceitar PT e EN
-# =========================
+
 def _pick(data: dict, *keys, default=None):
     """Devolve o primeiro valor não-nulo encontrado em data[key]."""
     for k in keys:
@@ -96,9 +94,9 @@ def _validate_non_negative(value, field: str):
     return value
 
 
-# =========================
+
 # GET /houses
-# =========================
+
 @router.get("")
 def list_houses(
     user_id: int = Depends(get_current_user),
@@ -107,9 +105,9 @@ def list_houses(
     return get_houses_by_user(db, user_id)
 
 
-# =========================
+
 # GET /houses/{id_house}
-# =========================
+
 @router.get("/{id_house}")
 def get_house(
     id_house: int,
@@ -125,9 +123,9 @@ def get_house(
     return house
 
 
-# =========================
+
 # POST /houses
-# =========================
+
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_new_house(
     data: dict,
@@ -135,7 +133,7 @@ def create_new_house(
     db=Depends(get_db),
 ):
     
-    # 🔒 BLOQUEIO POR PLANO
+
     houses = get_houses_by_user(db, user_id)
     plan = get_my_plan(user_id=user_id, db=db)
 
@@ -171,7 +169,6 @@ def create_new_house(
     contract_power = _to_float(_pick(data, "potencia_contratada", "contract_power", default=None), default=None)
     monthly_kwh = _to_float(_pick(data, "consumo_kwh_mes", "monthly_kwh", default=None), default=None)
 
-    # NOVO: preço por kWh (opcional)
     price_per_kwh = _to_float(_pick(data, "preco_kwh", "price_per_kwh", default=None), default=None)
 
     _validate_non_negative(adults, "adultos/adults")
@@ -208,9 +205,9 @@ def create_new_house(
     }
 
 
-# =========================
+
 # PUT /houses/{id_house}
-# =========================
+
 @router.put("/{id_house}")
 def update_existing_house(
     id_house: int,
@@ -244,7 +241,6 @@ def update_existing_house(
     contract_power = _to_float(_pick(data, "potencia_contratada", "contract_power", default=None), default=None)
     monthly_kwh = _to_float(_pick(data, "consumo_kwh_mes", "monthly_kwh", default=None), default=None)
 
-    # NOVO: preço por kWh (opcional)
     price_per_kwh = _to_float(_pick(data, "preco_kwh", "price_per_kwh", default=None), default=None)
 
     _validate_non_negative(adults, "adultos/adults")
@@ -268,7 +264,7 @@ def update_existing_house(
             tariff=tariff,
             contract_power=contract_power,
             monthly_kwh=monthly_kwh,
-            price_per_kwh=price_per_kwh,  # <- requer update no repository/model/DB
+            price_per_kwh=price_per_kwh,
         )
     except Exception as e:
         raise HTTPException(
@@ -285,9 +281,9 @@ def update_existing_house(
     return {"message": "Casa atualizada com sucesso"}
 
 
-# =========================
+
 # GET /houses/{id_house}/full
-# =========================
+
 @router.get("/{id_house}/full")
 def get_house_full_route(
     id_house: int,
@@ -303,9 +299,9 @@ def get_house_full_route(
     return house
 
 
-# =========================
+
 # PATCH /houses/{id_house}/deactivate
-# =========================
+
 @router.patch("/{id_house}/deactivate")
 def deactivate_house_route(
     id_house: int,
