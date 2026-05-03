@@ -1,9 +1,7 @@
 from typing import List, Dict, Any
 
 
-# ==========================================================
 # CREATE NOTIFICATION
-# ==========================================================
 
 def create_notification(
     db,
@@ -40,9 +38,9 @@ def create_notification(
         cursor.close()
 
 
-# ==========================================================
+
 # GET USER NOTIFICATIONS
-# ==========================================================
+
 
 def get_user_notifications(
     db,
@@ -83,9 +81,9 @@ def get_user_notifications(
         cursor.close()
 
 
-# ==========================================================
+
 # MARK ALL AS READ
-# ==========================================================
+
 
 def mark_all_notifications_as_read(
     db,
