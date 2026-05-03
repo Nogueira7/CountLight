@@ -11,9 +11,9 @@ from app.repositories.achievement_repository import house_belongs_to_user
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
 
-# ==========================================================
+
 # DEPENDENCY: CASA ATIVA
-# ==========================================================
+
 
 def get_current_house_id(x_house_id: Optional[int] = Header(None, alias="X-House-Id")) -> int:
     """
@@ -34,9 +34,9 @@ def get_current_house_id(x_house_id: Optional[int] = Header(None, alias="X-House
     return x_house_id
 
 
-# ==========================================================
+
 # GET USER NOTIFICATIONS (Timeline / Registo de eventos)
-# ==========================================================
+
 
 @router.get("", response_model=List[Dict[str, Any]])
 def get_user_notifications(
@@ -65,9 +65,6 @@ def get_user_notifications(
     return notifications
 
 
-# ==========================================================
-# MARK ALL AS READ
-# ==========================================================
 
 @router.patch("/read-all")
 def mark_all_notifications_read(
