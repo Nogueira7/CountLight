@@ -110,7 +110,7 @@
       loginBtn.innerText = "A autenticar...";
 
       try {
-        // 🔐 LOGIN (PASSO 1)
+        // LOGIN (PASSO 1)
         const formData = new URLSearchParams();
         formData.append("username", username);
         formData.append("password", password);
@@ -131,7 +131,7 @@
           return;
         }
 
-        // ✅ CASO 1: 2FA
+        // CASO 1: 2FA
         if (data && data["2fa_required"]) {
           localStorage.setItem("2fa_user_id", data.user_id);
           localStorage.setItem("2fa_username", username);
@@ -140,7 +140,7 @@
           return;
         }
 
-        // ✅ CASO 2: LOGIN DIRETO (ex: Google ou fallback)
+        // CASO 2: LOGIN DIRETO (ex: Google ou fallback)
         if (data && data.access_token) {
           const accessToken = data.access_token;
 
@@ -227,9 +227,9 @@
           return;
         }
 
-        // 🔐 guardar IGUAL ao login normal
+        // guardar IGUAL ao login normal
         localStorage.setItem("access_token", accessToken);
-        localStorage.setItem("token", accessToken); // 👈 FALTAVA
+        localStorage.setItem("token", accessToken);
         localStorage.setItem("user_id", meData.user_id);
         localStorage.setItem("role", meData.role);
 
