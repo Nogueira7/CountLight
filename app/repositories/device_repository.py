@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
+# GET — devices por divisão
 
-# =========================
-# GET — devices por divisão (seguro)
-# =========================
 def get_devices_by_room(db, id_room: int, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -34,10 +32,9 @@ def get_devices_by_room(db, id_room: int, user_id: int):
     return devices
 
 
-# =========================
-# GET — device por shelly_id (NÃO seguro sozinho)
-# Mantém para usos internos/admin; não usar para responder a users sem validar ownership.
-# =========================
+
+# GET — device por shelly_id
+
 def get_device_by_shelly_id(db, shelly_id: str):
     cursor = db.cursor(dictionary=True)
 
@@ -62,9 +59,9 @@ def get_device_by_shelly_id(db, shelly_id: str):
     return device
 
 
-# =========================
-# GET — device por shelly_id (seguro: pertence ao user)
-# =========================
+
+# GET — device por shelly_id (pertence ao user)
+
 def get_device_by_shelly_id_for_user(db, user_id: int, shelly_id: str):
     cursor = db.cursor(dictionary=True)
 
@@ -92,9 +89,9 @@ def get_device_by_shelly_id_for_user(db, user_id: int, shelly_id: str):
     return device
 
 
-# =========================
-# POST — criar device (seguro + erros consistentes)
-# =========================
+
+# POST — criar device
+
 def create_device(
     db,
     id_room: int,
@@ -167,9 +164,9 @@ def create_device(
         cursor.close()
 
 
-# =========================
-# DELETE — apagar device (seguro)
-# =========================
+
+# DELETE — apagar device
+
 def delete_device(
     db,
     id_device: int,
@@ -227,7 +224,7 @@ def update_device(
         if cursor.fetchone() is None:
             return False
 
-        # Faz o update (mesmo que não mude nada)
+
         cursor.execute(
             """
             UPDATE devices
@@ -250,9 +247,9 @@ def update_device(
         cursor.close()
 
 
-# =========================
+
 # GET — todos os devices do utilizador
-# =========================
+
 def get_all_user_devices(db, user_id: int):
     cursor = db.cursor(dictionary=True)
 
