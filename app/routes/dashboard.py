@@ -53,7 +53,7 @@ def get_dashboard_detailed(
     # Para cálculos de percentagem, usar always o mismo month_daily_avg
 
 
-    # COMPARAÇÕES
+    # COMPARAÇÕE
   
 
     vs_yesterday_percent = (
