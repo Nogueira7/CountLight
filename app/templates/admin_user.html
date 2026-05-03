@@ -55,19 +55,19 @@
                 <p id="user-info">A carregar...</p>
             </div>
 
-            <!-- 🏠 CASAS -->
+            <!-- CASAS -->
             <div class="card card_border mb-4">
                 <div class="card-header">Casas</div>
                 <div class="card-body" id="housesContainer"></div>
             </div>
 
-            <!-- 🧱 DIVISÕES -->
+            <!-- DIVISÕES -->
             <div class="card card_border mb-4">
                 <div class="card-header">Divisões</div>
                 <div class="card-body" id="roomsContainer"></div>
             </div>
 
-            <!-- ⚡ DISPOSITIVOS -->
+            <!-- DISPOSITIVOS -->
             <div class="card card_border">
                 <div class="card-header">Dispositivos</div>
                 <div class="card-body" id="devicesContainer"></div>
@@ -99,25 +99,25 @@
 
             const data = await res.json();
 
-            // 👤 USER INFO
+            // USER INFO
             document.getElementById("user-info").innerText =
                 `ID: ${data.user.id_user} | ${data.user.email} | ${data.user.active == 1 ? "Ativo" : "Bloqueado"}`;
 
-            // 🏠 CASAS
+            // CASAS
             const housesHTML = data.houses.length
                 ? data.houses.map(h => `<div>🏠 ${h.name} (ID: ${h.id_house})</div>`).join("")
                 : "Sem casas";
 
             document.getElementById("housesContainer").innerHTML = housesHTML;
 
-            // 🧱 ROOMS
+            // ROOMS
             const roomsHTML = data.rooms.length
                 ? data.rooms.map(r => `<div>🧱 ${r.name} (Casa ${r.id_house})</div>`).join("")
                 : "Sem divisões";
 
             document.getElementById("roomsContainer").innerHTML = roomsHTML;
 
-            // ⚡ DEVICES
+            // DEVICES
             const devicesHTML = data.devices.length
                 ? data.devices.map(d => `
                     <div>
