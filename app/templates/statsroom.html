@@ -125,7 +125,7 @@
             const roomId = window.location.pathname.split("/").pop();
 
             try {
-                // 🔐 1. Validar utilizador (Igual ao Index)
+                // alidar utilizador (Igual ao Index)
                 const meResponse = await fetch("/api/me", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -136,7 +136,7 @@
                     return;
                 }
 
-                // 📊 2. Buscar dados da divisão (Usando as suas novas funções do repository)
+                // Buscar dados da divisão (Usando as suas novas funções do repository)
                 const response = await fetch(`/api/rooms/${roomId}/summary`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -145,19 +145,19 @@
 
                 const data = await response.json();
 
-                // 🏷️ Atualizar Interface
+                // Atualizar Interface
                 document.getElementById("room-name").textContent = data.room_name;
                 document.getElementById("room-today").textContent = data.consumption.today.toFixed(2) + " kWh";
                 document.getElementById("room-month").textContent = data.consumption.month.toFixed(2) + " kWh";
                 document.getElementById("room-year").textContent = data.consumption.year.toFixed(2) + " kWh";
                 document.getElementById("room-cost").textContent = data.cost.estimated.toFixed(2) + " €";
-                // 📊 Construir resumo inteligente
+                // Construir resumo inteligente
 
                 const percentage = Number(data.percentage_of_house ?? 0).toFixed(0);
                 const comparison = Number(data.comparison_last_month ?? 0).toFixed(1);
                 const peakHour = data.peak_hour ?? "--";
 
-                // 🔎 Descobrir equipamento com maior consumo
+                // Descobrir equipamento com maior consumo
                 let topDevice = "equipamentos diversos";
 
                 if (data.devices && data.devices.length > 0) {
@@ -170,7 +170,7 @@
                     }
                 }
 
-                // 📈 Texto de tendência
+                // Texto de tendência
                 let trendText = "";
                 if (comparison > 0) {
                     trendText = `registou-se um aumento de cerca de ${comparison}% no consumo energético.`;
@@ -180,7 +180,7 @@
                     trendText = `não houve variação significativa no consumo energético.`;
                 }
 
-                // 📝 Frase final
+                // Frase final
                 const summaryText = `
 <p>
 Esta divisão representa aproximadamente <strong>${percentage}%</strong> do consumo total da habitação.
@@ -195,7 +195,7 @@ especialmente durante o período <strong>${peakHour}</strong>.
 
                 document.getElementById("room-summary-text").innerHTML = summaryText;
 
-                // 🥧 Atualizar Pie Chart (usar consumo por TIPO de dispositivo da divisão)
+                // Atualizar Pie Chart 
                 try {
                     const labels = (data.devices || []).map(d => d.name || d.label);
                     const values = (data.devices || []).map(d => d.kwh ?? d.value ?? 0);
@@ -209,7 +209,7 @@ especialmente durante o período <strong>${peakHour}</strong>.
                     console.error('Erro ao carregar tipos de dispositivo:', err);
                 }
 
-                // 📋 Preencher Modal de Equipamentos
+                // Preencher Modal de Equipamentos
                 const modalBody = document.getElementById("devices-list-container");
                 modalBody.innerHTML = (data.devices || []).map(device => `
     <p><strong>${device.name || device.label}</strong> - ${(device.kwh ?? device.value ?? 0).toFixed(2)} kWh</p>
