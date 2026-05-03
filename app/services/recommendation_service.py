@@ -2,14 +2,13 @@ import requests
 from app.core.logging import logger
 from app.repositories.device_repository import get_all_user_devices
 
-# =====================================================
+
 # CONFIGURAÇÃO
-# =====================================================
+
 
 COMPARAJA_API = "https://www.comparaja.pt/api/energy/products"
 ENABLE_COMPARAJA_API = False
 
-# escala energética
 ENERGY_SCORE = {
     "A": 1,
     "B": 2,
@@ -20,7 +19,6 @@ ENERGY_SCORE = {
     "G": 7
 }
 
-# consumo médio estimado por classe (kWh/ano)
 ENERGY_CONSUMPTION = {
     "A": 100,
     "B": 130,
@@ -34,9 +32,6 @@ ENERGY_CONSUMPTION = {
 ELECTRICITY_PRICE = 0.20  # €/kWh
 
 
-# =====================================================
-# HELPERS
-# =====================================================
 
 def _safe_float(value, default: float | None = None) -> float | None:
     try:
@@ -56,9 +51,6 @@ def _safe_int(value, default: int | None = None) -> int | None:
         return default
 
 
-# =====================================================
-# RECOMENDAÇÃO DE ELETRODOMÉSTICOS
-# =====================================================
 
 def get_appliance_recommendation(db, user_id: int):
     devices = get_all_user_devices(db, user_id)
@@ -116,9 +108,7 @@ def get_appliance_recommendation(db, user_id: int):
     }
 
 
-# =====================================================
-# RECOMENDAÇÃO — Horários mais baratos (bi/tri-horário)
-# =====================================================
+
 
 def get_time_of_use_recommendation(user_data: dict):
     """
@@ -131,7 +121,7 @@ def get_time_of_use_recommendation(user_data: dict):
       conservadora para estimar poupança.
     """
 
-    # campos que costumam existir no teu user_data (vindo do house_repository):
+
     monthly_kwh = _safe_float(
     user_data.get("monthly_kwh")
     or user_data.get("monthlyKwh")
@@ -161,24 +151,24 @@ def get_time_of_use_recommendation(user_data: dict):
     if not monthly_kwh or monthly_kwh <= 0:
         return None
 
-    # quanto dá para "mexer" (lavar roupa/loiça, secar, etc.)
+
     shiftable_kwh_per_month = round(monthly_kwh * 0.15, 1)
 
-    # janelas típicas (ajusta depois consoante a tua lógica/fornecedor)
+
     if "bi" in tariff:
         cheapest_period_name = "Vazio"
         cheapest_period_hours = "22:00–08:00"
-        # estimativa conservadora: ~4% de poupança no kWh deslocável
+
         estimated_savings_monthly = round(shiftable_kwh_per_month * price_per_kwh * 0.04, 2)
 
     elif "tri" in tariff:
         cheapest_period_name = "Vazio"
         cheapest_period_hours = "00:00–08:00"
-        # estimativa conservadora: ~5% de poupança no kWh deslocável
+
         estimated_savings_monthly = round(shiftable_kwh_per_month * price_per_kwh * 0.05, 2)
 
     else:
-        # tarifa simples: não há período mais barato
+
         return {
             "shiftableKwhPerMonth": shiftable_kwh_per_month,
             "cheapestPeriodName": "—",
@@ -204,9 +194,6 @@ def get_time_of_use_recommendation(user_data: dict):
     }
 
 
-# =====================================================
-# RECOMENDAÇÃO DE TARIFA
-# =====================================================
 
 def get_energy_recommendation(user_data: dict):
     if not ENABLE_COMPARAJA_API:
@@ -309,9 +296,6 @@ def get_energy_recommendation(user_data: dict):
         }
     
 
-# =====================================================
-# RECOMENDAÇÃO — Custo em tempo real e previsão mensal
-# =====================================================
 
 def get_cost_recommendation(user_data: dict):
     """
