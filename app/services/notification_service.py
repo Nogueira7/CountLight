@@ -5,9 +5,9 @@ from app.repositories.notification_repository import (
     mark_all_notifications_as_read,
 )
 
-# ==========================================================
+
 # GENERIC NOTIFICATION
-# ==========================================================
+
 
 def notify(
     db,
@@ -31,9 +31,9 @@ def notify(
     )
 
 
-# ==========================================================
+
 # GOAL COMPLETED
-# ==========================================================
+
 
 def notify_goal_completed(db, user_id: int, house_id: int):
     notify(
@@ -46,9 +46,9 @@ def notify_goal_completed(db, user_id: int, house_id: int):
     )
 
 
-# ==========================================================
+
 # GOAL FAILED
-# ==========================================================
+
 
 def notify_goal_failed(db, user_id: int, house_id: int):
     notify(
@@ -61,9 +61,9 @@ def notify_goal_failed(db, user_id: int, house_id: int):
     )
 
 
-# ==========================================================
+
 # ACHIEVEMENT COMPLETED
-# ==========================================================
+
 
 def notify_achievement_completed(
     db,
@@ -84,9 +84,9 @@ def notify_achievement_completed(
     )
 
 
-# ==========================================================
+
 # ENERGY ALERTS (para timeline inteligente)
-# ==========================================================
+
 
 def notify_energy_alert(
     db,
@@ -109,9 +109,8 @@ def notify_energy_alert(
     )
 
 
-# ==========================================================
 # GET NOTIFICATIONS
-# ==========================================================
+
 
 def get_notifications(db, user_id: int, house_id: int) -> List[Dict[str, Any]]:
     """
@@ -125,9 +124,9 @@ def get_notifications(db, user_id: int, house_id: int) -> List[Dict[str, Any]]:
     )
 
 
-# ==========================================================
+
 # CLEAR NOTIFICATIONS
-# ==========================================================
+
 
 def clear_notifications(db, user_id: int, house_id: int) -> int:
     """
