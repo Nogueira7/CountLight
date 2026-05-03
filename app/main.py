@@ -14,9 +14,9 @@ from app.routes.plans import router as plans_router
 from app.core.security import get_current_user
 from app.db.database import get_db
 
-# =====================================================
+
 # ROUTERS
-# =====================================================
+
 
 from app.routes.auth import router as auth_router
 from app.routes.houses import router as houses_router
@@ -30,9 +30,7 @@ from app.routes.goal import router as goal_router
 from app.routes.notification import router as notification_router  # 🔔 NOVO
 from app.routes import dev
 
-# =====================================================
 # REPOSITORIES (Dashboard Summary)
-# =====================================================
 
 from app.repositories.energy_repository import (
     get_energy_summary_by_room,
@@ -47,30 +45,29 @@ from app.repositories.energy_repository import (
 
 from app.routes.admin import router as admin_router
 
-# =====================================================
+
 # APP
-# =====================================================
+
 
 app = FastAPI(
     title="CountLight",
     version="2.3.0"
 )
 
-# =====================================================
+
 # STATIC FILES
-# =====================================================
+
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-# =====================================================
 # TEMPLATES
-# =====================================================
+
 
 templates = Jinja2Templates(directory="/root/CountLight/backend/app/templates")
 
-# =====================================================
+
 # CORS
-# =====================================================
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -80,9 +77,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# =====================================================
+
 # API ROUTERS
-# =====================================================
+
 
 app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
@@ -101,9 +98,8 @@ app.include_router(plans_router, prefix="/api")
 app.include_router(dev.router, prefix="/api/dev", tags=["dev"])
 app.include_router(admin_router, prefix="/api")
 
-# =====================================================
+
 # DASHBOARD SUMMARY API
-# =====================================================
 
 
 @app.get("/api/dashboard/summary")
@@ -140,9 +136,9 @@ def dashboard_summary(
     }
 
 
-# =====================================================
-# FRONTEND ROUTES (HTML)
-# =====================================================
+
+# FRONTEND ROUTES (HTML) 
+
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -230,7 +226,6 @@ def user_profile(request: Request, user_id: int):
 
 @app.get("/profile_setup", response_class=HTMLResponse)
 def profile_setup(request: Request):
-    # certifica-te que existe: app/templates/profile_setup.html
     return templates.TemplateResponse("profile_setup.html", {"request": request})
 
 
@@ -274,10 +269,6 @@ def admin_user_page(request: Request, user_id: int):
         }
     )
 
-
-# =====================================================
-# HEALTH CHECK
-# =====================================================
 
 
 @app.get("/health")
