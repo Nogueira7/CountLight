@@ -27,21 +27,15 @@ from app.repositories.user_repository import (
     is_email_taken,
     update_user_account,
     get_user_suggestions,
-    search_users_by_username,  # ✅ NOVO (barra de pesquisa)
+    search_users_by_username, 
 )
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
-# ==========================================================
-# CONFIG (uploads)
-# ==========================================================
 
-# Este ficheiro está em: backend/app/routes/user.py
-# app_dir -> backend/app
 APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Ajusta conforme o teu projeto:
-# - Se o teu static está dentro de backend/app/static (como o teu HTML sugere /static/...)
+
 STATIC_DIR = os.path.join(APP_DIR, "static")
 
 UPLOAD_DIR = os.path.join(STATIC_DIR, "images", "profile_photos")
@@ -52,9 +46,7 @@ MAX_IMAGE_BYTES = 2 * 1024 * 1024  # 2MB
 
 USERNAME_RE = re.compile(r"^[a-z0-9_.-]+$")
 
-# ==========================================================
-# UTIL - EXTRACT USER ID
-# ==========================================================
+
 
 
 def extract_user_id(current_user: Any) -> int:
@@ -131,9 +123,6 @@ def _safe_join_under(base_dir: str, rel_path: str) -> Optional[str]:
     return abs_target
 
 
-# ==========================================================
-# GET PROFILE (SELF)
-# ==========================================================
 
 
 @router.get("/me")
@@ -167,9 +156,6 @@ def get_me(
     }
 
 
-# ==========================================================
-# GET IMPACT (SELF)
-# ==========================================================
 
 
 @router.get("/me/impact")
@@ -188,11 +174,6 @@ def get_me_impact(
 
     return get_user_impact(db, user_id)
 
-
-# ==========================================================
-# PEOPLE YOU MAY KNOW (Sugestões)
-# ⚠️ Tem de vir ANTES de /{user_id}
-# ==========================================================
 
 
 @router.get("/suggestions")
@@ -244,11 +225,6 @@ def get_suggestions(
     return out[:limit]
 
 
-# ==========================================================
-# SEARCH USERS (para a barra de pesquisa no header) ✅ NOVO
-# ⚠️ Tem de vir ANTES de /{user_id}
-# ==========================================================
-
 
 @router.get("/search")
 def search_users(
@@ -285,12 +261,6 @@ def search_users(
     return out
 
 
-# ==========================================================
-# GET IMPACT (OTHER USER)
-# (põe antes de /{user_id} por clareza)
-# ==========================================================
-
-
 @router.get("/{user_id}/impact")
 def get_user_impact_by_id(
     user_id: int,
@@ -309,9 +279,6 @@ def get_user_impact_by_id(
     return get_user_impact(db, user_id)
 
 
-# ==========================================================
-# GET PROFILE (OTHER USER)
-# ==========================================================
 
 
 @router.get("/{user_id}")
@@ -341,11 +308,6 @@ def get_user_by_id(
         "photo_url": profile.get("photo_url"),
     }
 
-
-# ==========================================================
-# UPDATE PROFILE (USERNAME + EMAIL + DESCRIPTION + PHOTO)
-# (multipart/form-data)
-# ==========================================================
 
 
 @router.put("/me")
@@ -459,10 +421,6 @@ async def update_me(
 
     return {"message": "Perfil atualizado com sucesso."}
 
-
-# ==========================================================
-# DEACTIVATE ACCOUNT
-# ==========================================================
 
 
 @router.patch("/me/deactivate")
