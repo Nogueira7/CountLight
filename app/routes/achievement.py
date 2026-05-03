@@ -15,9 +15,9 @@ from app.repositories.achievement_repository import house_belongs_to_user
 router = APIRouter(prefix="/achievements", tags=["Achievements"])
 
 
-# ==========================================================
+
 # RESPONSE MODEL
-# ==========================================================
+
 
 class AchievementOut(BaseModel):
     achievement_id: int
@@ -29,9 +29,9 @@ class AchievementOut(BaseModel):
     status: str  # "completed" | "not_completed"
 
 
-# ==========================================================
+
 # DEPENDENCY: CASA ATIVA
-# ==========================================================
+
 
 def get_current_house_id(
     x_house_id: Optional[int] = Header(None, alias="X-House-Id"),
@@ -53,9 +53,9 @@ def get_current_house_id(
     return x_house_id
 
 
-# ==========================================================
+
 # GET ACHIEVEMENTS
-# ==========================================================
+
 
 @router.get("", response_model=List[AchievementOut])
 def get_achievements(
