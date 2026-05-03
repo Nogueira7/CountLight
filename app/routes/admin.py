@@ -5,9 +5,9 @@ from app.db.database import get_db
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
 
-# =====================================================
-# 🔒 VERIFICAR ADMIN
-# =====================================================
+
+#VERIFICAR ADMIN
+
 def is_admin(db, user_id: int) -> bool:
     cursor = db.cursor(dictionary=True)
     try:
@@ -24,9 +24,9 @@ def is_admin(db, user_id: int) -> bool:
         cursor.close()
 
 
-# =====================================================
-# 📊 DASHBOARD ADMIN
-# =====================================================
+
+# DASHBOARD ADMIN
+
 @router.get("/dashboard")
 def get_admin_dashboard(
     user_id: int = Depends(get_current_user),
@@ -70,9 +70,9 @@ def get_admin_dashboard(
     }
 
 
-# =====================================================
-# 👤 LISTAR USERS (COMPATÍVEL COM FRONTEND)
-# =====================================================
+
+# LISTAR USERS
+
 @router.get("/users")
 def get_users(
     search: str = Query(default=""),
@@ -109,9 +109,9 @@ def get_users(
     return users
 
 
-# =====================================================
-# 🚫 BLOQUEAR / ATIVAR USER
-# =====================================================
+
+# BLOQUEAR / ATIVAR USER
+
 @router.put("/users/{target_user_id}/toggle")
 def toggle_user(
     target_user_id: int,
@@ -149,13 +149,13 @@ def toggle_user(
 
     return {
         "message": "Estado atualizado",
-        "active": new_status  # 🔥 importante p/ frontend
+        "active": new_status
     }
 
 
-# =====================================================
-# 🔍 DETALHES DO USER
-# =====================================================
+
+# DETALHES DO USER
+
 @router.get("/users/{target_user_id}")
 def get_user_details(
     target_user_id: int,
