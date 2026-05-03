@@ -7,9 +7,9 @@ from datetime import date
 from typing import Literal
 
 
-# =====================================================
+
 # GET — leituras por device
-# =====================================================
+
 def get_energy_by_device(
     db,
     id_device: int,
@@ -44,9 +44,9 @@ def get_energy_by_device(
     return readings
 
 
-# =====================================================
+
 # GET — última leitura de um device
-# =====================================================
+
 def get_latest_energy_by_device(
     db,
     id_device: int,
@@ -77,9 +77,9 @@ def get_latest_energy_by_device(
     return reading
 
 
-# =====================================================
-# GET — leituras por divisão (seguro)
-# =====================================================
+
+# GET — leituras por divisão
+
 def get_energy_by_room(
     db,
     id_room: int,
@@ -115,10 +115,9 @@ def get_energy_by_room(
     return readings
 
 
-# =====================================================
-# DASHBOARD — consumo por divisão (MÊS ATUAL)
-# (MAX(energy_kwh)-MIN(energy_kwh) por device dentro do mês, somado por divisão)
-# =====================================================
+
+# DASHBOARD — consumo por divisão (MÊS ATUAL), (MAX(energy_kwh)-MIN(energy_kwh) por device dentro do mês, somado por divisão)
+
 def get_energy_summary_by_room(db, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -156,9 +155,9 @@ def get_energy_summary_by_room(db, user_id: int):
     return {"data": data, "has_data": has_data}
 
 
-# =====================================================
-# DASHBOARD — consumo por tipo (MÊS ATUAL)
-# =====================================================
+
+# DASHBOARD — consumo por tipo
+
 def get_energy_summary_by_device_type(db, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -193,9 +192,9 @@ def get_energy_summary_by_device_type(db, user_id: int):
     return data
 
 
-# =====================================================
-# DASHBOARD — consumo por dispositivo (HOJE)
-# =====================================================
+
+# DASHBOARD — consumo por dispositivo
+
 def get_energy_summary_by_device(
     db,
     user_id: int,
@@ -229,9 +228,9 @@ def get_energy_summary_by_device(
     return data
 
 
-# =====================================================
-# DASHBOARD — consumo total por período
-# =====================================================
+
+# DASHBOARD — consumo total por periodo
+
 def get_total_consumption_for_period(
     db, user_id: int, period: Literal["today", "month", "year"]
 ):
@@ -304,11 +303,7 @@ def get_estimated_month_cost(db, user_id: int):
     return round(month_kwh * float(house["price_per_kwh"]), 2)
 
 
-# =====================================================
-# ✅ BAR: consumo diário no mês (kWh)
-# Retorna: [{"label": "1", "value": 3.42}, ...]
-# CORRIGIDO: Usa MAX-MIN por device por dia (mesma lógica que month_comparison)
-# =====================================================
+
 def get_daily_consumption_in_month(db, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -361,13 +356,7 @@ def get_daily_consumption_in_month(db, user_id: int):
     return {"data": data, "has_data": has_data}
 
 
-# =====================================================
-# ✅ NOVO — LINE: consumo por hora no dia (kWh)
-# Retorna: [{"label":"00:00","value":0.12}, ... "23:00"]
-#
-# Mesma lógica (contador cumulativo):
-# por hora: last(energy_kwh na hora) - first(energy_kwh na hora), por device, somado.
-# =====================================================
+
 def get_hourly_consumption_today(db, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -426,16 +415,7 @@ def get_hourly_consumption_today(db, user_id: int):
 
 
 
-# =====================================================
-# ✅ BAR COMPARAÇÃO — Mês Atual vs Mês Anterior
-# Retorna:
-# {
-#   "labels": ["1","2","3",...],
-#   "current_month": [..kwh..],
-#   "previous_month": [..kwh..],
-#   "has_data": true/false
-# }
-# =====================================================
+
 def get_daily_consumption_month_comparison(db, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -457,9 +437,7 @@ def get_daily_consumption_month_comparison(db, user_id: int):
     days_current_month = calendar.monthrange(current_year, current_month)[1]
     days_previous_month = calendar.monthrange(previous_year, previous_month)[1]
 
-    # -------------------------------------------------
-    # 🔎 Último dia com dados no mês atual
-    # -------------------------------------------------
+
     cursor.execute(
         """
         SELECT MAX(DATE(er.recorded_at)) as last_date
@@ -479,9 +457,7 @@ def get_daily_consumption_month_comparison(db, user_id: int):
         last_result["last_date"].day if last_result and last_result["last_date"] else 0
     )
 
-    # -------------------------------------------------
-    # 📊 Consumo diário (mês atual + anterior)
-    # -------------------------------------------------
+
     cursor.execute(
         """
         WITH daily AS (
@@ -516,9 +492,7 @@ def get_daily_consumption_month_comparison(db, user_id: int):
     rows = cursor.fetchall()
     cursor.close()
 
-    # -------------------------------------------------
-    # 📦 Mapear resultados
-    # -------------------------------------------------
+
     current_map = {}
     previous_map = {}
 
@@ -531,20 +505,18 @@ def get_daily_consumption_month_comparison(db, user_id: int):
         elif r["y"] == previous_year and r["m"] == previous_month:
             previous_map[day] = value
 
-    # -------------------------------------------------
-    # 📈 Construir arrays finais
-    # -------------------------------------------------
 
-    # Labels usam apenas os dias do mês ATUAL (para coerência com daily_in_month)
+
+
     labels = [str(d) for d in range(1, days_current_month + 1)]
 
-    # Mês anterior → completo até seus dias, depois None para dias que não existem
+
     previous_data = [
         round(previous_map.get(d, 0.0), 3) if d <= days_previous_month else None
         for d in range(1, days_current_month + 1)
     ]
 
-    # Mês atual → só até último dia com dados
+
     current_data = []
     for d in range(1, days_current_month + 1):
         if d <= last_day_with_data:
@@ -561,14 +533,7 @@ def get_daily_consumption_month_comparison(db, user_id: int):
         "has_data": has_data,
     }
 
-# =====================================================
-# ✅ NOVO — consumo por divisão (HOJE)
-# Retorna:
-# {
-#   "data": [{"label":"Cozinha","value":2.4}, ...],
-#   "has_data": true/false
-# }
-# =====================================================
+
 def get_room_consumption_today(db, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -607,9 +572,9 @@ def get_room_consumption_today(db, user_id: int):
 
     return {"data": data, "has_data": has_data}
 
-# =====================================================
-# ✅ NOVO — consumo total para data específica
-# =====================================================
+
+# consumo total para data específica
+
 def get_total_consumption_for_date(db, user_id: int, target_date):
     cursor = db.cursor(dictionary=True)
 
@@ -638,9 +603,9 @@ def get_total_consumption_for_date(db, user_id: int, target_date):
 
     return float(result["total_kwh"] or 0)
 
-# =====================================================
-# ✅ NOVO — consumo total mês anterior
-# =====================================================
+
+# consumo total mês anterior
+
 def get_total_consumption_previous_month(db, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -670,9 +635,9 @@ def get_total_consumption_previous_month(db, user_id: int):
 
     return float(result["total_kwh"] or 0)
 
-# =====================================================
-# ✅ NOVO — obter preço por kWh da casa ativa
-# =====================================================
+
+# obter preço por kWh da casa ativa
+
 def get_price_per_kwh(db, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -695,9 +660,9 @@ def get_price_per_kwh(db, user_id: int):
 
     return float(house["price_per_kwh"])
 
-# =====================================================
-# ✅ NOVO — consumo por dispositivo (HOJE)
-# =====================================================
+
+# consumo por dispositivo (HOJE)
+
 def get_device_consumption_today(db, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -727,9 +692,9 @@ def get_device_consumption_today(db, user_id: int):
 
     return data
 
-# =====================================================
-# ✅ NOVO — média horária últimos 7 dias
-# =====================================================
+
+# média horária últimos 7 dias
+
 def get_hourly_average_last_7_days(db, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -765,9 +730,9 @@ def get_hourly_average_last_7_days(db, user_id: int):
         for r in rows
     }
 
-# =====================================================
-# ✅ ROOM — consumo total por período
-# =====================================================
+
+# consumo total por período
+
 def get_room_total_consumption_for_period(
     db,
     user_id: int,
@@ -818,9 +783,9 @@ def get_room_total_consumption_for_period(
 
     return float(result["total_kwh"] or 0)
 
-# =====================================================
-# ✅ ROOM — custo estimado mês atual
-# =====================================================
+
+# custo estimado mês atual 
+
 def get_room_estimated_month_cost(
     db,
     user_id: int,
@@ -943,9 +908,9 @@ def get_room_monthly_comparison(db, user_id: int, id_room: int):
     return round(variation, 2)
 
 
-# ==========================================================
+
 # ALERTS SUPPORT
-# ==========================================================
+
 
 def get_average_power_last_days(
     db,
@@ -974,9 +939,9 @@ def get_average_power_last_days(
 
     return float(result[0])
 
-# =====================================================
+
 # ALERTS — detectar dispositivos ligados há muito tempo
-# =====================================================
+
 def get_recent_device_power(db, house_id: int):
     cursor = db.cursor(dictionary=True)
 
