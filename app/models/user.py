@@ -6,10 +6,7 @@ from typing import Optional, List
 
 from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
 
-
-# ==========================================================
 # AUTH
-# ==========================================================
 
 USERNAME_PATTERN = re.compile(r"^[a-z0-9_.-]+$")
 
@@ -50,10 +47,7 @@ class RegisterData(BaseModel):
             raise ValueError("Password deve conter pelo menos um número")
         return v
 
-
-# ==========================================================
 # PROFILE (responses)
-# ==========================================================
 
 class UserMeResponse(BaseModel):
     """
@@ -109,10 +103,7 @@ class UserSuggestionsResponse(BaseModel):
 
     items: List[UserSuggestion]
 
-
-# ==========================================================
-# SEARCH (para a barra de pesquisa no header) ✅ NOVO
-# ==========================================================
+# SEARCH BAR
 
 class UserSearchItem(BaseModel):
     """
@@ -134,11 +125,6 @@ class UserSearchResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     items: List[UserSearchItem]
-
-
-# ==========================================================
-# IMPACT (optional typed response)
-# ==========================================================
 
 class LatestAchievement(BaseModel):
     model_config = ConfigDict(extra="ignore")
