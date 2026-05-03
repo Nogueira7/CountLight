@@ -5,9 +5,8 @@ from datetime import datetime
 from typing import Any, Dict, Optional, List
 
 
-# ==========================================================
 # AUTH / LOGIN
-# ==========================================================
+
 
 def get_user_by_email(db, email: str) -> Optional[Dict[str, Any]]:
     cursor = db.cursor(dictionary=True)
@@ -85,7 +84,7 @@ def create_user(
     email: str,
     password_hash: str,
     verification_token: str,
-    verification_expires: Any,  # ideal: datetime
+    verification_expires: Any,
 ) -> int:
     cursor = db.cursor()
     try:
@@ -138,7 +137,7 @@ def create_google_user(db, username: str, email: str, google_id: str) -> int:
                 username,
                 email,
                 google_id,
-                True,   # 🔥 Google já é verificado
+                True,
                 True,
             ),
         )
@@ -152,9 +151,9 @@ def create_google_user(db, username: str, email: str, google_id: str) -> int:
         cursor.close()
 
 
-# ==========================================================
+
 # REFRESH TOKEN
-# ==========================================================
+
 
 def save_refresh_token(db, user_id: int, token: str) -> None:
     cursor = db.cursor()
@@ -199,9 +198,7 @@ def clear_refresh_token(db, user_id: int) -> None:
         cursor.close()
 
 
-# ==========================================================
 # PROFILE DATA
-# ==========================================================
 
 def get_user_profile(db, user_id: int) -> Optional[Dict[str, Any]]:
     """
@@ -279,9 +276,6 @@ def update_user_profile(
         cursor.close()
 
 
-# ==========================================================
-# HELPERS (impact pieces)
-# ==========================================================
 
 def _to_iso(dt: Any) -> Optional[str]:
     if dt is None:
@@ -354,9 +348,7 @@ def _estimate_total_saved_eur(db, user_id: int) -> float:
     return float(total_kwh * price)
 
 
-# ==========================================================
 # PEOPLE SUGGESTIONS
-# ==========================================================
 
 def get_user_suggestions(db, exclude_user_id: int, limit: int = 4) -> List[Dict[str, Any]]:
     """
@@ -429,9 +421,9 @@ def get_user_suggestions(db, exclude_user_id: int, limit: int = 4) -> List[Dict[
     return out
 
 
-# ==========================================================
-# SEARCH USERS (para a barra de pesquisa no header)
-# ==========================================================
+
+# SEARCH USERS (para a barra de pesquisa no header) 
+
 
 def search_users_by_username(
     db,
@@ -491,9 +483,9 @@ def search_users_by_username(
         cursor.close()
 
 
-# ==========================================================
+
 # ACCOUNT DATA (username/email)
-# ==========================================================
+
 
 def is_username_taken(db, username: str, exclude_user_id: int) -> bool:
     cursor = db.cursor(dictionary=True)
@@ -568,9 +560,9 @@ def update_user_account(
         cursor.close()
 
 
-# ==========================================================
-# IMPACT / STATISTICS (para a página de Perfil)
-# ==========================================================
+
+# IMPACT / STATISTICS
+
 
 def get_user_impact(db, user_id: int) -> Dict[str, Any]:
     """
