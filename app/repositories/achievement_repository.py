@@ -3,10 +3,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Any, Dict, List, Optional, Tuple
 
-
-# ==========================================================
-# ACHIEVEMENTS (BASE)
-# ==========================================================
+# ACHIEVEMENTS
 
 def get_all_achievements(db) -> List[Dict[str, Any]]:
     """
@@ -55,10 +52,7 @@ def get_achievement_by_id(db, achievement_id: int) -> Optional[Dict[str, Any]]:
     finally:
         cursor.close()
 
-
-# ==========================================================
 # USER ACHIEVEMENTS
-# ==========================================================
 
 def get_user_achievement(
     db,
@@ -231,18 +225,15 @@ def mark_user_achievement_completed(
         period_reference,
     )
 
-    # 🛑 Já estava completed → não mudou
     if current and current.get("status") == "completed":
         return False, int(current["id_user_achievement"])
 
-    # 👉 Se não houver progress, usa o existente
     if progress is None:
         if current and current.get("progress") is not None:
             progress = float(current["progress"])
         else:
             progress = 0.0
 
-    # 💾 Atualiza para completed
     user_achievement_id = upsert_user_achievement(
         db=db,
         user_id=user_id,
@@ -255,10 +246,7 @@ def mark_user_achievement_completed(
 
     return True, user_achievement_id
 
-
-# ==========================================================
 # CONSUMPTION QUERIES (DADOS ACUMULATIVOS)
-# ==========================================================
 
 def get_monthly_consumption(
     db,
@@ -322,10 +310,7 @@ def get_house_monthly_limit(db, house_id: int) -> Optional[float]:
     finally:
         cursor.close()
 
-
-# ==========================================================
 # SECURITY CHECK
-# ==========================================================
 
 def house_belongs_to_user(db, user_id: int, house_id: int) -> bool:
     cursor = db.cursor()
