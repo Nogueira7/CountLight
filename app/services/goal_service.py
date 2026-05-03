@@ -18,9 +18,8 @@ from app.services.notification_service import (
     notify_goal_failed,
 )
 
-# ==========================================================
 # HELPERS
-# ==========================================================
+
 
 
 def get_current_month_range() -> Tuple[date, date]:
@@ -42,9 +41,8 @@ def calculate_progress(current: float, limit: float) -> float:
     return (current / limit) * 100.0
 
 
-# ==========================================================
 # CREATE GOALS
-# ==========================================================
+
 
 
 def create_monthly_limit_kwh_goal(
@@ -115,9 +113,9 @@ def create_monthly_cost_goal(
     }
 
 
-# ==========================================================
+
 # EVALUATION CORE
-# ==========================================================
+
 
 
 def evaluate_goal(
@@ -138,9 +136,8 @@ def evaluate_goal(
     limit = float(goal["target_value"])
     old_status = goal["status"]
 
-    # ======================================================
     # CALCULAR VALOR ATUAL
-    # ======================================================
+
 
     if goal_type == "monthly_limit_kwh":
         current_value = current_consumption
@@ -154,9 +151,9 @@ def evaluate_goal(
 
     progress = calculate_progress(current_value, limit)
 
-    # ======================================================
+
     # DETERMINAR NOVO STATUS
-    # ======================================================
+
 
     if current_value > limit:
         new_status = "failed"
@@ -167,9 +164,9 @@ def evaluate_goal(
     else:
         new_status = "active"
 
-    # ======================================================
+
     # NOTIFICAÇÕES (APENAS SE MUDOU)
-    # ======================================================
+
 
     if old_status != new_status:
 
@@ -179,9 +176,9 @@ def evaluate_goal(
         elif new_status == "failed":
             notify_goal_failed(db, user_id, house_id)
 
-    # ======================================================
+
     # ATUALIZAR BASE DE DADOS
-    # ======================================================
+
 
     update_goal_progress(
         db=db,
@@ -204,9 +201,9 @@ def evaluate_goal(
     }
 
 
-# ==========================================================
-# EVALUATE ALL ACTIVE GOALS
-# ==========================================================
+
+# EVALUATE ALL ACTIVE GOALS 
+
 
 
 def evaluate_all_active_goals(
@@ -227,9 +224,9 @@ def evaluate_all_active_goals(
     return results
 
 
-# ==========================================================
+
 # DELETE GOAL
-# ==========================================================
+
 
 
 def remove_goal(
