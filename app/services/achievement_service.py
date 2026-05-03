@@ -15,9 +15,9 @@ from app.repositories.achievement_repository import (
 from app.services.notification_service import notify_achievement_completed
 
 
-# ==========================================================
+
 # HELPERS
-# ==========================================================
+
 
 def calculate_percentage_reduction(current: float, previous: float) -> float:
     """
@@ -93,7 +93,7 @@ def _maybe_notify_completed(
 
     # 🆕 Só notifica se ainda não estava completed
     if not current or current.get("status") != "completed":
-        print("🔥 VOU NOTIFICAR:", achievement["title"])
+        print("VOU NOTIFICAR:", achievement["title"])
 
         notify_achievement_completed(
             db,
@@ -146,7 +146,6 @@ def evaluate_monthly_reduction(
     is_completed = reduction >= target
     status = _status_from_completed(is_completed)
 
-    # Persistir primeiro, depois notificar (evita notificação sem commit)
 
     _maybe_notify_completed(
         db,
@@ -199,7 +198,6 @@ def evaluate_monthly_limit(
         )
         return _build_response(achievement=achievement, progress=progress, status=status, target=0.0)
 
-    # Progresso visual: margem abaixo do limite (0..100)
     margin_percentage = ((float(limit) - current) / float(limit)) * 100.0
     progress = clamp(margin_percentage, 0.0, 100.0)
 
@@ -378,9 +376,8 @@ def evaluate_streak_days(
     return _build_response(achievement=achievement, progress=progress, status=status, target=float(target))
 
 
-# ==========================================================
 # PUBLIC SERVICE FUNCTION
-# ==========================================================
+
 
 def update_and_get_user_achievements(db, user_id: int, house_id: int) -> List[Dict[str, Any]]:
     """
@@ -395,8 +392,6 @@ def update_and_get_user_achievements(db, user_id: int, house_id: int) -> List[Di
     achievements = get_all_achievements(db)
     results: List[Dict[str, Any]] = []
 
-    # Pequena otimização: consumo mensal atual calculado 1x (usado por vários tipos)
-    # (mantém chamadas originais nos evaluators para não assumir demais; podes evoluir depois)
 
     for achievement in achievements:
         achievement_type = achievement.get("type")
@@ -459,7 +454,7 @@ def update_and_get_user_achievements(db, user_id: int, house_id: int) -> List[Di
             )
 
         else:
-            # Tipo desconhecido: guarda placeholder sem notificar
+
             progress = 0.0
             status = "not_completed"
             _persist_progress(
