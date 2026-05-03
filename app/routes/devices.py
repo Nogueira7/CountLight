@@ -27,9 +27,6 @@ ALLOWED_DEVICE_TYPES = {
 router = APIRouter(tags=["Devices"])
 
 
-# =========================
-# Helpers
-# =========================
 def _require_str(value, field: str) -> str:
     if value is None:
         raise HTTPException(
@@ -80,9 +77,9 @@ def _normalize_device_type(value):
 
 
 
-# =========================
+
 # GET /rooms/{id_room}/devices
-# =========================
+
 @router.get("/rooms/{id_room}/devices")
 def list_devices(
     id_room: int,
@@ -92,10 +89,9 @@ def list_devices(
     return get_devices_by_room(db, id_room, user_id)
 
 
-# =========================
+
 # GET /devices/by-shelly/{shelly_id}
-# (seguro: só devolve se pertencer ao utilizador)
-# =========================
+
 @router.get("/devices/by-shelly/{shelly_id}")
 def get_device_by_shelly(
     shelly_id: str,
@@ -115,9 +111,9 @@ def get_device_by_shelly(
     return device
 
 
-# =========================
+
 # POST /rooms/{id_room}/devices
-# =========================
+
 @router.post(
     "/rooms/{id_room}/devices",
     status_code=status.HTTP_201_CREATED,
@@ -132,7 +128,6 @@ def create_new_device(
 
     name = _require_str(data.get("name") or data.get("nome"), "Nome")
 
-    # aceitar variações comuns, mantendo compatibilidade
     shelly_id = _require_str(
         data.get("shelly_id") or data.get("shellyId") or data.get("id_shelly"),
         "Shelly ID",
@@ -177,9 +172,9 @@ def create_new_device(
     }
 
 
-# =========================
+
 # DELETE /devices/{id_device}
-# =========================
+
 @router.delete("/devices/{id_device}")
 def delete_existing_device(
     id_device: int,
