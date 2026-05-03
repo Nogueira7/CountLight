@@ -5,9 +5,9 @@ from app.core.security import get_current_user
 router = APIRouter(prefix="/plans", tags=["plans"])
 
 
-# ===============================
+
 # GET ME
-# ===============================
+
 @router.get("/me")
 def get_my_plan(
     user_id: int = Depends(get_current_user),
@@ -31,7 +31,7 @@ def get_my_plan(
 
         plan = cursor.fetchone()
 
-        # 🔐 fallback seguro (FREE)
+
         if not plan:
             return {
                 "plan": "free",
@@ -49,9 +49,7 @@ def get_my_plan(
         cursor.close()
 
 
-# ===============================
-# 🔥 SUBSCRIBE
-# ===============================
+
 @router.post("/subscribe")
 def subscribe_plan(
     plan_id: int,
@@ -61,7 +59,7 @@ def subscribe_plan(
     cursor = db.cursor()
 
     try:
-        # 🔒 validar se plano existe
+
         cursor.execute(
             "SELECT id_plan FROM plans WHERE id_plan = %s",
             (plan_id,)
@@ -69,7 +67,7 @@ def subscribe_plan(
         if not cursor.fetchone():
             raise HTTPException(status_code=404, detail="Plano não existe")
 
-        # 🔴 desativar plano atual
+
         cursor.execute(
             """
             UPDATE subscriptions
@@ -80,7 +78,7 @@ def subscribe_plan(
             (user_id,)
         )
 
-        # 🟢 criar novo plano
+
         cursor.execute(
             """
             INSERT INTO subscriptions (id_user, id_plan, start_date, is_active)
