@@ -26,16 +26,16 @@ from app.repositories.user_repository import get_user_by_google_id, create_googl
 from app.core.email import send_login_code_email
 
 
-# =====================================================
+
 # LOGIN (PASSO 1 - CREDENCIAIS)
-# =====================================================
+
 
 def login_user(db, username: str, password: str):
     logger.info(f"Tentativa de login: {username}")
 
     user = get_user_by_username(db, username) or get_user_by_email(db, username)
 
-    # 🔒 credenciais inválidas
+
     if not user or not verify_password(password, user["password_hash"]):
         logger.warning(f"Login falhado: {username}")
         raise HTTPException(
@@ -43,7 +43,7 @@ def login_user(db, username: str, password: str):
             detail="Login inválido",
         )
 
-    # 🔒 conta desativada
+
     if not user.get("is_active"):
         logger.warning(f"Tentativa de login em conta desativada: {username}")
         raise HTTPException(
@@ -51,7 +51,7 @@ def login_user(db, username: str, password: str):
             detail="Conta desativada",
         )
 
-    # 🔒 email não verificado
+
     if not user.get("is_verified"):
         logger.warning(f"Tentativa de login sem email verificado: {username}")
         raise HTTPException(
@@ -59,14 +59,14 @@ def login_user(db, username: str, password: str):
             detail="Confirma o teu email antes de fazer login",
         )
 
-    # =====================================================
-    # 🔐 GERAR CÓDIGO 2FA
-    # =====================================================
+
+    # GERAR CÓDIGO 2FA 
+
 
     code = str(random.randint(100000, 999999))
     expires = datetime.utcnow() + timedelta(minutes=5)
 
-    # 💾 guardar código na DB
+
     cursor = db.cursor()
     try:
         cursor.execute(
@@ -81,7 +81,7 @@ def login_user(db, username: str, password: str):
     finally:
         cursor.close()
 
-    # 📧 enviar email
+
     try:
         send_login_code_email(user["email"], code)
         logger.info(f"Código 2FA enviado para: {user['email']}")
@@ -94,16 +94,16 @@ def login_user(db, username: str, password: str):
 
     logger.info(f"Login fase 1 concluída (aguarda 2FA): {username}")
 
-    # 👉 ainda NÃO autenticado
+
     return {
         "2fa_required": True,
         "user_id": user["id_user"]
     }
 
 
-# =====================================================
-# LOGIN (PASSO 2 - VERIFICAR CÓDIGO)
-# =====================================================
+
+# LOGIN (PASSO 2 - VERIFICAR CÓDIGO) 
+
 
 def verify_login_code(db, user_id: int, code: str):
     cursor = db.cursor(dictionary=True)
@@ -123,23 +123,23 @@ def verify_login_code(db, user_id: int, code: str):
     if not user:
         raise HTTPException(status_code=404, detail="Utilizador não encontrado")
 
-    # 🔒 código errado
+
     if not user["login_code"] or user["login_code"] != code:
         raise HTTPException(status_code=401, detail="Código inválido")
 
-    # 🔒 código expirado
+
     if user["login_expires"] < datetime.utcnow():
         raise HTTPException(status_code=401, detail="Código expirado")
 
-    # 🔑 criar tokens
+
     access_token = create_access_token(str(user_id))
     refresh_token = create_refresh_token(str(user_id))
 
-    # 🔐 guardar refresh token
+
     hashed_refresh = hash_password(refresh_token)
     save_refresh_token(db, user_id, hashed_refresh)
 
-    # 🧹 limpar código usado
+
     cursor = db.cursor()
     try:
         cursor.execute(
@@ -159,9 +159,9 @@ def verify_login_code(db, user_id: int, code: str):
     return access_token, refresh_token
 
 
-# =====================================================
+
 # REGISTER
-# =====================================================
+
 
 def register_user(db, username: str, email: str, password: str) -> int:
     logger.info(f"Tentativa de registo: {username}")
@@ -205,9 +205,9 @@ def register_user(db, username: str, email: str, password: str) -> int:
     return user_id
 
 
-# =====================================================
+
 # LOGIN GOOGLE (SEM 2FA)
-# =====================================================
+
 
 def login_google_user(db, google_token: str):
     from google.oauth2 import id_token
