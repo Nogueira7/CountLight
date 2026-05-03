@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 
-# =========================
+
 # GET — casas do utilizador
-# =========================
+
 def get_houses_by_user(db, user_id: int):
     cursor = db.cursor(dictionary=True)
     cursor.execute(
@@ -36,9 +36,9 @@ def get_houses_by_user(db, user_id: int):
     return houses
 
 
-# =========================
+
 # GET — casa por ID (segura)
-# =========================
+
 def get_house_by_id(db, id_house: int, user_id: int):
     cursor = db.cursor(dictionary=True)
     cursor.execute(
@@ -68,9 +68,9 @@ def get_house_by_id(db, id_house: int, user_id: int):
     return house
 
 
-# =========================
+
 # POST — criar casa
-# =========================
+
 def create_house(
     db,
     user_id: int,
@@ -133,9 +133,8 @@ def create_house(
         cursor.close()
 
 
-# =========================
+
 # PUT — atualizar casa
-# =========================
 def update_house(
     db,
     id_house: int,
@@ -209,9 +208,9 @@ def update_house(
         cursor.close()
 
 
-# =========================
-# GET — casa completa (rooms + devices)
-# =========================
+
+# GET — casa completa (rooms + devices) 
+ 
 def get_house_full(db, id_house: int, user_id: int):
     cursor = db.cursor(dictionary=True)
 
@@ -288,9 +287,9 @@ def get_house_full(db, id_house: int, user_id: int):
         cursor.close()
 
 
-# =========================
-# PATCH — desativar casa
-# =========================
+
+# PATCH — desativar cas
+ 
 def deactivate_house(db, id_house: int, user_id: int):
     cursor = db.cursor()
     try:
@@ -358,8 +357,8 @@ def get_user_house_data(db, user_id):
     "consumption_high": consumption_high,
     "consumption_total": monthly,
     "power": house["contract_power"],
-    "tariff": house["tariff"],        # 👈 adicionar
-    "price_per_kwh": house["price_per_kwh"],  # 👈 opcional mas útil
-    "provider": house["provider"],    # 👈 opcional
+    "tariff": house["tariff"],
+    "price_per_kwh": house["price_per_kwh"],
+    "provider": house["provider"],
     "gas": 0
 }
