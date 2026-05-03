@@ -40,9 +40,6 @@ import matplotlib.pyplot as plt
 router = APIRouter(prefix="/reports", tags=["Reports"])
 
 
-# =====================================================
-# 🎨 THEME
-# =====================================================
 
 # ReportLab colors (PDF)
 THEME_BLUE = colors.HexColor("#113d9e")
@@ -60,7 +57,6 @@ MPL_TEXT_DARK = "#1f2937"
 MPL_TEXT_MUTED = "#6b7280"
 MPL_BORDER_SOFT = "#d6dbe6"
 
-# caminho do logo
 LOGO_PATH = r"C:\Users\tomas\countlight-project\backend\app\static\images\logo_neon.png"
 LOGO_FALLBACKS = [
     r"C:\Users\tomas\countlight-project\backend\app\static\images\logo_neon.jpg",
@@ -124,9 +120,6 @@ def build_styles():
     return base
 
 
-# =====================================================
-# 🧱 PDF LAYOUT HELPERS
-# =====================================================
 
 def header_footer(canvas, doc):
     canvas.saveState()
@@ -208,7 +201,7 @@ def create_kpi_card(label: str, value: str, chip_color=THEME_BLUE, trend: str | 
         [label_p, trend_p],
         [value_p, ""],
     ],
-    colWidths=[110, 50],  # 👉 mais espaço para o número
+    colWidths=[110, 50],
 )
 
     inner.setStyle(
@@ -220,13 +213,13 @@ def create_kpi_card(label: str, value: str, chip_color=THEME_BLUE, trend: str | 
                 ("TOPPADDING", (0, 0), (-1, -1), 12),
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
 
-                # 👉 garante que o valor ocupa linha inteira
+
                 ("SPAN", (0, 1), (1, 1)),
             ]
         )
     )
 
-    card = Table([[chip, inner]], colWidths=[10, 170])  # 👉 mais largo
+    card = Table([[chip, inner]], colWidths=[10, 170]) 
     card.setStyle(
         TableStyle(
             [
@@ -247,9 +240,6 @@ def cards_row(cards):
     return row
 
 
-# =====================================================
-# 📄 PAGES
-# =====================================================
 
 def build_page_summary(elements, report, styles, report_type, start, end):
     elements.append(Spacer(1, 18 * mm))
@@ -533,9 +523,6 @@ def build_page_charts(elements, styles, db, user_id):
         elements.append(Image(chart3, width=170 * mm, height=70 * mm))
 
 
-# =====================================================
-# 📄 GET — Relatório PDF
-# =====================================================
 
 @router.get("/pdf")
 def get_report_pdf(
@@ -609,9 +596,7 @@ def get_report_pdf(
     )
 
 
-# =====================================================
-# 📊 CHARTS (tema + barras com cores diferentes)
-# =====================================================
+
 
 def _apply_chart_theme(ax):
     ax.set_facecolor("white")
@@ -688,28 +673,28 @@ def create_pie_chart(data, title):
 
     total = sum(values)
 
-    # 🎨 paleta premium (mais suave)
+
     colors_list = [
-        "#1d4ed8",  # azul forte
+        "#1d4ed8",
         "#3b82f6",
         "#60a5fa",
         "#93c5fd",
-        "#f59e0b",  # accent
+        "#f59e0b",
         "#fbbf24",
         "#fde68a",
     ]
 
     colors_list = colors_list[:len(values)]
 
-    # 💥 ligeiro destaque nas fatias
+
     explode = [0.03] * len(values)
 
     fig, ax = plt.subplots(figsize=(7.0, 3.5), dpi=140)
 
     wedges, texts, autotexts = ax.pie(
         values,
-        labels=None,  # ❗ vamos controlar manualmente
-        autopct=lambda p: f"{p:.0f}%" if p > 5 else "",  # limpa percentagens pequenas
+        labels=None, 
+        autopct=lambda p: f"{p:.0f}%" if p > 5 else "", 
         startangle=90,
         colors=colors_list,
         explode=explode,
@@ -718,7 +703,7 @@ def create_pie_chart(data, title):
         textprops={"color": "white", "fontsize": 9, "weight": "bold"},
     )
 
-    # 🧠 legenda bonita (em vez de labels colados)
+
     ax.legend(
         wedges,
         [f"{l} ({v} kWh)" for l, v in zip(labels, values)],
@@ -728,7 +713,7 @@ def create_pie_chart(data, title):
         fontsize=9,
     )
 
-    # 🔥 TEXTO CENTRAL (premium feel)
+
     ax.text(
         0,
         0,
