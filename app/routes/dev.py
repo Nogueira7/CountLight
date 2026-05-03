@@ -7,14 +7,13 @@ router = APIRouter()
 @router.post("/generate-data")
 def generate_data(user_id: int = Depends(get_current_user), db=Depends(get_db)):
 
-    # 🔐 PROTEÇÃO
+    # PROTEÇÃO
     if user_id not in [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47]:
         raise HTTPException(status_code=403, detail="Não permitido")
 
     cursor = db.cursor()
 
     try:
-        # 🔍 verificar se já existem dados
         cursor.execute("""
             SELECT 1
             FROM energy_readings er
@@ -30,7 +29,6 @@ def generate_data(user_id: int = Depends(get_current_user), db=Depends(get_db)):
         if already_exists:
             return {"message": "Já existem dados gerados", "already_exists": True}
 
-        # 🚀 gerar dados
         cursor.execute("CALL GerarDadosUser(%s)", (user_id,))
         db.commit()
 
@@ -38,7 +36,7 @@ def generate_data(user_id: int = Depends(get_current_user), db=Depends(get_db)):
 
     except Exception as e:
         db.rollback()
-        print("ERRO generate-data:", e)  # 👈 MUITO IMPORTANTE para debug
+        print("ERRO generate-data:", e)
         raise HTTPException(status_code=500, detail="Erro ao gerar dados")
 
     finally:
@@ -49,7 +47,6 @@ def generate_data_status(user_id: int = Depends(get_current_user), db=Depends(ge
     cursor = db.cursor()
 
     try:
-        # 🔍 Verificar se tem dispositivos
         cursor.execute("""
             SELECT 1
             FROM devices d
@@ -60,7 +57,6 @@ def generate_data_status(user_id: int = Depends(get_current_user), db=Depends(ge
         """, (user_id,))
         has_devices = cursor.fetchone() is not None
 
-        # 🔍 Verificar se já tem dados
         cursor.execute("""
             SELECT 1
             FROM energy_readings er
