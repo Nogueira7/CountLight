@@ -40,9 +40,9 @@ import jwt  # type: ignore
 router = APIRouter()
 
 
-# =====================================================
+
 # LOGIN (PASSO 1)
-# =====================================================
+
 
 @router.post("/login")
 def login(
@@ -55,13 +55,12 @@ def login(
         form_data.password,
     )
 
-    # 👉 agora devolve 2FA em vez de token
     return result
 
 
-# =====================================================
-# LOGIN (PASSO 2 - VERIFICAR CÓDIGO)
-# =====================================================
+
+# LOGIN
+
 
 class VerifyLoginRequest(BaseModel):
     user_id: int
@@ -83,9 +82,9 @@ def verify_login(data: VerifyLoginRequest, db=Depends(get_db)):
     }
 
 
-# =====================================================
+
 # REGISTER
-# =====================================================
+
 
 @router.post("/register")
 def register(data: RegisterData, db=Depends(get_db)):
@@ -107,9 +106,8 @@ def register(data: RegisterData, db=Depends(get_db)):
     return {"message": "Conta criada com sucesso"}
 
 
-# =====================================================
+
 # ME
-# =====================================================
 
 @router.get("/me")
 def me(user_id: int = Depends(get_current_user), db=Depends(get_db)):
@@ -129,9 +127,9 @@ def me(user_id: int = Depends(get_current_user), db=Depends(get_db)):
         cursor.close()
 
 
-# =====================================================
+
 # REFRESH
-# =====================================================
+
 
 @router.post("/refresh")
 def refresh(token: str, db=Depends(get_db)):
@@ -159,9 +157,8 @@ def refresh(token: str, db=Depends(get_db)):
     return {"access_token": new_access}
 
 
-# =====================================================
+
 # LOGOUT
-# =====================================================
 
 @router.post("/logout")
 def logout(user_id: int = Depends(get_current_user), db=Depends(get_db)):
@@ -178,9 +175,8 @@ def logout(user_id: int = Depends(get_current_user), db=Depends(get_db)):
     return {"message": "Logout efetuado"}
 
 
-# =====================================================
+
 # VERIFY EMAIL
-# =====================================================
 
 @router.get("/verify")
 def verify(token: str, db=Depends(get_db)):
@@ -197,9 +193,8 @@ def verify(token: str, db=Depends(get_db)):
     return {"message": "Conta verificada com sucesso"}
 
 
-# =====================================================
+
 # FORGOT PASSWORD
-# =====================================================
 
 @router.post("/forgot-password")
 def forgot_password(data: dict, db=Depends(get_db)):
@@ -232,9 +227,7 @@ def forgot_password(data: dict, db=Depends(get_db)):
     return {"message": "Email enviado"}
 
 
-# =====================================================
 # RESET PASSWORD
-# =====================================================
 
 @router.post("/reset-password")
 def reset_password(
@@ -279,9 +272,8 @@ def reset_password(
         cursor.close()
 
 
-# =====================================================
+
 # GOOGLE LOGIN
-# =====================================================
 
 class GoogleAuthRequest(BaseModel):
     token: str
@@ -320,7 +312,6 @@ def resend_code(data: dict, db=Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="Utilizador não encontrado")
 
-    # 🔐 gerar novo código
     import random
     from datetime import datetime, timedelta
 
@@ -341,7 +332,6 @@ def resend_code(data: dict, db=Depends(get_db)):
     finally:
         cursor.close()
 
-    # 📧 enviar email
     from app.core.email import send_login_code_email
     send_login_code_email(user["email"], code)
 
