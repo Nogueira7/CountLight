@@ -27,9 +27,9 @@ def get_dashboard_detailed(
 ):
     user_id = current_user
 
-    # =====================================================
-    # 1️⃣ CONSUMOS BASE (CONVERTER LOGO PARA FLOAT)
-    # =====================================================
+
+    # CONSUMOS BASE 
+
 
     today_kwh = float(get_total_consumption_for_period(db, user_id, "today") or 0)
     month_kwh = float(get_total_consumption_for_period(db, user_id, "month") or 0)
@@ -39,9 +39,9 @@ def get_dashboard_detailed(
 
     previous_month_kwh = float(get_total_consumption_previous_month(db, user_id) or 0)
 
-    # =====================================================
-    # 2️⃣ MÉDIA DIÁRIA DO MÊS (ATÉ HOJE)
-    # =====================================================
+
+    # MÉDIA DIÁRIA DO MÊS (ATÉ HOJE)
+
 
     # Média baseada nos dias decorridos até hoje, não no total de dias do mês
     today_day = datetime.now().day
@@ -51,11 +51,10 @@ def get_dashboard_detailed(
     )
 
     # Para cálculos de percentagem, usar always o mismo month_daily_avg
-    # (não misturar com diferentes métodos de cálculo)
 
-    # =====================================================
-    # 3️⃣ COMPARAÇÕES
-    # =====================================================
+
+    # COMPARAÇÕES
+  
 
     vs_yesterday_percent = (
         ((today_kwh - yesterday_kwh) / yesterday_kwh) * 100
@@ -64,15 +63,15 @@ def get_dashboard_detailed(
 
     vs_month_avg_kwh = today_kwh - month_daily_avg
 
-    # Calcular percentagem usando month_daily_avg (agora correctamente calculada)
+    # Calcular percentagem usando month_daily_avg
     vs_month_avg_percent = (
         (vs_month_avg_kwh / month_daily_avg) * 100
         if month_daily_avg > 0 else 0
     )
 
-    # =====================================================
-    # 4️⃣ PICO HORÁRIO
-    # =====================================================
+
+    # PICO HORÁRIO
+
 
     hourly_data = get_hourly_consumption_today(db, user_id) or {}
     hourly_values = hourly_data.get("data", [])
@@ -86,9 +85,9 @@ def get_dashboard_detailed(
             today_peak_kwh = value
             today_peak_hour = item["label"]
 
-    # =====================================================
-    # 5️⃣ CUSTOS
-    # =====================================================
+
+    # CUSTOS
+
 
     price_per_kwh = float(get_price_per_kwh(db, user_id) or 0)
 
@@ -110,9 +109,8 @@ def get_dashboard_detailed(
     previous_month_cost = previous_month_kwh * price_per_kwh
     diff_vs_previous_month_cost = current_month_cost - previous_month_cost
 
-    # =====================================================
-    # 6️⃣ DIVISÕES
-    # =====================================================
+
+    # DIVISÕES
 
     room_today = get_room_consumption_today(db, user_id) or {}
     room_values = room_today.get("data", [])
@@ -135,9 +133,7 @@ def get_dashboard_detailed(
             max_room_kwh = value
             principal_room = item["label"]
 
-    # =====================================================
-    # 7️⃣ EQUIPAMENTOS
-    # =====================================================
+    # EQUIPAMENTOS
 
     device_today = get_device_consumption_today(db, user_id) or []
 
@@ -153,16 +149,12 @@ def get_dashboard_detailed(
             "percentage": round(percent, 1)
         })
 
-    # =====================================================
-    # 8️⃣ IMPACTO €
-    # =====================================================
+    # IMPACTO €
 
     impact_kwh = max(today_kwh - month_daily_avg, 0)
     impact_eur = impact_kwh * price_per_kwh
 
-    # =====================================================
-    # 9️⃣ INSIGHT INTELIGENTE
-    # =====================================================
+    # INSIGHT INTELIGENTE
 
     difference_kwh = today_kwh - month_daily_avg
     difference_percent = vs_month_avg_percent
@@ -199,9 +191,7 @@ def get_dashboard_detailed(
     else:
         insight = "Consumo dentro do padrão normal."
 
-    # =====================================================
-    # 🔟 RESPOSTA FINAL
-    # =====================================================
+    #RESPOSTA FINAL
 
     return {
         "consumption": {
