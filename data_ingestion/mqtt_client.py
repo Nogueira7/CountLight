@@ -48,10 +48,10 @@ def start():
         client.loop_forever()
 
     except KeyboardInterrupt:
-        logger.info("🛑 Serviço de ingestão parado manualmente")
+        logger.info("Serviço de ingestão parado manualmente")
 
     finally:
         client.disconnect()
-        logger.info("🔌 MQTT desligado")
+        logger.info("MQTT desligado")
 
 
