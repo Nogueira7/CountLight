@@ -19,7 +19,7 @@
 <script>
     const API_URL = "/api";
 
-    // 🔒 VERIFICAÇÃO SEGURA (igual ao dashboard)
+    // VERIFICAÇÃO SEGURA (igual ao dashboard)
     async function checkAdminAccess() {
         const token = localStorage.getItem("token");
 
@@ -61,13 +61,13 @@
             <p>Lista completa de utilizadores da plataforma</p>
         </div>
 
-        <!-- 🔍 PESQUISA -->
+        <!-- PESQUISA -->
         <div class="card card_border p-3 mb-4">
             <input type="text" id="searchInput" class="form-control"
                 placeholder="Pesquisar por username ou ID...">
         </div>
 
-        <!-- 📋 TABELA -->
+        <!-- TABELA -->
         <div class="card card_border">
             <div class="card-header">Utilizadores</div>
 
@@ -100,9 +100,7 @@
 <script>
     let users = [];
 
-    // =========================
-    // CARREGAR UTILIZADORES
-    // =========================
+
     async function loadUsers() {
         const token = localStorage.getItem("token");
 
@@ -131,9 +129,7 @@
         }
     }
 
-    // =========================
-    // RENDER TABELA
-    // =========================
+
     function renderUsers(list) {
         const tbody = document.getElementById("usersTable");
 
