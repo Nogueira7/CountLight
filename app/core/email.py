@@ -29,10 +29,7 @@ def _send_email(to_email: str, subject: str, html_content: str, text_content: st
         server.login(SMTP_USER, SMTP_PASS)
         server.send_message(msg)
 
-
-# =====================================================
 # VERIFY EMAIL
-# =====================================================
 
 def send_verification_email(to_email: str, token: str):
     verify_url = f"{FRONTEND_URL}/verify?token={token}"
@@ -94,10 +91,7 @@ Se não foste tu, ignora este email.
 
     _send_email(to_email, subject, html, text)
 
-
-# =====================================================
 # RESET PASSWORD
-# =====================================================
 
 def send_reset_email(to_email: str, token: str):
     reset_url = f"{FRONTEND_URL}/reset-password?token={token}"
@@ -158,10 +152,7 @@ Se não foste tu, ignora este email.
 
     _send_email(to_email, subject, html, text)
 
-
-# =====================================================
 # LOGIN 2FA CODE
-# =====================================================
 
 def send_login_code_email(to_email: str, code: str):
     subject = "Código de verificação - CountLight"
