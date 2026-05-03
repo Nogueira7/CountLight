@@ -12,9 +12,7 @@ from app.core.config import (
     REFRESH_TOKEN_EXPIRE_DAYS,
 )
 
-# --------------------------------------------------
 # PASSWORD HASHING
-# --------------------------------------------------
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
@@ -28,16 +26,11 @@ def verify_password(password: str, password_hash: str) -> bool:
     return pwd_context.verify(password, password_hash)
 
 
-# --------------------------------------------------
 # OAUTH2
-# --------------------------------------------------
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
 
-
-# --------------------------------------------------
 # TOKENS
-# --------------------------------------------------
 
 def create_access_token(subject: str) -> str:
     expire = datetime.utcnow() + timedelta(
@@ -47,7 +40,7 @@ def create_access_token(subject: str) -> str:
     payload = {
         "sub": subject,
         "exp": expire,
-        "type": "access",  # 🔒 só este pode aceder às rotas protegidas
+        "type": "access",
     }
 
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
@@ -66,10 +59,7 @@ def create_refresh_token(subject: str) -> str:
 
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-
-# --------------------------------------------------
 # DEPENDENCY (ROTAS PROTEGIDAS)
-# --------------------------------------------------
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> int:
     try:
@@ -79,7 +69,6 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> int:
             algorithms=[ALGORITHM],
         )
 
-        # 🚫 bloquear refresh tokens
         if payload.get("type") != "access":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
