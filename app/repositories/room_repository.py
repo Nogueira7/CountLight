@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 
-# =========================
-# GET — divisões de uma casa (segura)
-# =========================
+
+# GET — divisões de uma casa
+
 def get_rooms_by_house(db, id_house: int, user_id: int):
     """
     Devolve todas as divisões de uma casa,
@@ -34,9 +34,9 @@ def get_rooms_by_house(db, id_house: int, user_id: int):
     return rooms
 
 
-# =========================
-# GET — divisão por ID (segura)
-# =========================
+
+# GET — divisão por ID
+
 def get_room_by_id(db, id_room: int, user_id: int):
     """
     Devolve uma divisão pelo ID,
@@ -64,9 +64,9 @@ def get_room_by_id(db, id_room: int, user_id: int):
     return room
 
 
-# =========================
+
 # POST — criar divisão
-# =========================
+
 def create_room(
     db,
     id_house: int,
@@ -114,9 +114,9 @@ def create_room(
         cursor.close()
 
 
-# =========================
-# PUT — atualizar divisão (renomear)
-# =========================
+
+# PUT — atualizar divisã 
+
 def update_room(
     db,
     id_room: int,
@@ -150,9 +150,9 @@ def update_room(
         cursor.close()
 
 
-# =========================
-# DELETE — apagar divisão
-# =========================
+
+# DELETE — apagar divisão 
+
 def delete_room(
     db,
     id_room: int,
@@ -186,9 +186,9 @@ def delete_room(
         cursor.close()
 
 
-# =========================
+
 # GET — resumo da divisão
-# =========================
+
 def get_room_month_percentage(db, id_room: int, user_id: int):
     """
     Calcula percentagem do consumo mensal da divisão
@@ -197,7 +197,7 @@ def get_room_month_percentage(db, id_room: int, user_id: int):
 
     cursor = db.cursor(dictionary=True)
 
-    # 1️⃣ Verificar se a divisão pertence ao utilizador
+    # Verificar se a divisão pertence ao utilizador
     cursor.execute(
         """
         SELECT r.id_house
@@ -216,7 +216,7 @@ def get_room_month_percentage(db, id_room: int, user_id: int):
 
     id_house = room["id_house"]
 
-    # 2️⃣ Consumo mensal da divisão
+    # 2️Consumo mensal da divisão
     cursor.execute(
         """
         SELECT
@@ -238,7 +238,7 @@ def get_room_month_percentage(db, id_room: int, user_id: int):
 
     room_month = cursor.fetchone()["room_month"] or 0
 
-    # 3️⃣ Consumo mensal total da casa
+    # Consumo mensal total da casa
     cursor.execute(
         """
         SELECT
