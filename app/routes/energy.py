@@ -14,9 +14,9 @@ from app.repositories.energy_repository import (
 router = APIRouter(tags=["Energy"])
 
 
-# =====================================================
-# 🔒 Helper — verificar se device pertence ao user
-# =====================================================
+
+# verificar se device pertence ao user
+
 def _ensure_device_belongs_to_user(db, id_device: int, user_id: int):
     cursor = db.cursor()
     cursor.execute(
@@ -40,9 +40,9 @@ def _ensure_device_belongs_to_user(db, id_device: int, user_id: int):
         )
 
 
-# =====================================================
+
 # GET /devices/{id_device}/energy
-# =====================================================
+
 @router.get("/devices/{id_device}/energy")
 def list_energy_by_device(
     id_device: int,
@@ -59,9 +59,9 @@ def list_energy_by_device(
     return get_energy_by_device(db, id_device, limit)
 
 
-# =====================================================
+
 # GET /devices/{id_device}/energy/latest
-# =====================================================
+
 @router.get("/devices/{id_device}/energy/latest")
 def get_latest_energy(
     id_device: int,
@@ -85,9 +85,9 @@ def get_latest_energy(
     return reading
 
 
-# =====================================================
+
 # GET /rooms/{id_room}/energy
-# =====================================================
+
 @router.get("/rooms/{id_room}/energy")
 def list_energy_by_room(
     id_room: int,
@@ -101,7 +101,6 @@ def list_energy_by_room(
 
     readings = get_energy_by_room(db, id_room, user_id)
 
-    # Aqui mantemos 404 porque é recurso específico
     if not readings:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -111,9 +110,9 @@ def list_energy_by_room(
     return readings
 
 
-# =====================================================
-# 📊 GET /dashboard/energy/month-comparison
-# =====================================================
+
+# /dashboard/energy/month-comparison
+
 @router.get("/dashboard/energy/month-comparison")
 def get_month_comparison(
     user_id: int = Depends(get_current_user),
