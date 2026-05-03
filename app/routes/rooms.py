@@ -26,9 +26,6 @@ from app.repositories.energy_repository import get_room_monthly_comparison
 router = APIRouter(tags=["Rooms"])
 
 
-# =========================
-# Helpers
-# =========================
 def _require_str(value, field: str = "Nome da divisão") -> str:
     if value is None:
         raise HTTPException(
@@ -44,9 +41,9 @@ def _require_str(value, field: str = "Nome da divisão") -> str:
     return s
 
 
-# =========================
+
 # GET /houses/{id_house}/rooms
-# =========================
+
 @router.get("/houses/{id_house}/rooms")
 def list_rooms(
     id_house: int,
@@ -56,9 +53,8 @@ def list_rooms(
     return get_rooms_by_house(db, id_house, user_id)
 
 
-# =========================
-# GET /rooms/{id_room}
-# =========================
+
+
 @router.get("/rooms/{id_room}")
 def get_room(
     id_room: int,
@@ -74,9 +70,9 @@ def get_room(
     return room
 
 
-# =========================
+
 # POST /houses/{id_house}/rooms
-# =========================
+
 @router.post(
     "/houses/{id_house}/rooms",
     status_code=status.HTTP_201_CREATED,
@@ -110,9 +106,9 @@ def create_new_room(
     }
 
 
-# =========================
+
 # PUT /rooms/{id_room}
-# =========================
+
 @router.put("/rooms/{id_room}")
 def update_existing_room(
     id_room: int,
@@ -140,9 +136,9 @@ def update_existing_room(
     return {"message": "Divisão atualizada com sucesso"}
 
 
-# =========================
+
 # DELETE /rooms/{id_room}
-# =========================
+
 @router.delete("/rooms/{id_room}")
 def delete_existing_room(
     id_room: int,
@@ -160,15 +156,14 @@ def delete_existing_room(
     return {"message": "Divisão apagada com sucesso"}
 
 
-# =========================
+
 # GET /api/rooms (para sidebar)
-# =========================
-# ⚠️ IMPORTANTE:
+
 # Antes:
 #   - Usava "/api/rooms" → virava "/api/api/rooms" (404)
 #   - Usava models diretos → dava erro (não existem)
 # Agora:
-#   - Usa "/rooms" → fica "/api/rooms" (correto)
+#   - Usa "/rooms" → fica "/api/rooms"
 #   - Usa repositories (como o resto do projeto)
 
 @router.get("/rooms")
@@ -193,9 +188,9 @@ def get_rooms_for_sidebar(
     return all_rooms
 
 
-# =========================
+
 # GET /rooms/{id_room}/summary
-# =========================
+
 @router.get("/rooms/{id_room}/summary")
 def get_room_summary(
     id_room: int,
@@ -206,7 +201,7 @@ def get_room_summary(
     Devolve dados agregados da divisão (para statsroom)
     """
 
-    # 🔎 Verificar se a divisão pertence ao utilizador
+
     room = get_room_by_id(db, id_room, user_id)
     if not room:
         raise HTTPException(
@@ -214,20 +209,20 @@ def get_room_summary(
             detail="Divisão não encontrada ou não pertence ao utilizador",
         )
 
-    # 🔢 Consumos
+
     today_kwh = get_room_total_consumption_for_period(db, user_id, id_room, "today")
     month_kwh = get_room_total_consumption_for_period(db, user_id, id_room, "month")
     year_kwh = get_room_total_consumption_for_period(db, user_id, id_room, "year")
 
     month_cost = get_room_estimated_month_cost(db, user_id, id_room)
 
-    # 📊 Consumo por dispositivo (apenas desta divisão)
+
     devices = get_energy_summary_by_device(db, user_id)
 
-    # 📊 Percentagem da divisão face à casa (mês atual)
+
     percentage = get_room_month_percentage(db, id_room, user_id)
 
-    # 🔥 Hora pico
+
     hourly = get_hourly_consumption_today(db, user_id)
 
     peak_hour = "--"
@@ -254,9 +249,9 @@ def get_room_summary(
     }
 
 
-# =========================
+
 # GET /rooms/{id_room}/device-types
-# =========================
+
 @router.get("/rooms/{id_room}/device-types")
 def get_room_device_types(
     id_room: int,
@@ -267,7 +262,7 @@ def get_room_device_types(
     Devolve consumo mensal por tipo de equipamento da divisão
     """
 
-    # 🔎 Verificar se a divisão pertence ao utilizador
+
     room = get_room_by_id(db, id_room, user_id)
     if not room:
         raise HTTPException(
