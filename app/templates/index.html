@@ -334,7 +334,7 @@
       const data = await res.json();
       console.log("Plano do user:", data);
 
-      // 👉 Guarda para usar noutras páginas
+      // Guarda para usar noutras páginas
       localStorage.setItem("user_plan", data.plan);
       localStorage.setItem("max_houses", data.max_houses);
     }
@@ -425,25 +425,25 @@
       const data = await res.json();
       console.log("Dados recebidos:", data);
 
-      // 👉 Atualizar gráfico por divisão
+      // Atualizar gráfico por divisão
       const roomSummary = data.summary_by_room?.data || [];
       const roomLabels = roomSummary.map(item => item.label);
       const roomValues = roomSummary.map(item => item.value);
       updatePieChart(window.pieChartInstance, roomLabels, roomValues);
 
-      // 👉 Atualizar gráfico por tipo de equipamento
+      // Atualizar gráfico por tipo de equipamento
       const typeSummary = data.summary_by_type || [];
       const typeLabels = typeSummary.map(item => item.label);
       const typeValues = typeSummary.map(item => item.value);
       updatePieChart(window.pieChart2Instance, typeLabels, typeValues);
 
-      // 👉 KPIs
+      // KPIs
       document.getElementById("today-kwh").innerText = data.today_kwh + " kWh";
       document.getElementById("month-kwh").innerText = data.month_kwh + " kWh";
       document.getElementById("year-kwh").innerText = data.year_kwh + " kWh";
       document.getElementById("month-cost").innerText = data.estimated_month_cost + " €";
 
-      // ✅ IMPORTANTE: NÃO atualizar o bar aqui (evita conflito com month-comparison)
+      // IMPORTANTE: NÃO atualizar o bar aqui (evita conflito com month-comparison)
 
       // LINE ao longo do dia
       const hourly = normalizeSeriesArray(data.consumption_by_hour, "label", "value");
@@ -576,7 +576,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-      loadUserPlan(); // 👈 NOVO
+      loadUserPlan();
       loadDashboardData();
       loadMonthComparisonChart();
       loadDashboardDetailed();
