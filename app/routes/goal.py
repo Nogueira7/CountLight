@@ -19,9 +19,9 @@ router = APIRouter(
 )
 
 
-# ==========================================================
+
 # DEPENDENCY: CASA ATIVA
-# ==========================================================
+
 
 def get_current_house_id(
     x_house_id: int = Header(..., alias="X-House-Id")
@@ -36,9 +36,9 @@ def get_current_house_id(
     return x_house_id
 
 
-# ==========================================================
+
 # CREATE GOAL (DINÂMICO POR TIPO)
-# ==========================================================
+
 
 @router.post("", response_model=Dict[str, Any])
 def create_goal(
@@ -52,7 +52,7 @@ def create_goal(
     Cria meta conforme o tipo.
     """
 
-    # 🔒 Segurança
+    # Segurança
     if not house_belongs_to_user(db, current_user, house_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -89,9 +89,8 @@ def create_goal(
             detail=str(e)
         )
 
-# ==========================================================
-# GET ALL GOALS (LISTAGEM)
-# ==========================================================
+
+# GET ALL GOALS (LISTAGEM) 
 
 @router.get("", response_model=List[Dict[str, Any]])
 def get_all_goals(
@@ -109,14 +108,14 @@ def get_all_goals(
             detail="Acesso negado a esta casa."
         )
 
-    # 🔥 Primeiro recalcula as ativas
+
     evaluate_all_active_goals(
         db=db,
         user_id=current_user,
         house_id=house_id,
     )
 
-    # 🔥 Depois devolve TODAS
+
     return get_all_goals_repo(db, current_user, house_id)
 # ==========================================================
 # GET ALL ACTIVE GOALS (AUTO UPDATE)
@@ -132,7 +131,7 @@ def get_active_goals(
     Recalcula automaticamente todas as metas ativas.
     """
 
-    # 🔒 Segurança
+
     if not house_belongs_to_user(db, current_user, house_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -148,9 +147,9 @@ def get_active_goals(
     return goals
 
 
-# ==========================================================
+
 # DELETE GOAL
-# ==========================================================
+
 
 @router.delete("/{goal_id}", response_model=Dict[str, Any])
 def delete_goal(
@@ -160,7 +159,7 @@ def delete_goal(
     house_id: int = Depends(get_current_house_id),
 ):
 
-    # 🔒 Segurança
+
     if not house_belongs_to_user(db, current_user, house_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
