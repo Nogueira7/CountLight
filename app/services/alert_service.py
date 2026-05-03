@@ -7,9 +7,9 @@ from app.repositories.energy_repository import (
 )
 
 
-# =====================================================
+
 # ALERTA — Pico de potência
-# =====================================================
+
 
 def get_peak_power_alert(db, user_id: int, house_id: int):
 
@@ -68,9 +68,9 @@ def get_peak_power_alert(db, user_id: int, house_id: int):
     }
 
 
-# =====================================================
-# ALERTA — Consumo fora do padrão
-# =====================================================
+
+# ALERTA — Consumo fora do padrão 
+
 
 def get_consumption_pattern_alert(db, user_id: int, house_id: int):
 
@@ -120,9 +120,9 @@ def get_consumption_pattern_alert(db, user_id: int, house_id: int):
     }
 
 
-# =====================================================
-# ALERTA — Aparelho ligado demasiado tempo
-# =====================================================
+
+# ALERTA — Aparelho ligado demasiado tempo 
+
 
 def get_device_on_too_long_alert(db, house_id: int):
 
@@ -174,9 +174,9 @@ def get_device_on_too_long_alert(db, house_id: int):
     }
 
 
-# =====================================================
+
 # ALERTA — Consumo noturno/anómalo
-# =====================================================
+
 
 def get_night_consumption_alert(db, house_id: int):
 
@@ -234,9 +234,9 @@ def get_night_consumption_alert(db, house_id: int):
     }
 
 
-# =====================================================
+
 # ALERTA — Qualidade de dados / dispositivo offline
-# =====================================================
+
 
 def get_data_quality_alert(db, house_id: int):
 
